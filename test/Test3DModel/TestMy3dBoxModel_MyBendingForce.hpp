@@ -102,7 +102,7 @@ public:
 
         unsigned width = 10;	   // x
         unsigned height = 10;      // y
-        unsigned depth = 2;        // z
+        unsigned depth = 3;        // z
 
         // Get the dimensions for the non-zero target curvature region
         double centre_x = double (width)*0.5;
@@ -254,18 +254,18 @@ public:
         periodic_force->SetPeriodicDomainDepth(periodic_height);
         periodic_force->SetMeinekeSpringStiffness(10.0);
         simulator.AddForce(periodic_force);
-        
+/*        
 		// Create periodic basement membrane force law
-        MAKE_PTR(PeriodicBendingForce3d, periodic_basement_membrane);
+        MAKE_PTR(PeriodicBendingForce3d, periodic_bending_force);
      // PeriodicBasementMembraneForce3d periodic_basement_membrane;
-        periodic_basement_membrane->SetBasementMembraneParameter(beta_parameter);
-        periodic_basement_membrane->SetExponentParameter(alpha_parameter);
-        //periodic_basement_membrane->SetCircularNonZeroTargetCurvatureRegion(true, 0.15, radius, centre_x, centre_y);
-        periodic_basement_membrane->SetCircularNonZeroTargetCurvatureRegion(true, target_curvature, radius, centre_x, centre_y);
-        periodic_basement_membrane->SetPeriodicDomainWidth(periodic_width);
-        periodic_basement_membrane->SetPeriodicDomainDepth(periodic_height);
-        simulator.AddForce(periodic_basement_membrane);
- 
+        periodic_bending_force->SetBasementMembraneParameter(beta_parameter);
+        periodic_bending_force->SetExponentParameter(alpha_parameter);
+        //periodic_bending_force->SetCircularNonZeroTargetCurvatureRegion(true, 0.15, radius, centre_x, centre_y);
+        periodic_bending_force->SetCircularNonZeroTargetCurvatureRegion(true, target_curvature, radius, centre_x, centre_y);
+        periodic_bending_force->SetPeriodicDomainWidth(periodic_width);
+        periodic_bending_force->SetPeriodicDomainDepth(periodic_height);
+        simulator.AddForce(periodic_bending_force);
+ */
         // Add cell sloughing
         MAKE_PTR_ARGS(SloughingCellKiller3D, sloughing, (&cell_population, periodic_width, periodic_height));
      // SloughingCellKiller3D sloughing(&cell_population, periodic_width, periodic_width);
@@ -279,8 +279,8 @@ public:
 
         // Run for a short time to allow it to deform		        
     	simulator.SetSamplingTimestepMultiple(1);			// Every hour
-		simulator.SetEndTime(1.0);							// Firstly run to a steady state (i.e. til the thing is deformed as much as it will be)
-        simulator.SetDt(0.01);	
+		simulator.SetEndTime(0.002);							// Firstly run to a steady state (i.e. til the thing is deformed as much as it will be)
+        simulator.SetDt(0.001);	
         simulator.Solve();
 
 

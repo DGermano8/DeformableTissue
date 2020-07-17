@@ -1,0 +1,82 @@
+<ChasteBuildInfo>
+	<ProvenanceInfo>
+		<VersionString>2017.1.544f00a</VersionString> <!-- build specific -->
+		<IsWorkingCopyModified>1</IsWorkingCopyModified>
+		<BuildInformation>GccOpt, no Chaste libraries</BuildInformation>
+		<BuildTime>Thu, 16 Jul 2020 08:52:09 +0000</BuildTime>
+		<CurrentTime>Thu, 16 Jul 2020 08:52:16 +0000</CurrentTime>
+		<BuilderUnameInfo>Darwin Domenics-MacBook-Pro.local 18.7.0 Darwin Kernel Version 18.7.0: Tue Aug 20 16:57:14 PDT 2019; root:xnu-4903.271.2~2/RELEASE_X86_64 x86_64</BuilderUnameInfo>
+		<Projects>
+			<Project>
+				<Name>Comparision2017</Name>
+				<Version>0</Version>
+				<Modified>False</Modified>
+			</Project>
+			<Project>
+				<Name>DeformableTissue</Name>
+				<Version>21fd830</Version>
+				<Modified>True</Modified>
+			</Project>
+			<Project>
+				<Name>DomenicG</Name>
+				<Version>a27faf9</Version>
+				<Modified>True</Modified>
+			</Project>
+			<Project>
+				<Name>EpithelialFission</Name>
+				<Version>0</Version>
+				<Modified>False</Modified>
+			</Project>
+			<Project>
+				<Name>SJDunn_Deformable_Tissue</Name>
+				<Version>f1ba129</Version>
+				<Modified>True</Modified>
+			</Project>
+			<Project>
+				<Name>SaraJaneD_new</Name>
+				<Version>0</Version>
+				<Modified>False</Modified>
+			</Project>
+			<Project>
+				<Name>SaraJaneD_prev</Name>
+				<Version>27534</Version>
+				<Modified>True</Modified>
+			</Project>
+			<Project>
+				<Name>old_results</Name>
+				<Version>0</Version>
+				<Modified>False</Modified>
+			</Project>
+			<Project>
+				<Name>results</Name>
+				<Version>0</Version>
+				<Modified>False</Modified>
+			</Project>
+			<Project>
+				<Name>results_SJDunn_Deformable_Tissue</Name>
+				<Version>0</Version>
+				<Modified>False</Modified>
+			</Project>
+		</Projects>
+	</ProvenanceInfo>
+	<Compiler>
+		<NameAndVersion>clang, version unknown</NameAndVersion>
+		<Flags>-O3</Flags>
+	</Compiler>
+	<Libraries>
+		<CompiledIn>
+			<PETSc>3.9.3</PETSc>
+			<Boost>1.68.0</Boost>
+			<HDF5>1.10.4</HDF5>
+			<Parmetis>4.0.3</Parmetis>
+		</CompiledIn>
+		<Binaries>
+			<XSD>undetermined</XSD>
+		</Binaries>
+		<Optional>
+			<SUNDIALS>3.2.0</SUNDIALS>
+			<VTK>8.1</VTK>
+			<Xerces>3.2.2</Xerces>
+		</Optional>
+	</Libraries>
+</ChasteBuildInfo>

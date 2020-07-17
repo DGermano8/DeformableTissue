@@ -1,4 +1,6 @@
-function MeshVisualize3dBoxModel(filename)
+%MeshVisualize3dBoxModel(filename)
+clear all;
+filename = 'results';
 %
 % function Visualize3dBoxModel(filename)
 % Reads in <filename>.viznodes, <filename>.vizc;celltypes, <filename>.vizelements and <filename>.vizsetup
@@ -15,14 +17,15 @@ function MeshVisualize3dBoxModel(filename)
 % This requires LoadNonConstantLengthData('filename'), which is in the Chaste anim/matlab folder
 
 addpath /Users/domenicgermano/workspace/Chaste/anim/matlab
-addpath /Users/domenicgermano/workspace/Chaste/projects/results_SJDunn_Deformable_Tissue/results_monolayer_beta_5
+addpath /Users/domenicgermano/workspace/Chaste/projects/DeformableTissue/results/results_from_time_0
 
 % Visualiser options
 RandomColour = false;		% For cells
 PlotSprings = false;
-PlotTissueCells = false;
-PlotCells = true;			% Chinese-lantern type cells
+PlotTissueCells = true;
+PlotCells = false;			% Chinese-lantern type cells
 PlotCellCenters = true;
+PlotGhosts = false;
 NumPtsInCircles = 10;
 Defaultcolor = [0.0,0.0,0.7];
 
@@ -52,11 +55,12 @@ sphereZ = sphereZ;
 
 numtimes = length(nodedata);
 
-close all
+%close all
 fig=figure;
 pause(0.1)
+%%
 
-for i = 1:numtimes        % Timestep is 30 seconds
+for i = numtimes;        % Timestep is 30 seconds
     clf 
 
     time = nodedata{i}(1)     % Gives first element of ith row
@@ -75,26 +79,34 @@ for i = 1:numtimes        % Timestep is 30 seconds
     
     if (PlotCellCenters)
         for j=1:NumCells
-             if (types(j) == 0)
-                CellColour = [0 0 0];        % Black (stem) epithelial cells
-                
-            elseif (types(j) == 1)
-                CellColour = [0 0 1];        % Yellow (transit) epithelial cells
+            
+            if(j <= length(types))
+                if (types(j) == 0)
+                    CellColour = [0 0 0];        % Black (stem) epithelial cells
 
-            elseif (types(j) == 2)
-                CellColour = [1 0 1];        % Pink (differentiated) tissue cells
-                
-            else
+                elseif (types(j) == 1)
+                    CellColour = [0 0 1];        % Yellow (transit) epithelial cells
+
+                elseif (types(j) == 2)
+                    CellColour = [1 0 1];        % Pink (differentiated) tissue cells
+                end
+                Colour = CellColour;
+    %           plot3(xvals(j),yvals(j), zvals(j), 'o','Color',Colour)
+                scatter3(xvals(j),yvals(j), zvals(j), 50,'filled','MarkerFaceColor',Colour)
+                hold on
+            
+            elseif (PlotGhosts)
                 CellColour = [0.4 0.4 0.4];  % Grey cells - could be ghosts or apoptotic
+                Colour = CellColour;
+    %           plot3(xvals(j),yvals(j), zvals(j), 'o','Color',Colour)
+                scatter3(xvals(j),yvals(j), zvals(j), 50,'filled','MarkerFaceColor',Colour)
+                hold on
             end         
             
-            Colour = CellColour;
-            if (types(j) == 1) %(types(j) == 0) || (types(j) == 1) || (types(j) == 2)
-%                plot3(xvals(j),yvals(j), zvals(j), 'o','Color',Colour)
-                scatter3(xvals(j),yvals(j), zvals(j), 50,'filled','MarkerFaceColor',Colour)
-
-                hold on
-            end
+%             Colour = CellColour;
+% %           plot3(xvals(j),yvals(j), zvals(j), 'o','Color',Colour)
+%             scatter3(xvals(j),yvals(j), zvals(j), 50,'filled','MarkerFaceColor',Colour)
+%             hold on
         end
     end
     
@@ -146,24 +158,25 @@ for i = 1:numtimes        % Timestep is 30 seconds
             
             % Trying to plot cell colours according to proliferative state
             
-            if (types(j) == 0)
-                CellColour = [0 0 0];        % Black (stem) epithelial cells
-                
-            elseif (types(j) == 1)
-                CellColour = [1 1 0];        % Yellow (transit) epithelial cells
+            if(j <= length(types))
+                if (types(j) == 2)
+                    CellColour = [0 0 0];        % Black (stem) epithelial cells
 
-            elseif (types(j) == 2)
-                CellColour = [1 0 1];        % Pink (differentiated) tissue cells
-                
+                elseif (types(j) == 1)
+                    CellColour = [0 0 1];        % Yellow (transit) epithelial cells
+
+                elseif (types(j) == 0)
+                    CellColour = [1 0 1];        % Pink (differentiated) tissue cells
+                end
             else
                 CellColour = [0.4 0.4 0.4];  % Grey cells - could be ghosts or apoptotic
-            end         
+            end        
             
             Colour = CellColour;
             %if (types(j) <3)
             %if (types(j) == 2 )
-            %    surf (CellX, CellY, CellZ, 'FaceColor', Colour, 'FaceAlpha', 0.5) ;
-            %    hold on
+                surf (CellX, CellY, CellZ, 'FaceColor', Colour, 'FaceAlpha', 0.25) ;
+                hold on
             %end
         end
     end
@@ -179,21 +192,21 @@ for i = 1:numtimes        % Timestep is 30 seconds
 
     %view(3)
     az = 45;
-    el = 20;
+    el = 5;
     view(az, el);
 %    axis([-1,16,-1,16,-1,6]);				
 %     axis([-1,7,-1,7,-1,6]);				
-    title({sprintf('Time = %2.2f', time);' '})
+    title({sprintf('Time = %2.3f', time);' '})
 
     %pause(0.1)
     drawnow
     grid off
     M(i) = getframe(fig);
     
-    pause(0.01);
     
-       
+    pause(0.01);
 end
+       
 
 % folder = '/Users/germanod/Workspace/Chaste/projects/results_from_time_0/';
 % 

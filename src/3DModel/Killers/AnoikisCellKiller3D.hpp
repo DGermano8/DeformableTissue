@@ -3,6 +3,7 @@
 
 #include "AbstractCellKiller.hpp"
 #include "MeshBasedCellPopulation.hpp"
+#include "MeshBasedCellPopulationWithGhostNodes.hpp"
 #include "OutputFileHandler.hpp"
 #include "StromalCellMutationState.hpp"
 #include "WildTypeCellMutationState.hpp"

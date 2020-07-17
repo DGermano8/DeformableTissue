@@ -4,6 +4,7 @@
 #include "LinearSpringWithVariableSpringConstantsForce.hpp"
 #include "StromalCellMutationState.hpp"
 #include "MeshBasedCellPopulation.hpp"
+#include "MeshBasedCellPopulationWithGhostNodes.hpp"
 
 #include "ChasteSerialization.hpp"
 #include <boost/serialization/base_object.hpp>

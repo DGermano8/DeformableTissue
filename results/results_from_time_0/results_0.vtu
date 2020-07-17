@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<VTKFile type="UnstructuredGrid" version="0.1" byte_order="LittleEndian" header_type="UInt32" compressor="vtkZLibDataCompressor">
+  <UnstructuredGrid>
+    <Piece NumberOfPoints="700"                  NumberOfCells="0"                   >
+      <PointData>
+        <DataArray type="Float64" Name="Cell IDs" format="appended" RangeMin="-1"                   RangeMax="419"                  offset="0"                   />
+        <DataArray type="Float64" Name="Mutation states" format="appended" RangeMin="-1"                   RangeMax="0"                    offset="816"                 />
+        <DataArray type="Float64" Name="Cell types" format="appended" RangeMin="-1"                   RangeMax="1"                    offset="888"                 />
+        <DataArray type="Float64" Name="Ancestors" format="appended" RangeMin="-1"                   RangeMax="-1"                   offset="964"                 />
+        <DataArray type="Float64" Name="Location indices" format="appended" RangeMin="-1"                   RangeMax="0"                    offset="1040"                />
+      </PointData>
+      <CellData>
+      </CellData>
+      <Points>
+        <DataArray type="Float64" Name="Vertex positions" NumberOfComponents="3" format="appended" RangeMin="5"                    RangeMax="16.74102056"          offset="1112"                />
+      </Points>
+      <Cells>
+        <DataArray type="Int64" Name="connectivity" format="appended" RangeMin=""                     RangeMax=""                     offset="3308"                />
+        <DataArray type="Int64" Name="offsets" format="appended" RangeMin=""                     RangeMax=""                     offset="3324"                />
+        <DataArray type="UInt8" Name="types" format="appended" RangeMin=""                     RangeMax=""                     offset="3340"                />
+      </Cells>
+    </Piece>
+  </UnstructuredGrid>
+  <AppendedData encoding="base64">
+   _AQAAAACAAADgFQAAUgIAAA==eJztzbcNNUUUBeAbEv4BAQHBCiGEEEKL9/yD97B4D4P3sHgT3RJeCVPCdsCUsCVMCVsCwfsCWkB6k3xzdHR0I/77jqs+5cw1vMJreR2v58QbeCNv4s28hbfyNs68nXfwTt7Fu3kP7+V9vJ8P8EE+xIf5CK+ynE3GozLjMZnxuMx4QmY8KTOekhlPy4xnZMazMuM5mfG8zHhBZrwoM16SGS/LjOVsYbIzXtEz2Rmv6pnsjNf0THbG63omO+MNPZOd8aaeyc54S89kZ7ytZ7Iz3tEz2Rnv6pnsjPf0THbG+3omO+MDPZOd8aGeyc74SM9kZ9SzEwsrk42dg/GxPQsrk42dg/GJPQsrk42dg/GpPQsrk42dg/GZPQsrk42dg/G5PQsrk42dg/GFPQsrk42dg/GlPQsrk42dg/GVPQsrk42dg/G1PQsrk42dg/GNPQsrk42dg/GtPQsrk42dg/GdPQsrk42dg/G9PQsrk42dg/GDPQsrk42dg/GjPQsrk42dg7GevcKJMwsXVq5Mnti4sXPn4MH4yX1OnFm4sHJl8sTGjZ07Bw/Gz+5z4szChZUrkyc2buzcOXgwfnGfE2cWLqxcmTyxcWPnzsGD8av7nDizcGHlyuSJjRs7dw4ejN/c58SZhQsrVyZPbNzYuXPwYPzuPifOLFxYuTJ5YuPGzp2DB+MP9zlxZuHCypXJExs3du4cPBh/us+JMwsXVq5Mnti4sXPn4MH4y31OnFm4sHJl8sTGjZ07Bw/G3+5z4sw4/rl48eLFixcvXvy/+C/17ob9AQAAAACAAADgFQAAJAAAAA==eJztxTENAAAIA7D5N4UlJOxEA0n7NAEAAODs2LZtf7l1vtd4AQAAAACAAADgFQAAJwAAAA==eJztxTENAAAIAzCcIR1LSEAFx5L2aRUAQKJt2356bNu2Uz7Sv307AQAAAACAAADgFQAAJgAAAA==eJztxTENAAAIA7D5N4UlJCzIIGmfJmcntm3btm3btu1XF80TmsE=AQAAAACAAADgFQAAJAAAAA==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
+  </AppendedData>
+</VTKFile>
+
+<!-- Created by Chaste version 2017.1.544f00a (with uncommitted modifications) on Thu, 16 Jul 2020 08:52:16 +0000.  Chaste was built on Thu, 16 Jul 2020 08:52:09 +0000 by machine (uname) 'Darwin Domenics-MacBook-Pro.local 18.7.0 Darwin Kernel Version 18.7.0: Tue Aug 20 16:57:14 PDT 2019; root:xnu-4903.271.2~2/RELEASE_X86_64 x86_64' using settings: GccOpt, no Chaste libraries.  Checked-out project versions: Comparision2017=0; DeformableTissue=21fd830; DomenicG=a27faf9; EpithelialFission=0; SJDunn_Deformable_Tissue=f1ba129; SaraJaneD_new=0; SaraJaneD_prev=27534; old_results=0; results=0; results_SJDunn_Deformable_Tissue=0.
+-->

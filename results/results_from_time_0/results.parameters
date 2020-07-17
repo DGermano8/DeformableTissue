@@ -1,0 +1,121 @@
+<Chaste>
+
+	<OffLatticeSimulation-3-3>
+		<Dt>0.001</Dt>
+		<EndTime>10</EndTime>
+		<UpdateCellPopulation>1</UpdateCellPopulation>
+		<UpdateCellPopulationInterval>1</UpdateCellPopulationInterval>
+		<SamplingTimestepMultiple>20</SamplingTimestepMultiple>
+		<OutputDivisionLocations>0</OutputDivisionLocations>
+		<OutputCellVelocities>0</OutputCellVelocities>
+	</OffLatticeSimulation-3-3>
+
+	<DomMeshBasedCellPopulationWithGhostNodes-3>
+		<GhostSpringStiffness>15</GhostSpringStiffness>
+		<WriteVtkAsPoints>1</WriteVtkAsPoints>
+		<UseAreaBasedDampingConstant>0</UseAreaBasedDampingConstant>
+		<AreaBasedDampingConstantParameter>0.1</AreaBasedDampingConstantParameter>
+		<WriteVtkAsPoints>0</WriteVtkAsPoints>
+		<OutputMeshInVtk>0</OutputMeshInVtk>
+		<HasVariableRestLength>0</HasVariableRestLength>
+		<MeinekeDivisionSeparation>0.3</MeinekeDivisionSeparation>
+		<CentreBasedDivisionRule>
+			<RandomDirectionCentreBasedDivisionRule-3-3>
+			</RandomDirectionCentreBasedDivisionRule-3-3>
+		</CentreBasedDivisionRule>
+		<DampingConstantNormal>1</DampingConstantNormal>
+		<DampingConstantMutant>1</DampingConstantMutant>
+		<OutputResultsForChasteVisualizer>1</OutputResultsForChasteVisualizer>
+	</DomMeshBasedCellPopulationWithGhostNodes-3>
+
+	<CellCycleModels>
+		<FixedG1GenerationalCellCycleModel>
+			<MaxTransitGenerations>3</MaxTransitGenerations>
+			<StemCellG1Duration>14</StemCellG1Duration>
+			<TransitCellG1Duration>2</TransitCellG1Duration>
+			<SDuration>5</SDuration>
+			<G2Duration>4</G2Duration>
+			<MDuration>1</MDuration>
+		</FixedG1GenerationalCellCycleModel>
+	</CellCycleModels>
+
+	<SrnModels>
+		<NullSrnModel>
+		</NullSrnModel>
+	</SrnModels>
+
+	<CellKillers>
+		<SloughingCellKiller3DWithGhostNodes>
+			<CellsRemovedBySloughing>0</CellsRemovedBySloughing> 
+		</SloughingCellKiller3DWithGhostNodes>
+		<AnoikisCellKiller3DWithGhostNodes>
+			<CellsRemovedByAnoikis>0</CellsRemovedByAnoikis> 
+			<CutOffLength>2</CutOffLength> 
+		</AnoikisCellKiller3DWithGhostNodes>
+	</CellKillers>
+
+	<SimulationModifiers>
+	</SimulationModifiers>
+
+	<Forces>
+		<PeriodicCryptModelInteractionForceWithGhostNodes-3>
+			<UseCellTypeDependentSprings>0</UseCellTypeDependentSprings> 
+			<TransitTransitMultiplier>1.79769e+308</TransitTransitMultiplier> 
+			<DifferentiatedDifferentiatedMultiplier>1.79769e+308</DifferentiatedDifferentiatedMultiplier> 
+			<TransitDifferentiatedMultiplier>1.79769e+308</TransitDifferentiatedMultiplier> 
+			<UseEpithelialStromalCellDependentSprings>1</UseEpithelialStromalCellDependentSprings> 
+			<EpithelialEpithelialMultiplier>1</EpithelialEpithelialMultiplier> 
+			<StromalStromalMultiplier>1</StromalStromalMultiplier> 
+			<EpithelialStromalMultiplier>1</EpithelialStromalMultiplier> 
+			<ApcTwoHitStromalMultiplier>1</ApcTwoHitStromalMultiplier> 
+			<UseOneWaySprings>0</mUseOneWaySprings> 
+			<UseEdgeBasedSpringConstant>0</UseEdgeBasedSpringConstant> 
+			<PeriodicDomainWidth>10.1</PeriodicDomainWidth> 
+			<PeriodicDomainDepth>12.2244</PeriodicDomainDepth> 
+			<UseEdgeBasedSpringConstant>0</UseEdgeBasedSpringConstant>
+			<UseMutantSprings>0</UseMutantSprings>
+			<MutantMutantMultiplier>1.79769e+308</MutantMutantMultiplier>
+			<NormalMutantMultiplier>1.79769e+308</NormalMutantMultiplier>
+			<UseBCatSprings>0</UseBCatSprings>
+			<UseApoptoticSprings>0</UseApoptoticSprings>
+			<BetaCatSpringScaler>3.02333</BetaCatSpringScaler>
+			<ApoptoticSpringTensionStiffness>3.75</ApoptoticSpringTensionStiffness>
+			<ApoptoticSpringCompressionStiffness>11.25</ApoptoticSpringCompressionStiffness>
+			<MeinekeSpringStiffness>10</MeinekeSpringStiffness>
+			<MeinekeDivisionRestingSpringLength>0.5</MeinekeDivisionRestingSpringLength>
+			<MeinekeSpringGrowthDuration>1</MeinekeSpringGrowthDuration>
+			<UseCutOffLength>1</UseCutOffLength>
+			<CutOffLength>1.5</CutOffLength>
+		</PeriodicCryptModelInteractionForceWithGhostNodes-3>
+		<PeriodicBendingForce3dWithGhostNodes>
+			<BasementMembraneParameter>1</BasementMembraneParameter> 
+			<ExponentParameter>1.5</ExponentParameter> 
+			<PeriodicDomainWidth>10.1</PeriodicDomainWidth> 
+			<PeriodicDomainDepth>12.2244</PeriodicDomainDepth> 
+			<NonZeroTargetCurvature>0.15<NonZeroTargetCurvature> 
+		</PeriodicBendingForce3dWithGhostNodes>
+	</Forces>
+
+	<CellPopulationBoundaryConditions>
+		<PeriodicBoxBoundaryCondition3d>
+		<CellPopulationDepth>12.2244</CellPopulationDepth>
+		<CellPopulationWidth>10.1</CellPopulationWidth>
+		<MaxHeightForPinnedCells>0</MaxHeightForPinnedCells>
+		</PeriodicBoxBoundaryCondition3d>
+		<PeriodicStromalBoxBoundaryCondition3d>
+		<CellPopulationDepth>12.2244</CellPopulationDepth>
+		<CellPopulationWidth>10.1</CellPopulationWidth>
+		<MaxHeightForPinnedCells>-5</MaxHeightForPinnedCells>
+		</PeriodicStromalBoxBoundaryCondition3d>
+	</CellPopulationBoundaryConditions>
+
+	<NumericalMethod>
+		<ForwardEulerNumericalMethod-3-3>
+			<UseAdaptiveTimestep>0</UseAdaptiveTimestep> 
+			<UseUpdateNodeLocation>0</UseUpdateNodeLocation> 
+			<GhostNodeForcesEnabled>0</GhostNodeForcesEnabled> 
+			<DomGhostNodeForcesEnabled>1</DomGhostNodeForcesEnabled> 
+		</ForwardEulerNumericalMethod-3-3>
+	</NumericalMethod>
+
+</Chaste>

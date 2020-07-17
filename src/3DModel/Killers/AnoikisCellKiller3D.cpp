@@ -39,7 +39,7 @@ std::set<unsigned> AnoikisCellKiller3D::GetNeighbouringNodeIndices(unsigned node
 
 	// Need access to the mesh but can't get to it because the cell killer only owns a
 	// pointer to an AbstractCellPopulation
-    MeshBasedCellPopulation<3>* p_tissue = static_cast<MeshBasedCellPopulation<3>*> (this->mpCellPopulation);
+    MeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<MeshBasedCellPopulationWithGhostNodes<3>*> (this->mpCellPopulation);
 
 	// Find the indices of the elements owned by this node
     std::set<unsigned> containing_elem_indices = p_tissue->rGetMesh().GetNode(nodeIndex)->rGetContainingElementIndices();
@@ -71,7 +71,7 @@ std::set<unsigned> AnoikisCellKiller3D::GetNeighbouringNodeIndices(unsigned node
  */
 bool AnoikisCellKiller3D::HasCellPoppedUp(unsigned nodeIndex)
 {
-	MeshBasedCellPopulation<3>* p_tissue = static_cast<MeshBasedCellPopulation<3>*> (this->mpCellPopulation);
+	MeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<MeshBasedCellPopulationWithGhostNodes<3>*> (this->mpCellPopulation);
 
 	bool has_cell_popped_up = false;	// Initialising
 
@@ -105,7 +105,7 @@ bool AnoikisCellKiller3D::HasCellPoppedUp(unsigned nodeIndex)
  */
 std::vector<c_vector<unsigned,2> > AnoikisCellKiller3D::RemoveByAnoikis()
 {
-	MeshBasedCellPopulation<3>* p_tissue = static_cast<MeshBasedCellPopulation<3>*> (this->mpCellPopulation);
+	MeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<MeshBasedCellPopulationWithGhostNodes<3>*> (this->mpCellPopulation);
 
 //This needs fixing
 //   assert(p_tissue->GetVoronoiTessellation()!=NULL);	// This fails during archiving of a simulation as Voronoi stuff not archived yet
@@ -148,7 +148,7 @@ std::vector<c_vector<unsigned,2> > AnoikisCellKiller3D::RemoveByAnoikis()
 */
 void AnoikisCellKiller3D::CheckAndLabelCellsForApoptosisOrDeath()
 {
-	MeshBasedCellPopulation<3>* p_tissue = static_cast<MeshBasedCellPopulation<3>*> (this->mpCellPopulation);
+	MeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<MeshBasedCellPopulationWithGhostNodes<3>*> (this->mpCellPopulation);
 
 //This needs fixing
 //    assert(p_tissue->GetVoronoiTessellation()!=NULL);	// This fails during archiving of a simulation as Voronoi stuff not archived yet
@@ -198,7 +198,7 @@ unsigned AnoikisCellKiller3D::GetNumberCellsRemovedByAnoikis()
 /* Data stored: time - node_index - x - y - z */
 void AnoikisCellKiller3D::SetLocationsOfCellsRemovedByAnoikis(std::vector<c_vector<unsigned,2> > cellsRemoved)
 {
-	MeshBasedCellPopulation<3>* p_tissue = static_cast<MeshBasedCellPopulation<3>*> (this->mpCellPopulation);
+	MeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<MeshBasedCellPopulationWithGhostNodes<3>*> (this->mpCellPopulation);
 	double x_location, y_location, z_location;
 	c_vector<double, 5> node_time_and_location;
 

@@ -598,6 +598,7 @@ for (unsigned extended_node_index=0; extended_node_index<mpExtendedMesh->GetNumN
 
 				// ITERATE OVER NODES owned by this element
 				std::vector<unsigned> temp_triangular_element;
+				bool is_element_connected_to_tissue = false;
 				for (unsigned local_index=0; local_index<4; local_index++)
 				{
 					unsigned nodeBGlobalIndex = p_element->GetNodeGlobalIndex(local_index);
@@ -620,10 +621,16 @@ for (unsigned extended_node_index=0; extended_node_index<mpExtendedMesh->GetNumN
 						temp_triangular_element.push_back(nodeBGlobalIndex);
 						//temp_triangular_element.push_back(neighbour_index);
 					}
+					
+					else if(p_cell->GetMutationState()->IsType<StromalCellMutationState>())
+					{
+						is_element_connected_to_tissue = true;
+					}
 
 				}
 
-				if(temp_triangular_element.size() == 3)
+				// This means, we only consider adding if theres 3 epithelial cells AND 1 stromal cell
+				if(temp_triangular_element.size() == 3 && is_element_connected_to_tissue)
 				{
 					std::sort(temp_triangular_element.begin(), temp_triangular_element.end());
 					tri_el[0] = temp_triangular_element[0];
@@ -1632,13 +1639,29 @@ void PeriodicBendingForce3d::AddForceContribution(AbstractCellPopulation<3>& rCe
 	
 	double basement_membrane_parameter = GetBasementMembraneParameter();
 
+	//std::cout<<"\n";
+	
 	for(unsigned i=0; i<num_cells; i++)
 	{
+
+		//std::cout<<"\n";
+        //PRINT_VARIABLE(i);
+        //std::cout<<"\n";
+
+
         unsigned cell_i_ext = mExtendedMeshNodeIndexMap[i];
-		//PRINT_VARIABLE(cell_i_ext);
 		//std::cout << "cell_i_ext = " << cell_i_ext << "  i = " << i << "\n";
 		CellPtr p_cell_i_ext = rCellPopulation.GetCellUsingLocationIndex(cell_i_ext);
     	bool cell_is_dead = p_cell_i_ext->IsDead();
+		
+		//PRINT_VARIABLE(cell_i_ext);
+		//bool cell_is_ghost = p_cell_i_ext->IsDead();
+
+		//Element<3,3>* p_element = p_tissue->rGetMesh().GetElement(elementIndex);
+
+		//		if (p_tissue->IsGhostNode(p_element->GetNodeGlobalIndex(local_index)) == true)
+
+		//PRINT_VARIABLE(cell_i_ext);
 
         if(p_cell_i_ext->GetMutationState()->IsType<WildTypeCellMutationState>() == true && cell_is_dead == false )
 		{
@@ -1752,7 +1775,6 @@ void PeriodicBendingForce3d::AddForceContribution(AbstractCellPopulation<3>& rCe
 			//PRINT_VECTOR(force_due_to_curvature);
 
 			rCellPopulation.GetNode(cell_i_ext)->AddAppliedForceContribution(basement_membrane_parameter*force_due_to_curvature);
-			
 			//HOW_MANY_TIMES_HERE("inside for loop");
 
 		

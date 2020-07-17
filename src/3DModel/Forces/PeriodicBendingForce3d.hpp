@@ -3,6 +3,7 @@
 
 #include "GeneralisedLinearSpringForce.hpp"
 #include "MeshBasedCellPopulation.hpp"
+#include "MeshBasedCellPopulationWithGhostNodes.hpp"
 #include "AbstractVanLeeuwen2009WntSwatCellCycleModel.hpp"
 #include "SimpleWntCellCycleModel.hpp"
 #include "Debug.hpp"
