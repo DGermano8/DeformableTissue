@@ -344,124 +344,6 @@ std::vector<c_vector<unsigned, 10> > PeriodicBendingForce3dWithGhostNodes::GetEp
 			}
 		}
 
-		/*
-		if(std::find(temp_neighbours[node_A].begin(), temp_neighbours[node_A].end(), node_B) != temp_neighbours[node_A].end())
-		{
-			int iter_A = 0;
-			while(iter_A < 10)
-			{
-				if(temp_neighbours[node_A][iter_A] == 0)
-				{
-					temp_neighbours[node_A][iter_A] = node_B;
-					iter_A = 10;
-				}
-				iter_A++;
-			}
-		}
-		if(std::find(temp_neighbours[node_A].begin(), temp_neighbours[node_A].end(), node_C) != temp_neighbours[node_A].end())
-		{
-			int iter_A = 0;
-			while(iter_A < 10)
-			{
-				if(temp_neighbours[node_A][iter_A] == 0)
-				{
-					temp_neighbours[node_A][iter_A] = node_C;
-					iter_A = 10;
-				}
-				iter_A++;
-			}
-		}
-
-		}
-		
-		if(std::find(temp_neighbours[node_B].begin(), temp_neighbours[node_B].end(), node_A) != temp_neighbours[node_B].end())
-		{
-			int iter_B = 0;
-			while(iter_B < 10)
-			{
-				if(temp_neighbours[node_B][iter_B] == 0)
-				{
-					temp_neighbours[node_B][iter_B] = node_A;
-					iter_B = 10;
-				}
-				iter_B++;
-			}
-		}
-		if(std::find(temp_neighbours[node_B].begin(), temp_neighbours[node_B].end(), node_C) != temp_neighbours[node_B].end())
-		{
-			int iter_B = 0;
-			while(iter_B < 10)
-			{
-				if(temp_neighbours[node_B][iter_B] == 0)
-				{
-					temp_neighbours[node_B][iter_B] = node_C;
-					iter_B = 10;
-				}
-				iter_B++;
-			}
-		}
-		
-		if(std::find(temp_neighbours[node_C].begin(), temp_neighbours[node_C].end(), node_A) != temp_neighbours[node_C].end())
-		{
-			int iter_C = 0;
-			while(iter_C < 10)
-			{
-				if(temp_neighbours[node_C][iter_C] == 0)
-				{
-					temp_neighbours[node_C][iter_C] = node_A;
-					iter_C = 10;
-				}
-				iter_C++;
-			}
-		}
-		if(std::find(temp_neighbours[node_C].begin(), temp_neighbours[node_C].end(), node_B) != temp_neighbours[node_C].end())
-		{
-			int iter_C = 0;
-			while(iter_C < 10)
-			{
-				if(temp_neighbours[node_C][iter_C] == 0)
-				{
-					temp_neighbours[node_C][iter_C] = node_B;
-					iter_C = 10;
-				}
-				iter_C++;
-			}
-		}*/
-
-		/*int iter_A = 0;
-		while(iter_A < 10)
-		{
-			if(temp_neighbours[node_A][iter_A] == 0)
-			{
-				temp_neighbours[node_A][iter_A] = node_B;
-				temp_neighbours[node_A][iter_A+1] = node_C;
-				iter_A = 10;
-			}
-			iter_A++;
-		}
-		int iter_B = 0;
-		while(iter_B < 10)
-		{
-			if(temp_neighbours[node_B][iter_B] == 0)
-			{
-				temp_neighbours[node_B][iter_B] = node_A;
-				temp_neighbours[node_B][iter_B+1] = node_C;
-				iter_B = 10;
-			}
-			iter_B++;
-		}
-		int iter_C = 0;
-		while(iter_C < 10)
-		{
-			if(temp_neighbours[node_C][iter_C] == 0)
-			{
-				temp_neighbours[node_C][iter_C] = node_A;
-				temp_neighbours[node_C][iter_C+1] = node_B;
-				iter_C = 10;
-			}
-			iter_C++;
-		}*/
-
 	}
 	
 	for(unsigned i=0; i<4*number_of_cells; i++)
@@ -494,77 +376,13 @@ std::vector<c_vector<unsigned, 10> > PeriodicBendingForce3dWithGhostNodes::GetEp
 
 }
 
-// Dom - attempt to write a function to find epithelial node neighbours
 
-//std::vector<c_vector<unsigned, 10> > PeriodicBendingForce3dWithGhostNodes::GetEpithelialNeighbours(AbstractCellPopulation<3>& rCellPopulation);
 
 std::vector<c_vector<unsigned, 3> > PeriodicBendingForce3dWithGhostNodes::GetEpithelialMesh(AbstractCellPopulation<3>& rCellPopulation)
 {
-	//int num_cells = rCellPopulation.GetNumRealCells();
-
-	//std::array<unsigned, 10> node_neighbours = {};
-	//This explicitly relys on the fact that cell 0 is not an epithelial cell - which is NOT true for a monolayer model
-	// This uses a magic number of 10, meaning that we assume epithelial cells have at most 10 neighbouring epithelial cells
-	// This may need to be reviewed later on.
-	//unsigned node_neighbours[9*num_cells][10] = {};
-	
-
-	//std::vector<c_vector<unsigned, 2> > node_pairs; Delete this
-	
-	//for (typename MeshBasedCellPopulation<DIM>::SpringIterator spring_iterator=(static_cast<MeshBasedCellPopulation<DIM>*>(&rCellPopulation))->SpringsBegin();
-    //    spring_iterator!=(static_cast<MeshBasedCellPopulation<DIM>*>(&rCellPopulation))->SpringsEnd();
-    //    ++spring_iterator)
-	/*
-	for (typename MeshBasedCellPopulation<3>::SpringIterator spring_iterator=mpExtendedMesh->SpringsBegin();
-        spring_iterator!=mpExtendedMesh->SpringsEnd();
-        ++spring_iterator)	
-    {
-        unsigned nodeA_global_index = spring_iterator.GetNodeA()->GetIndex();
-        unsigned nodeB_global_index = spring_iterator.GetNodeB()->GetIndex();
-
-		unsigned real_nodeA = mExtendedMeshNodeIndexMap[nodeA_global_index];
-		unsigned real_nodeB = mExtendedMeshNodeIndexMap[nodeB_global_index];
-        
-		CellPtr p_real_nodeA = rCellPopulation.GetCellUsingLocationIndex(real_nodeA);
- 		CellPtr p_real_nodeB = rCellPopulation.GetCellUsingLocationIndex(real_nodeB);
-
-		if((p_real_nodeA->GetMutationState()->IsType<WildTypeCellMutationState>()) && (p_real_nodeB->GetMutationState()->IsType<WildTypeCellMutationState>()) )
-		{
-			 //Its going to looks something like:
-			 //
-			 //node_neighbours[real_nodeA][iterator_for_A_somehow] = real_nodeB;
-			 //node_neighbours[real_nodeB][iterator_for_B_somehow] = real_nodeA;
-			 //
-			 //but probably using push_back, i.e.:
-			 //
-			 int iter_A = 0;
-			 while(iter_A < 10)
-			 {
-				 if(node_neighbours[real_nodeA][iter_A] == 0)
-				{
-					node_neighbours[real_nodeA][iter_A] = real_nodeB;
-					iter_A = 10;
-				}
-				 iter_A++;
-			 }
-			 int iter_B = 0;
-			 while(iter_B < 10)
-			 {
-				 if(node_neighbours[real_nodeB][iter_B] == 0)
-				{
-					node_neighbours[real_nodeB][iter_B] = real_nodeA;
-					iter_B = 10;
-				}
-				 iter_B++;
-			 }
-		}
-
-    }*/
-
-
-	/////////
 // Get a pointer to this node in mpExtendedMesh
 std::vector<c_vector<unsigned, 3> > epithelial_triangulation;
+
 for (unsigned extended_node_index=0; extended_node_index<mpExtendedMesh->GetNumNodes(); extended_node_index++)
     {
         Node<3>* p_node = mpExtendedMesh->GetNode(extended_node_index);
@@ -583,6 +401,8 @@ for (unsigned extended_node_index=0; extended_node_index<mpExtendedMesh->GetNumN
 
     	// Get whether this cell is a live epithelial cell
     	bool is_live_epithelial_cell = (p_state->IsType<WildTypeCellMutationState>()==true) && !cell_is_dead;
+		
+		DomMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<3>*>(&rCellPopulation);
 
     	if (is_live_epithelial_cell)
     	{
@@ -590,13 +410,14 @@ for (unsigned extended_node_index=0; extended_node_index<mpExtendedMesh->GetNumN
     		
 			c_vector<unsigned, 3> tri_el;
 
+			// This needs both stromal and epithelial cells... so cant do monolayer..
     		for (Node<3>::ContainingElementIterator elem_iter = p_node->ContainingElementsBegin();
 		         elem_iter != p_node->ContainingElementsEnd();
 		         ++elem_iter)
     		{
 				// Get a pointer to the element
 				Element<3,3>* p_element = mpExtendedMesh->GetElement(*elem_iter);
-
+				
 				// ITERATE OVER NODES owned by this element
 				std::vector<unsigned> temp_triangular_element;
 				bool is_element_connected_to_tissue = false;
@@ -622,8 +443,7 @@ for (unsigned extended_node_index=0; extended_node_index<mpExtendedMesh->GetNumN
 						temp_triangular_element.push_back(nodeBGlobalIndex);
 						//temp_triangular_element.push_back(neighbour_index);
 					}
-					
-					else if(p_cell->GetMutationState()->IsType<StromalCellMutationState>())
+					else if(p_cell->GetMutationState()->IsType<StromalCellMutationState>() || p_tissue->IsGhostNode(nodeBGlobalIndex))
 					{
 						is_element_connected_to_tissue = true;
 					}
@@ -664,19 +484,6 @@ for (unsigned extended_node_index=0; extended_node_index<mpExtendedMesh->GetNumN
 			
 		}
     }
-
-	/*
-	std::cout << epithelial_triangulation.size() << "\n";
-	for(unsigned i=0; i<epithelial_triangulation.size(); i++)
-	{
-		if(1)//epithelial_triangulation[i][0] == 36)
-		{
-			std::cout << epithelial_triangulation[i][0] << " " << epithelial_triangulation[i][1] << " " << epithelial_triangulation[i][2] << "\n";
-		}
-	}
-	*/
-
-
 	return epithelial_triangulation;
 }
 
@@ -838,54 +645,6 @@ std::vector<c_vector<double, 3> > PeriodicBendingForce3dWithGhostNodes::FitPlane
 		image_location_per_second_order_neighbours.push_back(temp_cell_location);
 	}
 
-	/*for (unsigned i=0; i<second_order_neighs.size(); i++)
-	{
-		//int epithelialNodeIndex = second_order_neighs[i];
-		c_vector<double, 3> epithelial_location = mpExtendedMesh->GetNode(second_order_neighs[i])->rGetLocation();
-		
-		//PRINT_VECTOR(unit_normal);
-		//std::cout << pow(unit_normal[0],2) + pow(unit_normal[1],2) + pow(unit_normal[2],2) << "\n";
-		double alpha = pow(unit_normal[0],2) + pow(unit_normal[1],2) + pow(unit_normal[2],2);
-		double beta  = 2*unit_normal[0]*(epithelial_location[0]-circle_centre[0]) + 2*unit_normal[1]*(epithelial_location[1]-circle_centre[1]) + 2*unit_normal[2]*(epithelial_location[2]-circle_centre[2]);
-		double delta = pow(epithelial_location[0]-circle_centre[0],2) + pow(epithelial_location[1]-circle_centre[1],2) + pow(epithelial_location[2]-circle_centre[2],2) - pow(radius_from_curvature,2);
-
-		double param_T = (-1.0*beta - sign_of_curvature*sqrt(pow(beta,2) - 4*alpha*delta))/(2.0*alpha);
-		
-		c_vector<double, 3> point_on_sphere;
-		point_on_sphere[0] = unit_normal[0]*param_T + epithelial_location[0];
-		point_on_sphere[1] = unit_normal[1]*param_T + epithelial_location[1];
-		point_on_sphere[2] = unit_normal[2]*param_T + epithelial_location[2];
-
-		double k_point = (unit_normal[0]*point_on_sphere[0] + unit_normal[1]*point_on_sphere[1] + unit_normal[2]*point_on_sphere[2] - normal_vector[2])/alpha;
-		
-		c_vector<double, 3> point_on_plane;
-		point_on_plane[0] = point_on_sphere[0] - k_point*unit_normal[0];
-		point_on_plane[1] = point_on_sphere[1] - k_point*unit_normal[1];
-		point_on_plane[2] = point_on_sphere[2] - k_point*unit_normal[2];
-
-		double point_on_plane_DOT_point_on_sphere = sqrt(pow(point_on_plane[0]-point_on_sphere[0],2) + pow(point_on_plane[1]-point_on_sphere[1],2) + pow(point_on_plane[2]-point_on_sphere[2],2));
-
-		c_vector<double, 3> temp_cell_location;
-		temp_cell_location[0] = epithelial_location[0] - unit_normal[0]*point_on_plane_DOT_point_on_sphere;
-		temp_cell_location[1] = epithelial_location[1] - unit_normal[1]*point_on_plane_DOT_point_on_sphere;
-		temp_cell_location[2] = epithelial_location[2] - unit_normal[2]*point_on_plane_DOT_point_on_sphere;
-		
-		std::cout << pow(beta,2) - 4*alpha*delta << "\n";
-		PRINT_VECTOR(temp_cell_location);
-		image_location_per_second_order_neighbours.push_back(temp_cell_location);
-	}*/
-	//std::cout<< "\n";
-
-	// for(unsigned i=0; i<image_location_per_second_order_neighbours.size(); i++)
-	//{
-	//	c_vector<double, 3> temp_cell_loc;
-	//	temp_cell_loc[0] = image_location_per_second_order_neighbours[i][0];
-	//	temp_cell_loc[1] = image_location_per_second_order_neighbours[i][1];
-	//	temp_cell_loc[2] = image_location_per_second_order_neighbours[i][2];
-
-	//	PRINT_VECTOR(temp_cell_loc);
-	//}
-	//std::cout << "\n";
 	return image_location_per_second_order_neighbours;
 }
 
@@ -929,7 +688,7 @@ c_vector<double, 3> PeriodicBendingForce3dWithGhostNodes::GetForceDueToDiscreteC
 	// Calculate angles about the first order neighbours in the mesh
 	std::vector<double> angle_sum;
 	std::vector<double> angle_sum_indicats;
-
+	// std::cout << "\n\n";
 	for(unsigned j=0; j<first_order_neighs.size(); j++)
 	{
 		double ang_sum = 0.0;
@@ -970,6 +729,7 @@ c_vector<double, 3> PeriodicBendingForce3dWithGhostNodes::GetForceDueToDiscreteC
 				cell_c = rEpithelialMeshVector[i][1];
 				have_triangle = true;
 			}
+			// have_triangle = bool ( (cell_a == cell_i) + (cell_b == cell_i) + (cell_c == cell_i) );
 
 			if(have_triangle)
 			{
@@ -1019,7 +779,7 @@ c_vector<double, 3> PeriodicBendingForce3dWithGhostNodes::GetForceDueToDiscreteC
 				// Calculate grad_i phi_i
 				if(cell_a == cell_i)
 				{
-					//TRACE("one");
+					// TRACE("one");
 					//PRINT_VECTOR(cell_a_loc);
 					//PRINT_VECTOR(cell_b_loc);
 					//PRINT_VECTOR(cell_c_loc);
@@ -1033,7 +793,7 @@ c_vector<double, 3> PeriodicBendingForce3dWithGhostNodes::GetForceDueToDiscreteC
 				
 				else if(cell_b == cell_i)
 				{
-					//TRACE("two");
+					// TRACE("two");
 					//PRINT_VECTOR(cell_a_loc);
 					//PRINT_VECTOR(cell_b_loc);
 					//PRINT_VECTOR(cell_c_loc);
@@ -1045,10 +805,9 @@ c_vector<double, 3> PeriodicBendingForce3dWithGhostNodes::GetForceDueToDiscreteC
 					//PRINT_VECTOR(grad_hold);
 					//std::cout << "case 2 " << cell_a << "\n";
 				}
-
 				else if(cell_c == cell_i)
 				{
-					//TRACE("three");
+					// TRACE("three");
 					//PRINT_VECTOR(cell_a_loc);
 					//PRINT_VECTOR(cell_b_loc);
 					//PRINT_VECTOR(cell_c_loc);
@@ -1060,13 +819,28 @@ c_vector<double, 3> PeriodicBendingForce3dWithGhostNodes::GetForceDueToDiscreteC
 					//PRINT_VECTOR(grad_hold);
 					//std::cout << "case 3 " << cell_a << "\n";
 				}
+				else
+				{
+					grad_hold[0] = 0.0;
+					grad_hold[1] = 0.0;
+					grad_hold[2] = 0.0;
+					grad_i_phi_j_el += grad_hold;
+				}
+
 				if (isnan(grad_i_phi_j_el[0]) || isnan(grad_i_phi_j_el[1]) || isnan(grad_i_phi_j_el[2]))
 				{
 					PRINT_VECTOR(grad_i_phi_j_el);
 				}
+
+				// if ( cell_i == 154 )
+				// {
+				// 	PRINT_3_VARIABLES(cell_a,cell_b,cell_c);
+				// 	PRINT_VECTOR(grad_hold);
+				// }
 			}
 			
 		}
+		
 		//if(cell_a == cell_i)
 		//{
 		//	PRINT_VECTOR(grad_i_phi_j_el);
@@ -1079,8 +853,12 @@ c_vector<double, 3> PeriodicBendingForce3dWithGhostNodes::GetForceDueToDiscreteC
 
 		//PRINT_VECTOR(force_due_to_curvature);
 		// Using alpha = 1.5 and beta = 2.0 for now, will fix this later though
-		double sign_of_anlge = (round((2*3.141592653589793 - ang_sum)*pow(10.0,14))/pow(10.0,14) > 0) - (round((2*3.141592653589793 - ang_sum)*pow(10.0,14))/pow(10.0,14) < 0);
-
+		double sign_of_anlge = (round((2*3.141592653589793 - ang_sum)*pow(10.0,14))/pow(10.0,14) >= 0) - (round((2*3.141592653589793 - ang_sum)*pow(10.0,14))/pow(10.0,14) < 0);
+		// if ( cell_i == 154 )
+		// {
+		// 	double hold = (exponent_parameter)*(sign_of_anlge)*pow(sqrt((2*3.141592653589793 - ang_sum)*(2*3.141592653589793 - ang_sum)),(exponent_parameter-1.0));
+		// 	PRINT_2_VARIABLES(sign_of_anlge, hold);
+		// }
 		c_vector<double, 3> force_due_to_curvature_i = (exponent_parameter)*(sign_of_anlge)*pow(sqrt((2*3.141592653589793 - ang_sum)*(2*3.141592653589793 - ang_sum)),(exponent_parameter-1.0))*grad_i_phi_j_el;
 
 		force_due_to_curvature +=  force_due_to_curvature_i;
@@ -1092,6 +870,7 @@ c_vector<double, 3> PeriodicBendingForce3dWithGhostNodes::GetForceDueToDiscreteC
 		//std::cout << round((2*3.141592653589793 - ang_sum)*pow(10.0,14))/pow(10.0,14) << "\n";
 		//std::cout<< "sign_of_anlge = " << sign_of_anlge << "\n";
 	}
+	
 
 	//PRINT_VECTOR(force_due_to_curvature);
 
@@ -1108,370 +887,6 @@ c_vector<double, 3> PeriodicBendingForce3dWithGhostNodes::GetForceDueToDiscreteC
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-// Dom - here is where the curvature is calculated (externally), which seems like a nice idea.
-/* A method to take in an Epithelial-Tissue node pairing and return the curvature value
- * This takes in indices of nodes in the extended mesh, so to get the corresponding cells in the cell population, we use the
- * extended node map
- */
-double PeriodicBendingForce3dWithGhostNodes::GetCurvatureDueToSpringMidpoints(AbstractCellPopulation<3>& rCellPopulation, unsigned epithelialNodeIndex, unsigned tissueNodeIndex)
-{
-
-	// Get the node indices that correspond to the real cells in the cell population that have been imaged
-	unsigned real_epithelial_node = mExtendedMeshNodeIndexMap[epithelialNodeIndex];
-	unsigned real_tissue_node = mExtendedMeshNodeIndexMap[tissueNodeIndex];
-	
-	CellPtr p_epithelial_cell = rCellPopulation.GetCellUsingLocationIndex(real_epithelial_node);
- 	CellPtr p_tissue_cell = rCellPopulation.GetCellUsingLocationIndex(real_tissue_node);
-
-	assert(p_epithelial_cell->GetMutationState()->IsType<WildTypeCellMutationState>());
- 	assert(p_tissue_cell->GetMutationState()->IsType<StromalCellMutationState>());
-
-    // Seeking the common elements that contain both the epithelial node and the tissue node
-	// Note: Don't want to count any elements that have ghost nodes (this shouldn't matter if you just are using cutoff lengths)
-
-	std::vector<unsigned> common_elements;	// Initialising
-    std::vector<double> local_dAds;	// The value of dA/ds for a particular common element (these will all be summed)
-    c_vector<double, 3> cross_product, cross_product_derivative;
-
-	// The elements that contain this node in the extended mesh
-    std::set<unsigned> epithelial_elements = mpExtendedMesh->GetNode(epithelialNodeIndex)->rGetContainingElementIndices();
-    assert(!epithelial_elements.empty());
-
-    // Check there are elements that contain the tissue node:
-    assert(mpExtendedMesh->GetNode(tissueNodeIndex)->GetNumContainingElements() != 0);
-
-    // Loop over all elements that contain the tissue node
-    for (Node<3>::ContainingElementIterator elt_it = mpExtendedMesh->GetNode(tissueNodeIndex)->ContainingElementsBegin();
-         elt_it != mpExtendedMesh->GetNode(tissueNodeIndex)->ContainingElementsEnd();
-         ++elt_it)
-    {
-    	unsigned elt_index = *elt_it;
-
-    	// We don't want to consider any elements with really long edges
-    	bool elt_contains_long_edge = DoesElementContainLongEdge(rCellPopulation, elt_index, 1.5);
-
-    	// Keep only those elements that also contain the epithelial node (there shouldn't be any ghost nodes in the extended mesh)
-        if ( (elt_contains_long_edge == false) && (epithelial_elements.find(elt_index) != epithelial_elements.end()) )
-        {
-        	// Common element
-           	common_elements.push_back(elt_index);
-        }
-    }
-
-	//	assert(!common_elements.empty());		// This is bad - but may happen if we eliminate all cases with long edge...
-
-	// We iterate over these common elements to find the midpoints of the other springs that
-	// connect epithelial and  tissue nodes
-
-	c_vector<double, 3> epithelial_location = mpExtendedMesh->GetNode(epithelialNodeIndex)->rGetLocation();
-	c_vector<double, 3> tissue_location = mpExtendedMesh->GetNode(tissueNodeIndex)->rGetLocation();
-
-	// The original spring midpoint, between the original epithelial and tissue nodes, which corresponds to v1 in your workings
-	c_vector<double, 3> central_spring_midpoint = epithelial_location + 0.5*(mpExtendedMesh->GetVectorFromAtoB(epithelial_location, tissue_location));
-
-	// We now have to consider each common tetrahedral element to calculate the other midpoints (v2 and v3) and work out each
-	// triangle individually
-	for (std::vector<unsigned>::iterator elem_iter = common_elements.begin();
-										 elem_iter != common_elements.end();
-										 ++elem_iter)
-	{
-		double local_area = 0.0;
-		double sum_terms = 0.0;
-
-		// Need to determine the cell type of each local node in the element as we want to find
-		// the midpoint between epithelial and tissue pairs
-
-		// Looking at the four nodes which form the vertices of the element
-
-		unsigned global_index_A = mpExtendedMesh->GetElement(*elem_iter)->GetNodeGlobalIndex(0);
-		unsigned global_index_B = mpExtendedMesh->GetElement(*elem_iter)->GetNodeGlobalIndex(1);
-		unsigned global_index_C = mpExtendedMesh->GetElement(*elem_iter)->GetNodeGlobalIndex(2);
-		unsigned global_index_D = mpExtendedMesh->GetElement(*elem_iter)->GetNodeGlobalIndex(3);
-
-		// We will assign labels to the local nodes, retaining the epithelial node and the tissue node of interest
-		unsigned E=UINT_MAX;  // E - the epithelial node we're interested in,
-		unsigned T=UINT_MAX;  // T - the tissue node it's connected to, and
-		unsigned P=UINT_MAX;  // P - one of the other nodes in the element,
-		unsigned Q=UINT_MAX;  // Q - one of the other nodes in the element,
-
-		// Need to assign these nodes correctly, so that we know which are the epithelial node and tissue node of interest
-		if (global_index_A == epithelialNodeIndex)
-		{
-			E = global_index_A;
-
-			if (global_index_B == tissueNodeIndex)
-			{
-				T = global_index_B;
-				P = global_index_C;
-				Q = global_index_D;
-			}
-			else if (global_index_C == tissueNodeIndex)
-			{
-				T = global_index_C;
-				P = global_index_B;
-				Q = global_index_D;
-			}
-			else if (global_index_D == tissueNodeIndex)
-			{
-				T = global_index_D;
-				P = global_index_B;
-				Q = global_index_C;
-			}
-		}
-		else if (global_index_B == epithelialNodeIndex)
-		{
-			E = global_index_B;
-
-			if (global_index_A == tissueNodeIndex)
-			{
-				T = global_index_A;
-				P = global_index_C;
-				Q = global_index_D;
-			}
-			else if (global_index_C == tissueNodeIndex)
-			{
-				T = global_index_C;
-				P = global_index_A;
-				Q = global_index_D;
-			}
-			else if (global_index_D == tissueNodeIndex)
-			{
-				T = global_index_D;
-				P = global_index_A;
-				Q = global_index_C;
-			}
-		}
-		else if (global_index_C == epithelialNodeIndex)
-		{
-			E = global_index_C;
-
-			if (global_index_A == tissueNodeIndex)
-			{
-				T = global_index_A;
-				P = global_index_B;
-				Q = global_index_D;
-			}
-			else if (global_index_B == tissueNodeIndex)
-			{
-				T = global_index_B;
-				P = global_index_A;
-				Q = global_index_D;
-			}
-			else if (global_index_D == tissueNodeIndex)
-			{
-				T = global_index_D;
-				P = global_index_A;
-				Q = global_index_B;
-			}
-		}
-		else if (global_index_D == epithelialNodeIndex)
-		{
-			E = global_index_D;
-
-			if (global_index_A == tissueNodeIndex)
-			{
-				T = global_index_A;
-				P = global_index_B;
-				Q = global_index_C;
-			}
-			else if (global_index_B == tissueNodeIndex)
-			{
-				T = global_index_B;
-				P = global_index_A;
-				Q = global_index_C;
-			}
-			else if (global_index_C == tissueNodeIndex)
-			{
-				T = global_index_C;
-				P = global_index_A;
-				Q = global_index_B;
-			}
-		}
-
-		assert(E<UINT_MAX);
-		assert(T<UINT_MAX);
-		assert(P<UINT_MAX);
-		assert(Q<UINT_MAX);
-
-		// Check that we've identified the original epithelial and tissue pair correctly
-		assert(E == epithelialNodeIndex);
-		assert(T == tissueNodeIndex);
-
-		/* Now we work with E (the epithelial node), T (the tissue node it's connected to) and P and Q, the other nodes.
-		 * We need to work out if P and Q are epithelial or tissue nodes to then find the midpoint we require in this element.
-		 */
-		c_vector<double, 3> vector_E_to_P = mpExtendedMesh->GetVectorFromAtoB(mpExtendedMesh->GetNode(E)->rGetLocation(),mpExtendedMesh->GetNode(P)->rGetLocation());
-		c_vector<double, 3> vector_P_to_T = mpExtendedMesh->GetVectorFromAtoB(mpExtendedMesh->GetNode(P)->rGetLocation(),mpExtendedMesh->GetNode(T)->rGetLocation());
-		c_vector<double, 3> vector_E_to_Q = mpExtendedMesh->GetVectorFromAtoB(mpExtendedMesh->GetNode(E)->rGetLocation(),mpExtendedMesh->GetNode(Q)->rGetLocation());
-		c_vector<double, 3> vector_Q_to_T = mpExtendedMesh->GetVectorFromAtoB(mpExtendedMesh->GetNode(Q)->rGetLocation(),mpExtendedMesh->GetNode(T)->rGetLocation());
-
-	 // Dom - Check E is Epithelial cell
-	 //		unsigned real_other_node_E = mExtendedMeshNodeIndexMap[E];
-	 //		boost::shared_ptr<AbstractCellMutationState> E_mutation_state = rCellPopulation.GetCellUsingLocationIndex(real_other_node_E)->GetMutationState();
-	 //		std::cout << "Check if E is Epithelial" << (E_mutation_state->IsType<WildTypeCellMutationState>()==true) << '\n';
-
-		// Now check the mutation state of P and Q to see if they are tissue cells or epithelial cells
-		unsigned real_other_node_P = mExtendedMeshNodeIndexMap[P];
-		boost::shared_ptr<AbstractCellMutationState> P_mutation_state = rCellPopulation.GetCellUsingLocationIndex(real_other_node_P)->GetMutationState();
-
-		unsigned real_other_node_Q = mExtendedMeshNodeIndexMap[Q];
-		boost::shared_ptr<AbstractCellMutationState> Q_mutation_state = rCellPopulation.GetCellUsingLocationIndex(real_other_node_Q)->GetMutationState();
-
-		// Now choose the appropriate midpoints to use to form the triangle. Note that we don't want to choose the midpoint of PQ,
-		// so we always choose the midpoints of EP, EQ, TP or TQ, depending on whether P and Q are epithelial or tissue nodes
-		c_vector<double, 3> midpoint_2, midpoint_3;
-
-		if (P_mutation_state->IsType<StromalCellMutationState>()==false)		// P = Epithelial, i.e not labelled
-		{
-			midpoint_3 = mpExtendedMesh->GetNode(P)->rGetLocation() + 0.5*vector_P_to_T;
-
-			if (Q_mutation_state->IsType<StromalCellMutationState>()==false)	// Q = Epithelial
-			{
-				midpoint_2 = mpExtendedMesh->GetNode(Q)->rGetLocation() + 0.5*vector_Q_to_T;
-			}
-			else if (Q_mutation_state->IsType<StromalCellMutationState>()==true)	// Q = Tissue, so labelled
-			{
-				midpoint_2 = mpExtendedMesh->GetNode(E)->rGetLocation() + 0.5*vector_E_to_Q;
-			}
-		}
-		else if (P_mutation_state->IsType<StromalCellMutationState>()==true)	// P = Tissue
-		{
-			midpoint_3 = mpExtendedMesh->GetNode(E)->rGetLocation() + 0.5*vector_E_to_P;
-
-			if(Q_mutation_state->IsType<StromalCellMutationState>()==true)	// Q = Tissue
-			{
-				midpoint_2 = mpExtendedMesh->GetNode(E)->rGetLocation() + 0.5*vector_E_to_Q;
-			}
-			else if (Q_mutation_state->IsType<StromalCellMutationState>()==false)	// Q = Epithelial
-			{
-				midpoint_2 = mpExtendedMesh->GetNode(Q)->rGetLocation() + 0.5*vector_Q_to_T;
-			}
-		}
-
-		// Now we want the area of the triangle connecting these two midpoints to the central midpoint
-
-		c_vector<double, 3> vector_to_midpoint_2 = mpExtendedMesh->GetVectorFromAtoB(central_spring_midpoint, midpoint_2);
-		c_vector<double, 3> vector_to_midpoint_3 = mpExtendedMesh->GetVectorFromAtoB(central_spring_midpoint, midpoint_3);
-
-		// Consider the vertices of the triangle as labelled A (central midpoint), B (midpoint 1) and C (midpoint 2)
-		local_area = GetAreaOfTriangle(vector_to_midpoint_2, vector_to_midpoint_3);		// Checked
-
-		if (isnan(local_area))
-		{
-			PRINT_VECTOR(vector_to_midpoint_2);
-			PRINT_VECTOR(vector_to_midpoint_3);
-			// NB. These indices correspond to the cell population, not the extended mesh
-			PRINT_4_VARIABLES(SimulationTime::Instance()->GetTime(), epithelialNodeIndex, tissueNodeIndex, local_area);
-		}
-		assert(!isnan(local_area));
-
-		// New definition of the central midpoint dependent on s, for use in the curvature calculation
-		// TODO: WILL THIS CHANGE WHEN YOU HAVE TO THINK ABOUT PERIODICITY?
-        //central_spring_midpoint = tissue_location + 0.5*(epithelial_location - tissue_location);
-
-		// In your notes: v_5 = epithelial node, v_4 = tissue node, v_3 and v_2 are the spring midpoints from the common element
-		// (and v_1 is the midpoint between the epithelial and tissue node)
-
-		cross_product[0] = midpoint_3[1]*midpoint_2[2] - 0.5*tissue_location[1]*midpoint_2[2] - 0.5*epithelial_location[1]*midpoint_2[2]
-						   - midpoint_2[1]*midpoint_3[2] + 0.5*tissue_location[1]*midpoint_3[2] + 0.5*epithelial_location[1]*midpoint_3[2]
-						   + 0.5*midpoint_2[1]*tissue_location[2] - 0.5*midpoint_3[1]*tissue_location[2]
-						   + 0.5*midpoint_2[1]*epithelial_location[2] - 0.5*midpoint_3[1]*epithelial_location[2]; // Double checked
-
-		cross_product[1] = -midpoint_3[0]*midpoint_2[2] + 0.5*tissue_location[0]*midpoint_2[2] + 0.5*epithelial_location[0]*midpoint_2[2]
-						   + midpoint_2[0]*midpoint_3[2] - 0.5*tissue_location[0]*midpoint_3[2] - 0.5*epithelial_location[0]*midpoint_3[2]
-						   - 0.5*midpoint_2[0]*tissue_location[2] + 0.5*midpoint_3[0]*tissue_location[2] - 0.5*midpoint_2[0]*epithelial_location[2]
-						   + 0.5*midpoint_3[0]*epithelial_location[2];  // Double checked
-
-		cross_product[2] = midpoint_3[0]*midpoint_2[1] - 0.5*tissue_location[0]*midpoint_2[1] - 0.5*epithelial_location[0]*midpoint_2[1]
-						   - midpoint_2[0]*midpoint_3[1] + 0.5*tissue_location[0]*midpoint_3[1] + 0.5*epithelial_location[0]*midpoint_3[1]
-						   + 0.5*midpoint_2[0]*tissue_location[1] - 0.5*midpoint_3[0]*tissue_location[1] + 0.5*midpoint_2[0]*epithelial_location[1]
-						   - 0.5*midpoint_3[0]*epithelial_location[1];  // Double checked
-
-		cross_product_derivative[0] = tissue_location[1]*midpoint_2[2] - epithelial_location[1]*midpoint_2[2] - tissue_location[1]*midpoint_3[2]
-									  + epithelial_location[1]*midpoint_3[2] - midpoint_2[1]*tissue_location[2] + midpoint_3[1]*tissue_location[2]
-									  + midpoint_2[1]*epithelial_location[2] - midpoint_3[1]*epithelial_location[2];  // Double checked
-
-		cross_product_derivative[1] = -tissue_location[0]*midpoint_2[2] + epithelial_location[0]*midpoint_2[2] + tissue_location[0]*midpoint_3[2]
-									  - epithelial_location[0]*midpoint_3[2] + midpoint_2[0]*tissue_location[2] - midpoint_3[0]*tissue_location[2]
-									  - midpoint_2[0]*epithelial_location[2] + midpoint_3[0]*epithelial_location[2];  // Double checked
-
-		cross_product_derivative[2] = tissue_location[0]*midpoint_2[1] - epithelial_location[0]*midpoint_2[1] - tissue_location[0]*midpoint_3[1]
-									  + epithelial_location[0]*midpoint_3[1] - midpoint_2[0]*tissue_location[1] + midpoint_3[0]*tissue_location[1]
-									  + midpoint_2[0]*epithelial_location[1] - midpoint_3[0]*epithelial_location[1];  // Double checked
-
-		sum_terms = cross_product[0]*cross_product_derivative[0] + cross_product[1]*cross_product_derivative[1] + cross_product[2]*cross_product_derivative[2];
-
-		assert(!isnan(sum_terms));
-
-		double dAds;
-
-		if (local_area == 0.0)
-		{
-			TRACE("triangle area zero");
-			dAds = 0.0;
-		}
-		else
-		{
-			dAds = 0.5*(1.0/local_area)*sum_terms;		// for this triangle
-		}
-
-		assert(!isnan(dAds));
-
-		local_dAds.push_back(dAds);
-		// At this point you want to have dA/ds for this common element (push back into a vector which can then be summed
-		// just after this loop ends)
-	}
-
-	assert(local_dAds.size() == common_elements.size());    // Need a triangle for every common tetrahedra
-
-	double total_dAds = 0.0;		// This should be summed for each epithelial-tissue pair, and so should be the sum of each triangle found
-
-	for (unsigned k=0; k<local_dAds.size(); k++)
-	{
-		total_dAds += local_dAds[k];
-	}
-
-	double curvature = total_dAds;
-
-	if (mSetNonZeroTargetCurvatureRegion)	// The values will only be set if this is true
-	{
-		bool epithelial_cell_in_non_zero_target_curvature_region = (pow(epithelial_location[0] - mXCoordinateOfCentreOfNonZeroTargetCurvatureRegion,2)
-				+ pow(epithelial_location[1] - mYCoordinateOfCentreOfNonZeroTargetCurvatureRegion,2) <= mRadiusOfNonZeroTargetCurvatureRegion*mRadiusOfNonZeroTargetCurvatureRegion);
-
-		if(epithelial_cell_in_non_zero_target_curvature_region)
-		{
-			curvature += mNonZeroTargetCurvature;
-		}
-	}
-
-	assert(!isnan(curvature));
-	return curvature;
-}
-
-// Dom - Probalby wont need this once my force is implemented
-/* Method to return the area of the triangle defined by it's three vertices: A, B and C
- *
- * area = 0.5 * ( |AB|^2*|AC|^2 - (AB.AC)^2 ) ^0.5
- *
- */
-double PeriodicBendingForce3dWithGhostNodes::GetAreaOfTriangle(c_vector<double,3> vectorOneToTwo, c_vector<double,3> vectorOneToThree)
-{
-	// Need to find |AB|^2 and |AC|^2, i.e. the dot products of these vectors with themselves
-
-	double vector_one_to_two_squared = vectorOneToTwo[0]*vectorOneToTwo[0] + vectorOneToTwo[1]*vectorOneToTwo[1] + vectorOneToTwo[2]*vectorOneToTwo[2];
-	double vector_one_to_three_squared = vectorOneToThree[0]*vectorOneToThree[0] + vectorOneToThree[1]*vectorOneToThree[1] + vectorOneToThree[2]*vectorOneToThree[2];
-
-	// Now need the dot product of the two vectors
-	double dot_product = vectorOneToTwo[0]*vectorOneToThree[0] + vectorOneToTwo[1]*vectorOneToThree[1] + vectorOneToTwo[2]*vectorOneToThree[2];
-
-	// Now the area can be calculated:
-	double area = 0.5*sqrt( vector_one_to_two_squared*vector_one_to_three_squared - pow(dot_product,2) );
-
-	return area;
-}
 
 // Dom - looks like some legacy code...
 /*
@@ -1730,10 +1145,12 @@ void PeriodicBendingForce3dWithGhostNodes::AddForceContribution(AbstractCellPopu
 	//PRINT_VARIABLE("Start");
 
 	std::vector<c_vector<unsigned, 3> > epithelial_triangulation = GetEpithelialMesh(rCellPopulation);
+
 	std::vector<c_vector<unsigned, 10> > epithelial_neighbours = GetEpithelialNeighbours(epithelial_triangulation, num_cells);
 	//	int second_order_neighs[100];
 	//std::cout << "num_cells = " << num_cells << "\n";
-	
+
+
 	double basement_membrane_parameter = GetBasementMembraneParameter();
 
 	
@@ -1801,12 +1218,15 @@ void PeriodicBendingForce3dWithGhostNodes::AddForceContribution(AbstractCellPopu
 			std::vector<c_vector<double, 3> > image_location_per_second_order_neighbours;
 
 
-			bool epithelial_cell_in_non_zero_target_curvature_region = (pow(epithelial_location[0] - mXCoordinateOfCentreOfNonZeroTargetCurvatureRegion,2)
-			+ pow(epithelial_location[1] - mYCoordinateOfCentreOfNonZeroTargetCurvatureRegion,2) <= mRadiusOfNonZeroTargetCurvatureRegion*mRadiusOfNonZeroTargetCurvatureRegion);
+			bool epithelial_cell_in_non_zero_target_curvature_region = (pow((epithelial_location[0] - mXCoordinateOfCentreOfNonZeroTargetCurvatureRegion),2)
+																	  + pow((epithelial_location[1] - mYCoordinateOfCentreOfNonZeroTargetCurvatureRegion),2) 
+																	 <= pow(mRadiusOfNonZeroTargetCurvatureRegion,2) );
 
 			// here we will find
 			if(epithelial_cell_in_non_zero_target_curvature_region == true)
 			{
+				// PRINT_VECTOR(epithelial_location);
+				// PRINT_VARIABLE(cell_i_ext);
 				// Are i and cell_i_ext always the same?
 				//std::cout  << "cell_i_ext = " << cell_i_ext << " i = " << i << "\n";
 				image_location_per_second_order_neighbours = FitPlaneAndFindImage(rCellPopulation, second_order_neighs, cell_i_ext);
@@ -1881,10 +1301,10 @@ void PeriodicBendingForce3dWithGhostNodes::AddForceContribution(AbstractCellPopu
 
 			//std::cout << "cell i = " << cell_i_ext << "\n";
 			//PRINT_VECTOR(force_due_to_curvature);
-			if (isnan(force_due_to_curvature[0]) || isnan(force_due_to_curvature[1]) || isnan(force_due_to_curvature[2]))
-			{
-				PRINT_VECTOR(force_due_to_curvature);
-			}
+			// if (isnan(force_due_to_curvature[0]) || isnan(force_due_to_curvature[1]) || isnan(force_due_to_curvature[2]))
+			// {
+			// 	PRINT_VECTOR(force_due_to_curvature);
+			// }
 			
 			rCellPopulation.GetNode(cell_i_ext)->AddAppliedForceContribution(basement_membrane_parameter*force_due_to_curvature);
 			//HOW_MANY_TIMES_HERE("inside for loop");
@@ -1903,77 +1323,6 @@ void PeriodicBendingForce3dWithGhostNodes::AddForceContribution(AbstractCellPopu
 		
 	}
 	//PRINT_VARIABLE("Finish");
-	////
-	/*
-	for (unsigned i=0; i<num_cells; i++)
-	{
-
-		unsigned extended_epithelial_node_index = node_pairs[i][0];
-		unsigned extended_tissue_node_index = node_pairs[i][1];
-		// Get the corresponding node index in rCellPopulation
-        unsigned epithelial_node_index = mExtendedMeshNodeIndexMap[extended_epithelial_node_index];
-        unsigned tissue_node_index = mExtendedMeshNodeIndexMap[extended_tissue_node_index];
-
-        // Get the cells corresponding to these nodes to check the cell types
-        CellPtr p_epithelial_cell = rCellPopulation.GetCellUsingLocationIndex(epithelial_node_index);
-        assert(p_epithelial_cell->GetMutationState()->IsType<StromalCellMutationState>() == false);
-        assert(p_epithelial_cell->GetMutationState()->IsType<WildTypeCellMutationState>() == true);
-
-		CellPtr p_tissue_cell = rCellPopulation.GetCellUsingLocationIndex(tissue_node_index);
-		assert(p_tissue_cell->GetMutationState()->IsType<StromalCellMutationState>() == true);		
-
-		// Get the locations in the extended mesh
-		c_vector<double, 3> epithelial_location = mpExtendedMesh->GetNode(extended_epithelial_node_index)->rGetLocation();
-		c_vector<double, 3> tissue_location = mpExtendedMesh->GetNode(extended_tissue_node_index)->rGetLocation();
-
-		// The force due to the basal lamina acts along the spring connecting the epithelial and tissue nodes, T->E direction
-		c_vector<double, 3> curvature_force_direction = mpExtendedMesh->GetVectorFromAtoB(tissue_location, epithelial_location);
-
-		double distance_between_nodes = norm_2(curvature_force_direction);
-		assert(distance_between_nodes > 0);
-		assert(!isnan(distance_between_nodes));
-
-		curvature_force_direction /= distance_between_nodes;
-
-		//////
-		// Safety check
-		unsigned real_epithelial_node = mExtendedMeshNodeIndexMap[extended_epithelial_node_index];
-		unsigned real_tissue_node = mExtendedMeshNodeIndexMap[extended_tissue_node_index];
-		
-		CellPtr p_ext_epithelial_cell = rCellPopulation.GetCellUsingLocationIndex(real_epithelial_node);
-		CellPtr p_ext_tissue_cell = rCellPopulation.GetCellUsingLocationIndex(real_tissue_node);
-	
-		assert(p_ext_epithelial_cell->GetMutationState()->IsType<WildTypeCellMutationState>());
-		assert(p_ext_tissue_cell->GetMutationState()->IsType<StromalCellMutationState>());
-
-		boost::shared_ptr<AbstractCellMutationState> p_extended_epithelial_node_mutation_state = p_ext_epithelial_cell->GetMutationState();
-    	boost::shared_ptr<AbstractCellMutationState> p_extended_tissue_node_mutation_state = p_ext_tissue_cell->GetMutationState();
-		////
-
-		double curvature = GetCurvatureDueToSpringMidpoints(rCellPopulation, extended_epithelial_node_index, extended_tissue_node_index);
-
-	 // Dom
-	 //		if (extended_epithelial_node_index == 11)
-	 //		{
-	 //			std::cout<< "curvature at node 11 = " << curvature << "\n";
-	 //		}
-			
-
-		double basement_membrane_parameter = GetBasementMembraneParameter();
-
-		c_vector<double, 3> force_due_to_basement_membrane = -basement_membrane_parameter*curvature*curvature_force_direction;
-		// Had this (v) original version with a minus sign...
-		//c_vector<double, 3> force_due_to_basement_membrane = -basement_membrane_parameter*curvature*curvature_force_direction;
-
-        // Now we make sure that we only apply the force to the real node and not the image node
-        if (extended_epithelial_node_index < num_cells)
-        {
-			//rForces[epithelial_node_index] += force_due_to_basement_membrane;
-			rCellPopulation.GetNode(epithelial_node_index)->AddAppliedForceContribution(-force_due_to_basement_membrane);
-        }
-		
-	}
-	*/
 	
 }
 
@@ -2013,6 +1362,9 @@ void PeriodicBendingForce3dWithGhostNodes::OutputForceParameters(out_stream& rPa
 	*rParamsFile <<  "\t\t\t<PeriodicDomainWidth>"<<  mPeriodicDomainWidth << "</PeriodicDomainWidth> \n" ;
 	*rParamsFile <<  "\t\t\t<PeriodicDomainDepth>"<<  mPeriodicDomainDepth << "</PeriodicDomainDepth> \n" ;
 	*rParamsFile <<  "\t\t\t<NonZeroTargetCurvature>"<<  mNonZeroTargetCurvature << "<NonZeroTargetCurvature> \n" ;
+	*rParamsFile <<  "\t\t\t<RadiusOfCurvature>"<<  mRadiusOfNonZeroTargetCurvatureRegion << "<RadiusOfCurvature> \n" ;
+	*rParamsFile <<  "\t\t\t<XCoordinateOfCurvature>"<<  mXCoordinateOfCentreOfNonZeroTargetCurvatureRegion << "<XCoordinateOfCurvature> \n" ;
+	*rParamsFile <<  "\t\t\t<YCoordinateOfCurvature>"<<  mYCoordinateOfCentreOfNonZeroTargetCurvatureRegion << "<YCoordinateOfCurvature> \n" ;
 
 	// Call direct parent class
 	AbstractForce<3>::OutputForceParameters(rParamsFile);

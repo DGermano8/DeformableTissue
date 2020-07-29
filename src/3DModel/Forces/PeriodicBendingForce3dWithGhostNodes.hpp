@@ -162,14 +162,7 @@ public :
 
     ////
 
-//    double GetCurvatureDueToSpringMidpoints(AbstractCellPopulation<3>& rCellPopulation, unsigned epithelialNodeIndex, unsigned tissueNodeIndex);
-
 //Doms add
-    double GetCurvatureDueToSpringMidpoints(AbstractCellPopulation<3>& rCellPopulation, unsigned epithelialNodeIndex, unsigned tissueNodeIndex);
-
-    /* Returns the area of the triangle ABC given two vectors: AB and AC
-     */
-    double GetAreaOfTriangle(c_vector<double,3> vectorOneToTwo, c_vector<double,3> vectorOneToThree);
 
     /* Returns a boolean for whether the element contains ghost nodes
      */

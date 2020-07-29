@@ -131,6 +131,7 @@ bool AnoikisCellKiller3DWithGhostNodes::HasCellPoppedUp(unsigned nodeIndex)
    	{
 		//PRINT_4_VARIABLES(SimulationTime::Instance()->GetTime(),nodeIndex, neighbours.size(), num_stromal_neighbours);
    		has_cell_popped_up = true;
+		// PRINT_3_VARIABLES(SimulationTime::Instance()->GetTime(), num_stromal_neighbours,num_ghost_neighbours);
    	}
 	//PRINT_VARIABLE(num_stromal_neighbours);
    
@@ -205,6 +206,7 @@ void AnoikisCellKiller3DWithGhostNodes::CheckAndLabelCellsForApoptosisOrDeath()
     {
     	if (cells_to_remove[i][1] == 1)
     	{
+			// PRINT_VARIABLE("cell removed");
     		// Get cell associated to this node
     		CellPtr p_cell = p_tissue->GetCellUsingLocationIndex(cells_to_remove[i][0]);
     		p_cell->Kill();
