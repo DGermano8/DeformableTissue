@@ -4,10 +4,12 @@
 /* Apoptosis for cells that are epithelial and lose contact with the basement membrane
  *
  */
-AnoikisCellKiller3DWithGhostNodes::AnoikisCellKiller3DWithGhostNodes(AbstractCellPopulation<3>* pCrypt, double cut_off)
+AnoikisCellKiller3DWithGhostNodes::AnoikisCellKiller3DWithGhostNodes(AbstractCellPopulation<3>* pCrypt, double cut_off, double cellPopulationWidth, double cellPopulationDepth)
     : AbstractCellKiller<3>(pCrypt),
     mCellsRemovedByAnoikis(0),
-	mCutOffLength(cut_off)
+	mCutOffLength(cut_off),
+	mCellPopulationWidth(cellPopulationWidth),
+    mCellPopulationDepth(cellPopulationDepth)
 {
     // Sets up output file
 //	OutputFileHandler output_file_handler(mOutputDirectory + "AnoikisData/", false);
@@ -71,7 +73,7 @@ std::set<unsigned> AnoikisCellKiller3DWithGhostNodes::GetNeighbouringNodeIndices
 				double y_location_n = this->mpCellPopulation->GetLocationOfCellCentre(p_cell_n)[1];
 				double z_location_n = this->mpCellPopulation->GetLocationOfCellCentre(p_cell_n)[2];
 
-				bool less_than_cutt_off = sqrt(pow((x_location-x_location_n),2)+pow((y_location-y_location_n),2)+pow((z_location-z_location_n),2)) < mCutOffLength;
+				bool less_than_cutt_off = pow((x_location-x_location_n),2)+pow((y_location-y_location_n),2)+pow((z_location-z_location_n),2) < pow(mCutOffLength,2);
 
 				if( (neighbour_global_index != nodeIndex) && less_than_cutt_off)
 				{
@@ -125,11 +127,12 @@ bool AnoikisCellKiller3DWithGhostNodes::HasCellPoppedUp(unsigned nodeIndex)
 			num_ghost_neighbours += 1;
 		}
    	}
-
-	// Ensure that the cell is connected to atleast 1 stromal cell and atleast 1 ghost node
-   	if(num_stromal_neighbours < 1 || num_ghost_neighbours < 1)
+	// PRINT_2_VARIABLES(num_stromal_neighbours,num_ghost_neighbours);
+	// Ensure that the cell is connected to atleast 1 stromal cell and atleast 1 ghost node (not needed, only remove those not connected to stroma)
+   	if(num_stromal_neighbours < 1 ) //|| num_ghost_neighbours < 1)
    	{
-		//PRINT_4_VARIABLES(SimulationTime::Instance()->GetTime(),nodeIndex, neighbours.size(), num_stromal_neighbours);
+		// PRINT_2_VARIABLES(num_stromal_neighbours,num_ghost_neighbours);
+		// PRINT_4_VARIABLES(SimulationTime::Instance()->GetTime(),nodeIndex, neighbours.size(), num_stromal_neighbours);
    		has_cell_popped_up = true;
 		// PRINT_3_VARIABLES(SimulationTime::Instance()->GetTime(), num_stromal_neighbours,num_ghost_neighbours);
    	}
@@ -143,7 +146,8 @@ bool AnoikisCellKiller3DWithGhostNodes::HasCellPoppedUp(unsigned nodeIndex)
 std::vector<c_vector<unsigned,2> > AnoikisCellKiller3DWithGhostNodes::RemoveByAnoikis()
 {
 	DomMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<3>*> (this->mpCellPopulation);
-
+	double domain_tollerance = 0.1;
+	
 	//This needs fixing
 	//   assert(p_tissue->GetVoronoiTessellation()!=NULL);	// This fails during archiving of a simulation as Voronoi stuff not archived yet
 
@@ -170,7 +174,20 @@ std::vector<c_vector<unsigned,2> > AnoikisCellKiller3DWithGhostNodes::RemoveByAn
 				// Determining whether to remove this cell by anoikis
 				if((!cell_iter->IsDead()) && (this->HasCellPoppedUp(node_index)==true) )
 				{
-					individual_node_information[1] = 1;
+					CellPtr p_cell = p_tissue->GetCellUsingLocationIndex(node_index);
+					double x_location = this->mpCellPopulation->GetLocationOfCellCentre(p_cell)[0];
+					double y_location = this->mpCellPopulation->GetLocationOfCellCentre(p_cell)[1];
+					double z_location = this->mpCellPopulation->GetLocationOfCellCentre(p_cell)[2];
+					
+					// Make sure cell is well inside tissue and not just an edge
+					if (x_location >= domain_tollerance && x_location <= mCellPopulationWidth - domain_tollerance)
+					{
+						if (y_location >= domain_tollerance && y_location <= mCellPopulationDepth - domain_tollerance)
+						{
+							individual_node_information[1] = 1;
+						}
+					}
+					
 				}
 			}
 
@@ -209,7 +226,24 @@ void AnoikisCellKiller3DWithGhostNodes::CheckAndLabelCellsForApoptosisOrDeath()
 			// PRINT_VARIABLE("cell removed");
     		// Get cell associated to this node
     		CellPtr p_cell = p_tissue->GetCellUsingLocationIndex(cells_to_remove[i][0]);
-    		p_cell->Kill();
+			p_cell->Kill();
+			// TRACE("Cell removed");
+			
+			// double x_location = this->mpCellPopulation->GetLocationOfCellCentre(p_cell)[0];
+			// double y_location = this->mpCellPopulation->GetLocationOfCellCentre(p_cell)[1];
+			// double z_location = this->mpCellPopulation->GetLocationOfCellCentre(p_cell)[2];
+    		
+			// // Make sure cell is well inside tissue and not just an edge
+			// if (x_location >= 1.0 && x_location <= mCellPopulationWidth - 1.0)
+			// {
+			// 	if (y_location >= 1.0 && y_location <= mCellPopulationDepth - 1.0)
+			// 	{
+			// 		p_cell->Kill();
+			// 		// TRACE("Cell removed");
+			// 	}
+			// }
+			
+			
     	}
     }
 	

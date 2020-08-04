@@ -103,12 +103,12 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-        unsigned width = 10;	   // x
+        unsigned width = 8;	   // x
         unsigned height = 10;      // y
         unsigned ghosts_bottom = 0;       // ghosts > depth
         unsigned ghosts_top = 2;       // ghosts > depth
-        unsigned num_tissue_depth = 7;
-        unsigned num_tissue_beneith_crypt = 3; // If num_tissue_depth < 4 , use 0
+        unsigned num_tissue_depth = 4;
+        unsigned num_tissue_beneith_crypt = 2; // If num_tissue_depth < 4 , use 0
 
         unsigned depth = ghosts_bottom + num_tissue_depth + 1.0 + ghosts_top ;        // +1 for epithelial cells -> which we always only have a monolayer
 
@@ -132,7 +132,7 @@ public:
         double centre_y = double (periodic_height)*0.5;
         // double radius =  2.0;//periodic_width+1.0;
         double radius =  0;//periodic_width+1.0;
-        double target_curvature = 0.15; //maximum curvature is 0.2066 -> higher curvature means smaller sphere
+        double target_curvature = 0.0000001; //maximum curvature is 0.2066 -> higher curvature means smaller sphere
         double beta_parameter = 0.5;
         double alpha_parameter = 1.5;
 
@@ -355,7 +355,8 @@ public:
             }
         }
 
-        DomMeshBasedCellPopulationWithGhostNodes<3> cell_population(mesh, cells, real_node_indices);
+        double ghost_node_spring = 5.0;
+        DomMeshBasedCellPopulationWithGhostNodes<3> cell_population(mesh, cells, real_node_indices, false, ghost_node_spring);
         //MeshBasedCellPopulationWithGhostNodes<3> cell_population(mesh, cells, real_node_indices);
 //        MeshBasedCellPopulation<3> cell_population(mesh, cells);
         assert(cell_population.GetNumRealCells() != 0);
@@ -420,7 +421,7 @@ public:
         periodic_spring_force->SetUseOneWaySprings(false);
         periodic_spring_force->SetCutOffLength(1.5);
         //                     SetEpithelialStromalCellDependentSprings(ind , Ep-Ep, Str-Str, Ep-Str, apcTwoHitStromalMultiplier);
-        periodic_spring_force->SetEpithelialStromalCellDependentSprings(true, 1.0,     0.01,     1.0,    1.0);
+        periodic_spring_force->SetEpithelialStromalCellDependentSprings(true, 1.0,     0.01,     0.25,    1.0);
         periodic_spring_force->SetPeriodicDomainWidth(periodic_width);
         periodic_spring_force->SetPeriodicDomainDepth(periodic_height);
         periodic_spring_force->SetMeinekeSpringStiffness(10.0);
@@ -445,12 +446,12 @@ public:
 
 
         // Add cell sloughing -> dont need if using periodic conditions...
-        MAKE_PTR_ARGS(SloughingCellKiller3DWithGhostNodes, sloughing, (&cell_population, periodic_width, periodic_height));
-        simulator.AddCellKiller(sloughing);
+        // MAKE_PTR_ARGS(SloughingCellKiller3DWithGhostNodes, sloughing, (&cell_population, periodic_width, periodic_height));
+        // simulator.AddCellKiller(sloughing);
 
-        double cut_off = 2.5;
+        double cut_off = 5;
         // Add anoikis cell killer
-        MAKE_PTR_ARGS(AnoikisCellKiller3DWithGhostNodes, anoikis, (&cell_population, cut_off));
+        MAKE_PTR_ARGS(AnoikisCellKiller3DWithGhostNodes, anoikis, (&cell_population, cut_off, periodic_width, periodic_height));
         simulator.AddCellKiller(anoikis);
 
         //Test Forces

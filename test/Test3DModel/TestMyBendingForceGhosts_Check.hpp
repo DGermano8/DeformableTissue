@@ -210,7 +210,7 @@ public:
 
         DomMeshBasedCellPopulationWithGhostNodes<3> cell_population(mesh, cells, real_node_indices);
         //MeshBasedCellPopulationWithGhostNodes<3> cell_population(mesh, cells, real_node_indices);
-//        MeshBasedCellPopulation<3> cell_population(mesh, cells);
+        //  MeshBasedCellPopulation<3> cell_population(mesh, cells);
         assert(cell_population.GetNumRealCells() != 0);
 
 
@@ -219,7 +219,7 @@ public:
         OffLatticeSimulation<3> simulator(cell_population);
         std::string output_directory = "TestBendingForceCheck";
         simulator.SetOutputDirectory(output_directory);
-//        cell_population.InitialiseCells();
+        // ell_population.InitialiseCells();
 
         // Make sure we have a Voronoi tessellation to begin with
         //cell_population.CreateVoronoiTessellation();      
@@ -283,7 +283,7 @@ public:
 
 		// Create periodic basement membrane force law
         MAKE_PTR(PeriodicBendingForce3dWithGhostNodes, periodic_bending_force);
-     // PeriodicBasementMembraneForce3d periodic_basement_membrane;
+       // PeriodicBasementMembraneForce3d periodic_basement_membrane;
         periodic_bending_force->SetBasementMembraneParameter(beta_parameter);
         periodic_bending_force->SetExponentParameter(alpha_parameter);
         //periodic_bending_force->SetCircularNonZeroTargetCurvatureRegion(true, 0.15, radius, centre_x, centre_y);
@@ -318,15 +318,15 @@ public:
 
         SimulationTime::Destroy();
 
-/*
-* A check to see that the force model we have implemented is actually working.
-* This does require that:
-* target_curvature = 0.15
-* beta_parameter   = 5.0;
-* alpha_parameter  = 2.0;
-*
-* Forces are found using the Mathematica script " TestingBendingForce.nb "
-*/
+        /*
+        * A check to see that the force model we have implemented is actually working.
+        * This does require that:
+        * target_curvature = 0.15
+        * beta_parameter   = 5.0;
+        * alpha_parameter  = 2.0;
+        *
+        * Forces are found using the Mathematica script " TestingBendingForce.nb "
+        */
         for (AbstractCellPopulation<3>::Iterator cell_iter = cell_population.Begin();
          cell_iter != cell_population.End();
          ++cell_iter)
@@ -488,7 +488,7 @@ public:
 
         DomMeshBasedCellPopulationWithGhostNodes<3> cell_population(mesh, cells, real_node_indices);
         //MeshBasedCellPopulationWithGhostNodes<3> cell_population(mesh, cells, real_node_indices);
-//        MeshBasedCellPopulation<3> cell_population(mesh, cells);
+        //  MeshBasedCellPopulation<3> cell_population(mesh, cells);
         assert(cell_population.GetNumRealCells() != 0);
 
 
@@ -557,7 +557,7 @@ public:
 
 		// Create periodic basement membrane force law
         MAKE_PTR(PeriodicBendingForce3dWithGhostNodes, periodic_bending_force);
-     // PeriodicBasementMembraneForce3d periodic_basement_membrane;
+       // PeriodicBasementMembraneForce3d periodic_basement_membrane;
         periodic_bending_force->SetBasementMembraneParameter(beta_parameter);
         periodic_bending_force->SetExponentParameter(alpha_parameter);
         //periodic_bending_force->SetCircularNonZeroTargetCurvatureRegion(true, 0.15, radius, centre_x, centre_y);
@@ -592,15 +592,15 @@ public:
 
         SimulationTime::Destroy();
 
-/*
-* A check to see that the force model we have implemented is actually working.
-* This does require that:
-* target_curvature = 0.15
-* beta_parameter   = 5.0;
-* alpha_parameter  = 2.0;
-*
-* Forces are found using the Mathematica script " TestingBendingForce.nb "
-*/
+        /*
+        * A check to see that the force model we have implemented is actually working.
+        * This does require that:
+        * target_curvature = 0.15
+        * beta_parameter   = 5.0;
+        * alpha_parameter  = 2.0;
+        *
+        * Forces are found using the Mathematica script " TestingBendingForce.nb "
+        */
         for (AbstractCellPopulation<3>::Iterator cell_iter = cell_population.Begin();
          cell_iter != cell_population.End();
          ++cell_iter)
@@ -763,7 +763,7 @@ public:
 
         DomMeshBasedCellPopulationWithGhostNodes<3> cell_population(mesh, cells, real_node_indices);
         //MeshBasedCellPopulationWithGhostNodes<3> cell_population(mesh, cells, real_node_indices);
-//        MeshBasedCellPopulation<3> cell_population(mesh, cells);
+        // MeshBasedCellPopulation<3> cell_population(mesh, cells);
         assert(cell_population.GetNumRealCells() != 0);
 
 
@@ -832,7 +832,7 @@ public:
 
 		// Create periodic basement membrane force law
         MAKE_PTR(PeriodicBendingForce3dWithGhostNodes, periodic_bending_force);
-     // PeriodicBasementMembraneForce3d periodic_basement_membrane;
+        // PeriodicBasementMembraneForce3d periodic_basement_membrane;
         periodic_bending_force->SetBasementMembraneParameter(beta_parameter);
         periodic_bending_force->SetExponentParameter(alpha_parameter);
         //periodic_bending_force->SetCircularNonZeroTargetCurvatureRegion(true, 0.15, radius, centre_x, centre_y);
@@ -867,15 +867,15 @@ public:
 
         SimulationTime::Destroy();
 
-/*
-* A check to see that the force model we have implemented is actually working.
-* This does require that:
-* target_curvature = 0.15
-* beta_parameter   = 5.0;
-* alpha_parameter  = 2.0;
-*
-* Forces are found using the Mathematica script " TestingBendingForce.nb "
-*/
+        /*
+        * A check to see that the force model we have implemented is actually working.
+        * This does require that:
+        * target_curvature = 0.15
+        * beta_parameter   = 5.0;
+        * alpha_parameter  = 2.0;
+        *
+        * Forces are found using the Mathematica script " TestingBendingForce.nb "
+        */
         for (AbstractCellPopulation<3>::Iterator cell_iter = cell_population.Begin();
          cell_iter != cell_population.End();
          ++cell_iter)
@@ -1038,7 +1038,7 @@ public:
 
         DomMeshBasedCellPopulationWithGhostNodes<3> cell_population(mesh, cells, real_node_indices);
         //MeshBasedCellPopulationWithGhostNodes<3> cell_population(mesh, cells, real_node_indices);
-//        MeshBasedCellPopulation<3> cell_population(mesh, cells);
+        // MeshBasedCellPopulation<3> cell_population(mesh, cells);
         assert(cell_population.GetNumRealCells() != 0);
 
 
@@ -1107,7 +1107,7 @@ public:
 
 		// Create periodic basement membrane force law
         MAKE_PTR(PeriodicBendingForce3dWithGhostNodes, periodic_bending_force);
-     // PeriodicBasementMembraneForce3d periodic_basement_membrane;
+        // PeriodicBasementMembraneForce3d periodic_basement_membrane;
         periodic_bending_force->SetBasementMembraneParameter(beta_parameter);
         periodic_bending_force->SetExponentParameter(alpha_parameter);
         //periodic_bending_force->SetCircularNonZeroTargetCurvatureRegion(true, 0.15, radius, centre_x, centre_y);
@@ -1142,15 +1142,15 @@ public:
 
         SimulationTime::Destroy();
 
-/*
-* A check to see that the force model we have implemented is actually working.
-* This does require that:
-* target_curvature = 0.15
-* beta_parameter   = 5.0;
-* alpha_parameter  = 2.0;
-*
-* Forces are found using the Mathematica script " TestingBendingForce.nb "
-*/
+        /*
+        * A check to see that the force model we have implemented is actually working.
+        * This does require that:
+        * target_curvature = 0.15
+        * beta_parameter   = 5.0;
+        * alpha_parameter  = 2.0;
+        *
+        * Forces are found using the Mathematica script " TestingBendingForce.nb "
+        */
         for (AbstractCellPopulation<3>::Iterator cell_iter = cell_population.Begin();
          cell_iter != cell_population.End();
          ++cell_iter)

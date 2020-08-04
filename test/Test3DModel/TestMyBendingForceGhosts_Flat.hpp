@@ -368,13 +368,12 @@ public:
 
         // Run for a short time to allow it to deform		        
     	simulator.SetSamplingTimestepMultiple(1);			// Every hour
-		simulator.SetEndTime(1);
+		simulator.SetEndTime(0.1);
         simulator.SetDt(0.001);	
         simulator.Solve();
         
     }     
-     
-           
+
 };
 
 #endif /*TEST3DBOXMODEL_HPP_*/

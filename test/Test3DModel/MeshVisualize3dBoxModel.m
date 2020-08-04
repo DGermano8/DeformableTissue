@@ -3,6 +3,7 @@ clear all;
 filename = 'results';
 %
 % function Visualize3dBoxModel(filename)
+
 % Reads in <filename>.viznodes, <filename>.vizc;celltypes, <filename>.vizelements and <filename>.vizsetup
 %
 % <filename>.viznodes has form:

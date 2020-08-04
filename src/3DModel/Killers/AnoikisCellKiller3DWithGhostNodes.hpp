@@ -33,6 +33,8 @@ private:
 
     unsigned mCellsRemovedByAnoikis;
     double mCutOffLength;
+    double mCellPopulationWidth;
+    double mCellPopulationDepth;
 
     std::vector<c_vector<double,5> > mLocationsOfAnoikisCells;
 
@@ -62,6 +64,8 @@ private:
 
         archive & mCellsRemovedByAnoikis;
         archive & mCutOffLength;
+        archive & mCellPopulationWidth;
+        archive & mCellPopulationDepth;
 //        archive & mXLocationsOfAnoikisCells;
         archive & mOutputDirectory;
     }
@@ -74,7 +78,7 @@ public:
      * @param pCellPopulation pointer to a tissue
      * @param sloughOrifice whether to slough compressed cells at crypt orifice
      */
-    AnoikisCellKiller3DWithGhostNodes(AbstractCellPopulation<3>* pCellPopulation, double cut_off = 100.0);
+    AnoikisCellKiller3DWithGhostNodes(AbstractCellPopulation<3>* pCellPopulation, double cut_off = 100.0, double tissueWidth = 10.0, double tissueDepth = 10.0);
 
 	// Destructor
 	~AnoikisCellKiller3DWithGhostNodes();

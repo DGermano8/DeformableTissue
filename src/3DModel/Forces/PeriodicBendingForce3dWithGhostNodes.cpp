@@ -594,7 +594,7 @@ std::vector<c_vector<double, 3> > PeriodicBendingForce3dWithGhostNodes::FitPlane
 		double param_T = (-1.0*beta - sign_of_curvature*sqrt(pow(beta,2) - 4*alpha*delta))/(2.0*alpha);
 		c_vector<double, 3> point_on_sphere;
 		
-		if (isnan(param_T))
+		if (isnan(param_T) || pow(beta,2) - 4*alpha*delta < 0 )
 		{
 			//param_T = 0.0;
 			// i.e. don't move the cell
@@ -752,26 +752,28 @@ c_vector<double, 3> PeriodicBendingForce3dWithGhostNodes::GetForceDueToDiscreteC
 				double cos_abc = (vect_ab[0]*vect_ac[0] + vect_ab[1]*vect_ac[1] + vect_ab[2]*vect_ac[2])/(mag_ab*mag_ac);
 
 				// Think these edge cases, they shouldn't be happening, but they do...
-				if (cos_abc >= 0.99999999 || cos_abc == 1)
+				if (!isnan(ang_sum))
 				{
-					//PRINT_VARIABLE("+1");
-					ang_sum += 0.0;
-					cos_abc = 0.9999;
+					if (cos_abc >= 0.99999999 || cos_abc == 1)
+					{
+						//PRINT_VARIABLE("+1");
+						ang_sum += 0.0;
+						cos_abc = 0.9999;
+					}
+					else if (cos_abc <= -0.99999999 || cos_abc == -1)
+					{
+						//PRINT_VARIABLE("-1");
+						ang_sum += 3.141592653589793;
+						cos_abc = -0.9999;
+					}
+					else
+					{
+						ang_sum += acos(cos_abc);
+					}
 				}
-				else if (cos_abc <= -0.99999999 || cos_abc == -1)
+				else if (isnan(ang_sum))
 				{
-					//PRINT_VARIABLE("-1");
-					ang_sum += 3.141592653589793;
-					cos_abc = -0.9999;
-				}
-				else
-				{
-					ang_sum += acos(cos_abc);
-				}
-
-				if (isnan(ang_sum))
-				{
-					PRINT_2_VARIABLES(cos_abc, acos(cos_abc));
+					cos_abc = 0;
 				}
 
 				c_vector<double, 3> grad_hold;
@@ -827,10 +829,10 @@ c_vector<double, 3> PeriodicBendingForce3dWithGhostNodes::GetForceDueToDiscreteC
 					grad_i_phi_j_el += grad_hold;
 				}
 
-				if (isnan(grad_i_phi_j_el[0]) || isnan(grad_i_phi_j_el[1]) || isnan(grad_i_phi_j_el[2]))
-				{
-					PRINT_VECTOR(grad_i_phi_j_el);
-				}
+				// if (isnan(grad_i_phi_j_el[0]) || isnan(grad_i_phi_j_el[1]) || isnan(grad_i_phi_j_el[2]))
+				// {
+				// 	PRINT_VECTOR(grad_i_phi_j_el);
+				// }
 
 				// if ( cell_i == 154 )
 				// {
@@ -1301,10 +1303,13 @@ void PeriodicBendingForce3dWithGhostNodes::AddForceContribution(AbstractCellPopu
 
 			//std::cout << "cell i = " << cell_i_ext << "\n";
 			//PRINT_VECTOR(force_due_to_curvature);
-			// if (isnan(force_due_to_curvature[0]) || isnan(force_due_to_curvature[1]) || isnan(force_due_to_curvature[2]))
-			// {
-			// 	PRINT_VECTOR(force_due_to_curvature);
-			// }
+			if (isnan(force_due_to_curvature[0]) || isnan(force_due_to_curvature[1]) || isnan(force_due_to_curvature[2]))
+			{
+				PRINT_VECTOR(force_due_to_curvature);
+				force_due_to_curvature[0] = 0.0;
+				force_due_to_curvature[1] = 0.0;
+				force_due_to_curvature[2] = 0.0;
+			}
 			
 			rCellPopulation.GetNode(cell_i_ext)->AddAppliedForceContribution(basement_membrane_parameter*force_due_to_curvature);
 			//HOW_MANY_TIMES_HERE("inside for loop");

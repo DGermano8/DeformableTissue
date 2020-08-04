@@ -107,8 +107,8 @@ public:
         unsigned height = 10;      // y
         unsigned ghosts_bottom = 0;       // ghosts > depth
         unsigned ghosts_top = 2;       // ghosts > depth
-        unsigned num_tissue_depth = 5;
-        unsigned num_tissue_beneith_crypt = 1; // If num_tissue_depth < 4 , use 0
+        unsigned num_tissue_depth = 6;
+        unsigned num_tissue_beneith_crypt = 2; // If num_tissue_depth < 4 , use 0
 
         unsigned depth = ghosts_bottom + num_tissue_depth + 1.0 + ghosts_top ;        // +1 for epithelial cells -> which we always only have a monolayer
 
@@ -131,7 +131,7 @@ public:
         double centre_x = double (periodic_width)*0.5 - 0.5;
         double centre_y = double (periodic_height)*0.5;
         // double radius =  2.0;//periodic_width+1.0;
-        double radius =  1.4;//periodic_width+1.0;
+        double radius =  0;//periodic_width+1.0;
         double target_curvature = 0.15; //maximum curvature is 0.2066 -> higher curvature means smaller sphere
         double beta_parameter = 1.0;
         double alpha_parameter = 2.0;
@@ -238,7 +238,7 @@ public:
         }
 
         MutableMesh<3,3> mesh(nodes);
-        //mesh.Translate(0.5, 0.5);
+        // mesh.Translate(0.001, 0.001);
 
 
         std::vector<CellPtr> cells;
@@ -412,7 +412,7 @@ public:
         periodic_spring_force->SetUseOneWaySprings(false);
         periodic_spring_force->SetCutOffLength(1.5);
         //                     SetEpithelialStromalCellDependentSprings(ind , Ep-Ep, Str-Str, Ep-Str, apcTwoHitStromalMultiplier);
-        periodic_spring_force->SetEpithelialStromalCellDependentSprings(true, 1.0,     1.0,     1.0,    1.0);
+        periodic_spring_force->SetEpithelialStromalCellDependentSprings(true, 1.0,     0.01,     1.0,    1.0);
         periodic_spring_force->SetPeriodicDomainWidth(periodic_width);
         periodic_spring_force->SetPeriodicDomainDepth(periodic_height);
         periodic_spring_force->SetMeinekeSpringStiffness(10.0);
@@ -442,7 +442,7 @@ public:
 
         double cut_off = 2.5;
         // Add anoikis cell killer
-        MAKE_PTR_ARGS(AnoikisCellKiller3DWithGhostNodes, anoikis, (&cell_population, cut_off));
+        MAKE_PTR_ARGS(AnoikisCellKiller3DWithGhostNodes, anoikis, (&cell_population, cut_off, periodic_width, periodic_height));
         simulator.AddCellKiller(anoikis);
 
         //Test Forces
@@ -469,9 +469,8 @@ public:
         // }
         
         
-
         // Run for a short time to allow it to deform		        
-    	simulator.SetSamplingTimestepMultiple(1);			// Every hour
+    	simulator.SetSamplingTimestepMultiple(10);			// Every hour
 		simulator.SetEndTime(1);
         simulator.SetDt(0.001);
 
