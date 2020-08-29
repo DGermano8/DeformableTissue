@@ -1289,6 +1289,7 @@ void PeriodicBendingForce3dWithGhostNodes::AddForceContribution(AbstractCellPopu
 			{
 				//PRINT_VECTOR(first_order_neighs_vect);
 				force_due_to_curvature = GetForceDueToDiscreteCurvature(rCellPopulation, epithelial_triangulation, first_order_neighs_vect, second_order_neighs, image_location_per_second_order_neighbours, cell_i_ext, num_cells);
+				// PRINT_VECTOR(force_due_to_curvature);
 			}
 			else if(first_order_neighs_vect.size() < 3)
 			{

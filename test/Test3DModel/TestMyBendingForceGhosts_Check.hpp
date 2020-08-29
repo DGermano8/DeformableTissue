@@ -21,6 +21,8 @@
 #include "PeriodicCryptModelInteractionForceWithGhostNodes.hpp"
 //#include "BasementMembraneForce3d.hpp"
 #include "PeriodicBendingForce3dWithGhostNodes.hpp"
+#include "PeriodicBendingForce3dHeightWithGhostNodes.hpp"
+
 #include "CryptSimulation3dGhosts.hpp"
 #include "SloughingCellKiller3DWithGhostNodes.hpp"
 #include "AnoikisCellKiller3DWithGhostNodes.hpp"
@@ -283,6 +285,8 @@ public:
 
 		// Create periodic basement membrane force law
         MAKE_PTR(PeriodicBendingForce3dWithGhostNodes, periodic_bending_force);
+        // MAKE_PTR(PeriodicBendingForce3dHeightWithGhostNodes, periodic_bending_force);
+
        // PeriodicBasementMembraneForce3d periodic_basement_membrane;
         periodic_bending_force->SetBasementMembraneParameter(beta_parameter);
         periodic_bending_force->SetExponentParameter(alpha_parameter);
@@ -557,6 +561,8 @@ public:
 
 		// Create periodic basement membrane force law
         MAKE_PTR(PeriodicBendingForce3dWithGhostNodes, periodic_bending_force);
+        // MAKE_PTR(PeriodicBendingForce3dHeightWithGhostNodes, periodic_bending_force);
+
        // PeriodicBasementMembraneForce3d periodic_basement_membrane;
         periodic_bending_force->SetBasementMembraneParameter(beta_parameter);
         periodic_bending_force->SetExponentParameter(alpha_parameter);
@@ -832,6 +838,7 @@ public:
 
 		// Create periodic basement membrane force law
         MAKE_PTR(PeriodicBendingForce3dWithGhostNodes, periodic_bending_force);
+        // MAKE_PTR(PeriodicBendingForce3dHeightWithGhostNodes, periodic_bending_force);
         // PeriodicBasementMembraneForce3d periodic_basement_membrane;
         periodic_bending_force->SetBasementMembraneParameter(beta_parameter);
         periodic_bending_force->SetExponentParameter(alpha_parameter);
@@ -1107,6 +1114,7 @@ public:
 
 		// Create periodic basement membrane force law
         MAKE_PTR(PeriodicBendingForce3dWithGhostNodes, periodic_bending_force);
+        // MAKE_PTR(PeriodicBendingForce3dHeightWithGhostNodes, periodic_bending_force);
         // PeriodicBasementMembraneForce3d periodic_basement_membrane;
         periodic_bending_force->SetBasementMembraneParameter(beta_parameter);
         periodic_bending_force->SetExponentParameter(alpha_parameter);

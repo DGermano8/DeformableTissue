@@ -38,7 +38,7 @@ void PeriodicBoxBoundaryCondition3d::ImposeBoundaryCondition(const std::map<Node
 			// Get old node location
 			typename std::map<Node<3>*, c_vector<double, 3> >::const_iterator it = rOldLocations.find(p_node);
     		c_vector<double, 3> old_node_location = it->second;
-//			c_vector<double, 3> old_node_location = rOldLocations[node_index];
+			// c_vector<double, 3> old_node_location = rOldLocations[node_index];
 
 			// Return node to old location
 			p_node->rGetModifiableLocation()[0] = old_node_location[0];

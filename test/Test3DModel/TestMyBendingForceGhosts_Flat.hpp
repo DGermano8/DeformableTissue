@@ -18,6 +18,7 @@
 #include "WildTypeCellMutationState.hpp"
 #include "CellsGenerator.hpp"
 #include "CryptModelInteractionForce.hpp"
+#include "RandomMotionForce.hpp"
 #include "PeriodicCryptModelInteractionForceWithGhostNodes.hpp"
 //#include "BasementMembraneForce3d.hpp"
 #include "PeriodicBendingForce3dWithGhostNodes.hpp"
@@ -25,6 +26,7 @@
 #include "SloughingCellKiller3DWithGhostNodes.hpp"
 #include "AnoikisCellKiller3DWithGhostNodes.hpp"
 #include "RandomRadialCellKiller3d.hpp"
+#include "RandomCellKiller3dWithGhostNodes.hpp"
 #include "PeriodicBoxBoundaryCondition3d.hpp"
 #include "PeriodicStromalBoxBoundaryCondition3d.hpp"
 #include "TrianglesMeshWriter.hpp"
@@ -125,9 +127,9 @@ public:
         // Get the dimensions for the non-zero target curvature region
         double centre_x = double (width)*0.5;
         double centre_y = double (height)*0.5;
-        double radius =  1.75;//periodic_width+1.0;
-        double target_curvature = 0.15; //maximum curvature is 0.2066 -> higher curvature means smaller sphere
-        double beta_parameter = 2.0;
+        double radius =  0.0;//periodic_width+1.0;
+        double target_curvature = 0.2; //maximum curvature is 0.2066 -> higher curvature means smaller sphere
+        double beta_parameter = 1.0;
         double alpha_parameter = 1.5;
 
         std::vector<unsigned> ghost_node_indices, real_node_indices;
@@ -147,7 +149,7 @@ public:
                     //x_coordinate = (double) (i + 0.5*((j%2 + k%2)%2))*width_space;
                     x_coordinate = (double) (i + 0.5*(j%2 + k%2))*width_space;
                     y_coordinate = (double) j*height_space;
-                    z_coordinate = (double) 5.0 + k*depth_space;
+                    z_coordinate = (double) 2.0 + k*depth_space;// + 0.25*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
                     
                     /*
                     if (cell_iter >= 100 && cell_iter < 200)
@@ -209,6 +211,9 @@ public:
             p_differentiated_cell->SetCellProliferativeType(p_differentiated_type);
             p_model->SetDimension(3);
 
+            double birth_time = - 10.0;
+            p_differentiated_cell->SetBirthTime(birth_time);
+
 			cells.push_back(p_differentiated_cell);
         }
 
@@ -223,14 +228,15 @@ public:
             p_model->SetDimension(3);
             
             //p_model->SetTransitCellG1Duration(5);
-            //double birth_time = -RandomNumberGenerator::Instance()->ranf()*(p_model->GetTransitCellG1Duration() + p_model->GetSG2MDuration());
+            double birth_time = -RandomNumberGenerator::Instance()->ranf()*(p_model->GetTransitCellG1Duration() + p_model->GetSG2MDuration());
             
-            p_model->SetMaxTransitGenerations(1);
-            p_model->SetTransitCellG1Duration(100);       
-            double birth_time = 0.0;
+            p_model->SetMaxTransitGenerations(10);
+            p_model->SetTransitCellG1Duration(2);       
+            // double birth_time = 0.0;
             //std::cout << "cell i = " << i << " birth_time = " << birth_time << "\n";
 			
             p_epithelial_cell->SetBirthTime(birth_time);
+            p_epithelial_cell->SetApoptosisTime(1);
             
             p_epithelial_cell->InitialiseCellCycleModel();
             
@@ -250,7 +256,7 @@ public:
         //CryptSimulation3dGhosts simulator(cell_population, false, true);
         //CryptSimulation3d(rCellPopulation, bool deleteCellPopulationAndForceCollection, bool initialiseCells)
         OffLatticeSimulation<3> simulator(cell_population);
-        std::string output_directory = "TestSimulation_MyBendingForce";
+        std::string output_directory = "TestSimulation_WithBending";
         simulator.SetOutputDirectory(output_directory);
 //        cell_population.InitialiseCells();
 
@@ -309,7 +315,7 @@ public:
         periodic_spring_force->SetEpithelialStromalCellDependentSprings(true, 1.0,     1.0,     1.0,    1.0);
         periodic_spring_force->SetPeriodicDomainWidth(periodic_width);
         periodic_spring_force->SetPeriodicDomainDepth(periodic_height);
-        periodic_spring_force->SetMeinekeSpringStiffness(10.0);
+        periodic_spring_force->SetMeinekeSpringStiffness(15.0);
         simulator.AddForce(periodic_spring_force);
 
 
@@ -329,17 +335,31 @@ public:
         periodic_bending_force->SetPeriodicDomainDepth(periodic_height);
         simulator.AddForce(periodic_bending_force);
 
+        // Prevents getting stuck in a local minimums -> used to help break symmetry in cell anoikus
+        MAKE_PTR(RandomMotionForce<3>, p_random_force);
+        p_random_force->SetMovementParameter(0.001); //0.1 causes dissasociation, 0.001 is not enough
+        simulator.AddForce(p_random_force);
+
  
         // Add cell sloughing
-        MAKE_PTR_ARGS(SloughingCellKiller3DWithGhostNodes, sloughing, (&cell_population, periodic_width, periodic_height));
+        // MAKE_PTR_ARGS(SloughingCellKiller3DWithGhostNodes, sloughing, (&cell_population, periodic_width, periodic_height));
      // SloughingCellKiller3D sloughing(&cell_population, periodic_width, periodic_width);
-        //simulator.AddCellKiller(sloughing);
+        // simulator.AddCellKiller(sloughing);
 
         double cut_off = 2.5;
                 // Add anoikis cell killer
         MAKE_PTR_ARGS(AnoikisCellKiller3DWithGhostNodes, anoikis, (&cell_population, cut_off));
      // AnoikisCellKiller3D anoikis(&cell_population);
-        //simulator.AddCellKiller(anoikis);
+        simulator.AddCellKiller(anoikis);
+
+
+
+        // Add random cell killer for death at the edges
+        //      ProbabilityOfDeathInAnHour, MinXBoundary, MaxXBoundary, MinYBoundary, MaxYBoundary)
+        // MAKE_PTR_ARGS(RandomCellKiller3dWithGhostNodes, random_cell_death, (&cell_population, 0.1, 1.0,periodic_width-1.0, 1.0, periodic_height-1.0));
+        MAKE_PTR_ARGS(RandomCellKiller3dWithGhostNodes, random_cell_death, (&cell_population, 0.01, periodic_width+1.0, -1.0, periodic_height+1.0, -1.0));
+		// RandomCellKiller3d random_cell_death(&cell_population, 0.1, 2.0, 4.0, 2.0, 4.0);
+		simulator.AddCellKiller(random_cell_death);
 
         //Test Forces
         /*
@@ -367,11 +387,17 @@ public:
         
 
         // Run for a short time to allow it to deform		        
-    	simulator.SetSamplingTimestepMultiple(1);			// Every hour
-		simulator.SetEndTime(0.1);
+    	simulator.SetSamplingTimestepMultiple(10);			// Every hour
+		simulator.SetEndTime(6);
         simulator.SetDt(0.001);	
+
+        auto t1 = std::chrono::high_resolution_clock::now();
         simulator.Solve();
-        
+        auto t2 = std::chrono::high_resolution_clock::now();
+        auto duration = pow(10.0,-6)*(std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count());
+
+        std::cout << "\nTime taken = " << duration << " seconds\n\n";
+
     }     
 
 };

@@ -22,6 +22,7 @@
 #include "PeriodicCryptModelInteractionForceWithGhostNodes.hpp"
 //#include "BasementMembraneForce3d.hpp"
 #include "PeriodicBendingForce3dWithGhostNodes.hpp"
+#include "PeriodicBendingForce3dHeightWithGhostNodes.hpp"
 #include "CryptSimulation3dGhosts.hpp"
 #include "SloughingCellKiller3DWithGhostNodes.hpp"
 #include "AnoikisCellKiller3DWithGhostNodes.hpp"
@@ -30,6 +31,9 @@
 #include "PeriodicStromalBoxBoundaryCondition3d.hpp"
 #include "TrianglesMeshWriter.hpp"
 #include "Debug.hpp"
+#include "RandomMotionForce.hpp"
+#include "RandomCellKiller3dWithGhostNodes.hpp"
+
 //#include "FixedBoundaries3d.hpp"
 
 #include "DifferentiatedCellProliferativeType.hpp"
@@ -77,19 +81,8 @@ private:
         return p_mesh;
     }
 
-//    double mLastStartTime;
-//    void setUp()
-//    {
-//        mLastStartTime = std::clock();
-//        AbstractCellBasedTestSuite::setUp();
-//    }
-//    void tearDown()
-//    {
-//        double time = std::clock();
-//        double elapsed_time = (time - mLastStartTime)/(CLOCKS_PER_SEC);
-//        std::cout << "Elapsed time: " << elapsed_time << std::endl;
-//        AbstractCellBasedTestSuite::tearDown();
-//    }
+
+
 
 public:
     
@@ -107,7 +100,7 @@ public:
         unsigned height = 10;      // y
         unsigned ghosts_bottom = 0;       // ghosts > depth
         unsigned ghosts_top = 2;       // ghosts > depth
-        unsigned num_tissue_depth = 4;
+        unsigned num_tissue_depth = 9;
         unsigned num_tissue_beneith_crypt = 2; // If num_tissue_depth < 4 , use 0
 
         unsigned depth = ghosts_bottom + num_tissue_depth + 1.0 + ghosts_top ;        // +1 for epithelial cells -> which we always only have a monolayer
@@ -122,7 +115,7 @@ public:
         double periodic_width = (double) (width+0.0)*width_space;
         double periodic_height = (double) (height+0.0)*height_space;
 
-        double off_set = 2.0;
+        double off_set = 0.0;
 
         bool isGhost = false;
         double x_coordinate, y_coordinate, z_coordinate;
@@ -131,16 +124,19 @@ public:
         double centre_x = double (periodic_width)*0.5 - 0.5;
         double centre_y = double (periodic_height)*0.5;
         // double radius =  2.0;//periodic_width+1.0;
-        double radius =  0;//periodic_width+1.0;
-        double target_curvature = 0.0000001; //maximum curvature is 0.2066 -> higher curvature means smaller sphere
-        double beta_parameter = 0.5;
+        double radius =  4.0;//periodic_width+1.0;
+        double target_curvature = 0.15; //maximum curvature is 0.2066 -> higher curvature means smaller sphere
+        double beta_parameter = 1.0;
         double alpha_parameter = 1.5;
+        double ratio_of_crypt_curvature = 0.2;
 
         double epithelial_height = depth_space*num_tissue_depth + off_set;
         // double epithelial_radius = 4.25;
         // double ghost_radius = 3.4;
-        double epithelial_radius = 2.5;
-        double ghost_radius = 1.5;
+        // double epithelial_radius = 3.3;
+        // double ghost_radius = epithelial_radius-0.9;
+        double epithelial_radius = 2.10;
+        double ghost_radius = epithelial_radius-0.9;
 
 
         c_vector<unsigned,3> is_epithelial_cell;
@@ -185,7 +181,7 @@ public:
                         }
                         // The base of the crypt
                         else if ( (k == (ghosts_bottom + num_tissue_beneith_crypt)  ) && 
-                                (pow((x_coordinate - centre_x),2) + pow((y_coordinate - centre_y),2) <= pow((epithelial_radius+0.5),2)) ) //(z_coordinate == off_set + depth_space*(ghosts_bottom + 2.0))
+                                (pow((x_coordinate - centre_x),2) + pow((y_coordinate - centre_y),2) <= pow((epithelial_radius-0.4),2)) ) //(z_coordinate == off_set + depth_space*(ghosts_bottom + 2.0))
                         {
                             is_epithelial_cell[1] = 1;
                             is_epithelial_cell[2] = 1;
@@ -253,7 +249,7 @@ public:
 
     	// First we sort the real node indices into increasing order (the last ones will correspond to the
     	// epithelial nodes)
-    	sort(real_node_indices.begin(), real_node_indices.end());
+    	// sort(real_node_indices.begin(), real_node_indices.end());
 
         // Set up cells by iterating through the mesh nodes
         // unsigned num_nodes = mesh.GetNumAllNodes();
@@ -262,7 +258,7 @@ public:
         // unsigned num_ghosts_bottom = (width)*(height)*(ghosts_bottom);
         // unsigned num_ghosts_top = (width)*(height)*(ghosts_top);
 
-        boost::shared_ptr<AbstractCellMutationState> p_state(new WildTypeCellMutationState);
+        boost::shared_ptr<AbstractCellMutationState> p_epithelial_state(new WildTypeCellMutationState);
         boost::shared_ptr<AbstractCellMutationState> p_stromal_state(new StromalCellMutationState);
 
         MAKE_PTR(DifferentiatedCellProliferativeType, p_differentiated_type);
@@ -310,8 +306,11 @@ public:
 
         for(unsigned i=0; i<real_node_indices.size(); i++)
         {
+
+
             if (epithelial_cells_indicator[i][1] == 0)
             {
+                // PRINT_VARIABLE(real_node_indices[i]);
                 //StochasticDurationGenerationBasedCellCycleModel* p_model = new StochasticDurationGenerationBasedCellCycleModel();
                 FixedG1GenerationalCellCycleModel* p_model = new FixedG1GenerationalCellCycleModel();
 
@@ -323,20 +322,25 @@ public:
             }
             else if (epithelial_cells_indicator[i][1] == 1)
             {
+                // PRINT_VARIABLE(real_node_indices[i]);
+
                 FixedG1GenerationalCellCycleModel* p_model = new FixedG1GenerationalCellCycleModel();
-                CellPtr p_epithelial_cell(new Cell(p_state, p_model));
-                // if (epithelial_cells_indicator[i][2] == 1)
-                // {
-                //     p_epithelial_cell->SetCellProliferativeType(p_transit_type);
-                //     // p_model->SetMaxTransitGenerations(1);
-                //     p_model->SetTransitCellG1Duration(3);    
-                // }
-                // else if (epithelial_cells_indicator[i][2] == 0)
-                // {
-                //     p_epithelial_cell->SetCellProliferativeType(p_differentiated_type);
-                // }
+                CellPtr p_epithelial_cell(new Cell(p_epithelial_state, p_model));
+                // Only set cell in the crypt to proliferate
+                if (epithelial_cells_indicator[i][2] == 1)
+                {
+
+                    p_epithelial_cell->SetCellProliferativeType(p_transit_type);
+                    p_model->SetMaxTransitGenerations(1);
+                    p_model->SetTransitCellG1Duration(1);    
+                }
+                else if (epithelial_cells_indicator[i][2] == 0)
+                {
+                    p_epithelial_cell->SetCellProliferativeType(p_differentiated_type);
+                }
                 // Set all epithelial as differentiated
-                p_epithelial_cell->SetCellProliferativeType(p_differentiated_type);
+                // p_epithelial_cell->SetCellProliferativeType(p_differentiated_type);
+
                 p_model->SetDimension(3);
                 
                 //p_model->SetTransitCellG1Duration(5);
@@ -362,30 +366,28 @@ public:
         assert(cell_population.GetNumRealCells() != 0);
 
 
-        //CryptSimulation3dGhosts simulator(cell_population, false, true);
+	    //CryptSimulation3dGhosts simulator(cell_population, false, true);
         //CryptSimulation3d(rCellPopulation, bool deleteCellPopulationAndForceCollection, bool initialiseCells)
         OffLatticeSimulation<3> simulator(cell_population);
-        std::string output_directory = "TestSimulation_MyBendingForce";
+        std::string output_directory = "TestSimulation_MonoBending";
         simulator.SetOutputDirectory(output_directory);
 //        cell_population.InitialiseCells();
 
         // Make sure we have a Voronoi tessellation to begin with
-        //cell_population.CreateVoronoiTessellation();
         
         cell_population.AddCellWriter<CellIdWriter>();
         cell_population.AddCellWriter<CellMutationStatesWriter>();
         cell_population.AddCellWriter<CellProliferativeTypesWriter>();
         // cell_population.AddCellWriter<CellAncestorWriter>();
         // cell_population.AddPopulationWriter<NodeVelocityWriter>();
-        //cell_population.AddPopulationWriter<VoronoiDataWriter>(); // paraview is pretty pointless at viewing this, worth looking into
+        // cell_population.AddPopulationWriter<VoronoiDataWriter>(); // paraview is pretty pointless at viewing this, worth looking into
         
         //cell_population.WriteVtkResultsToFile(output_directory);
         //To fix paraview
-        cell_population.SetWriteVtkAsPointsDom(true);
-        //std::cout<<cell_population.GetWriteVtkAsPoints() << "\n";
-        //PRINT_VARIABLE(cell_population.GetWriteVtkAsPoints());
-        //cell_population.SetOutputMeshInVtk(true);
+        cell_population.CreateVoronoiTessellation();
 
+        cell_population.SetWriteVtkAsPointsDom(true);
+        cell_population.SetOutputMeshInVtkDom(true);
 
 
         std::map<Node<3>*, c_vector<double,3> > node_locations_before;
@@ -419,9 +421,9 @@ public:
         MAKE_PTR(PeriodicCryptModelInteractionForceWithGhostNodes<3>, periodic_spring_force);
      // PeriodicCryptModelInteractionForce<3> periodic_spring_force;  // Variable spring strengths
         periodic_spring_force->SetUseOneWaySprings(false);
-        periodic_spring_force->SetCutOffLength(1.5);
+        periodic_spring_force->SetCutOffLength(1.25);
         //                     SetEpithelialStromalCellDependentSprings(ind , Ep-Ep, Str-Str, Ep-Str, apcTwoHitStromalMultiplier);
-        periodic_spring_force->SetEpithelialStromalCellDependentSprings(true, 1.0,     0.01,     0.25,    1.0);
+        periodic_spring_force->SetEpithelialStromalCellDependentSprings(true, 1.0,     1.0,     1.0,    1.0);
         periodic_spring_force->SetPeriodicDomainWidth(periodic_width);
         periodic_spring_force->SetPeriodicDomainDepth(periodic_height);
         periodic_spring_force->SetMeinekeSpringStiffness(10.0);
@@ -434,15 +436,28 @@ public:
         //simulator.AddForce(linear_force);
 
 		// Create periodic basement membrane force law
-        MAKE_PTR(PeriodicBendingForce3dWithGhostNodes, periodic_bending_force);
+        // MAKE_PTR(PeriodicBendingForce3dWithGhostNodes, periodic_bending_force);
+        MAKE_PTR(PeriodicBendingForce3dHeightWithGhostNodes, periodic_bending_force);
      // PeriodicBasementMembraneForce3d periodic_basement_membrane;
         periodic_bending_force->SetBasementMembraneParameter(beta_parameter);
         periodic_bending_force->SetExponentParameter(alpha_parameter);
+        periodic_bending_force->SetHeightDependantCurvatureParameter(ratio_of_crypt_curvature);
         //periodic_bending_force->SetCircularNonZeroTargetCurvatureRegion(true, 0.15, radius, centre_x, centre_y);
         periodic_bending_force->SetCircularNonZeroTargetCurvatureRegion(true, target_curvature, radius, centre_x, centre_y);
         periodic_bending_force->SetPeriodicDomainWidth(periodic_width);
         periodic_bending_force->SetPeriodicDomainDepth(periodic_height);
         simulator.AddForce(periodic_bending_force);
+
+        MAKE_PTR(RandomMotionForce<3>, p_random_force);
+        p_random_force->SetMovementParameter(0.0025); //0.1 causes dissasociation, 0.001 is not enough
+        // simulator.AddForce(p_random_force);
+
+        // Add random cell killer for death at the edges
+        //      ProbabilityOfDeathInAnHour, MinXBoundary, MaxXBoundary, MinYBoundary, MaxYBoundary)
+        // MAKE_PTR_ARGS(RandomCellKiller3dWithGhostNodes, random_cell_death, (&cell_population, 0.1, 1.0,periodic_width-1.0, 1.0, periodic_height-1.0));
+        MAKE_PTR_ARGS(RandomCellKiller3dWithGhostNodes, random_cell_death, (&cell_population, 0.025, periodic_width+1.0, -1.0, periodic_height+1.0, -1.0));
+		// RandomCellKiller3d random_cell_death(&cell_population, 0.1, 2.0, 4.0, 2.0, 4.0);
+		// simulator.AddCellKiller(random_cell_death);
 
 
         // Add cell sloughing -> dont need if using periodic conditions...
@@ -455,7 +470,6 @@ public:
         simulator.AddCellKiller(anoikis);
 
         //Test Forces
-        
         // for (unsigned i=0; i<cell_population.GetNumNodes(); i++)
         // {
         //     cell_population.GetNode(i)->ClearAppliedForce();
@@ -467,7 +481,7 @@ public:
         // SimulationTime::Instance()->SetEndTimeAndNumberOfTimeSteps(0.001, 1);
 
         // periodic_bending_force->AddForceContribution(cell_population);
-        // //periodic_force->AddForceContribution(cell_population);
+        // periodic_spring_force->AddForceContribution(cell_population);
 
         // SimulationTime::Destroy();
 
@@ -478,7 +492,7 @@ public:
         // }
 
         // Run for a short time to allow it to deform		        
-    	simulator.SetSamplingTimestepMultiple(10);			// Every hour
+    	simulator.SetSamplingTimestepMultiple(1);			// Every hour
 		simulator.SetEndTime(2);
         simulator.SetDt(0.001);
 

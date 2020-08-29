@@ -833,19 +833,11 @@ c_vector<double, DIM> PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::Cal
         }
     }
 
-    // Calculate the rest length of the spring connecting the two nodes
-
-    double rest_length = 1.0;
-
-    ///\todo Extend force class to cope with newly divided cells (#1856)
-
-    double a_rest_length = rest_length*0.5;
-    double b_rest_length = a_rest_length;
+ 
 
     ///\todo Extend force class to cope with apoptotic cells (#1856)
 
-    rest_length = a_rest_length + b_rest_length;
-    assert(rest_length <= 1.0+1e-12);
+
 
 	// Get the corresponding node index in rCellPopulation
     unsigned real_A_node_index = mExtendedMeshNodeIndexMap[nodeAGlobalIndex];
@@ -900,17 +892,91 @@ c_vector<double, DIM> PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::Cal
 //     * If either of the cells has begun apoptosis, then the length of the spring
 //     * connecting them decreases linearly with time.
 //     */
-//    if (p_cell_A->HasApoptosisBegun())
-//    {
-//        double time_until_death_a = p_cell_A->GetTimeUntilDeath();
-//        a_rest_length = a_rest_length * time_until_death_a / p_cell_A->GetApoptosisTime();
-//    }
-//    if (p_cell_B->HasApoptosisBegun())
-//    {
-//        double time_until_death_b = p_cell_B->GetTimeUntilDeath();
-//        b_rest_length = b_rest_length * time_until_death_b / p_cell_B->GetApoptosisTime();
-//    }
-//
+
+    // Calculate the rest length of the spring connecting the two nodes
+
+    double rest_length = 1.0;
+
+    
+
+    double a_rest_length = rest_length*0.5;
+    double b_rest_length = a_rest_length;
+
+    ///\todo Extend force class to cope with newly divided cells (#1856)
+    // This should do this...?
+
+
+    if (p_cell_A->GetAge() < 1)
+    {
+        a_rest_length = a_rest_length*p_cell_A->GetAge();
+    }
+    if (p_cell_B->GetAge() < 1)
+    {
+        b_rest_length = b_rest_length*p_cell_B->GetAge();
+    }
+    bool a_born = (p_cell_A->GetAge() < 1);
+    bool b_born = (p_cell_B->GetAge() < 1);
+
+    bool a_apop = p_cell_A->HasApoptosisBegun();
+    bool b_apop = p_cell_B->HasApoptosisBegun();
+    
+   if(a_apop==true && b_apop==true)
+   {
+       double time_until_death_a = p_cell_A->GetTimeUntilDeath();
+       double a_rest_length_pop = a_rest_length * time_until_death_a / p_cell_A->GetApoptosisTime();
+
+       double time_until_death_b = p_cell_B->GetTimeUntilDeath();
+       double b_rest_length_pop = b_rest_length * time_until_death_b / p_cell_B->GetApoptosisTime();
+
+       rest_length = a_rest_length_pop*(a_rest_length_pop <= b_rest_length_pop) + b_rest_length_pop*(b_rest_length_pop < a_rest_length_pop);
+   }
+   else if(a_apop==true && b_apop==false)
+   {
+       double time_until_death_a = p_cell_A->GetTimeUntilDeath();
+       double a_rest_length_pop = time_until_death_a / p_cell_A->GetApoptosisTime();
+       
+       bool is_b_ep_cell = p_cell_B->GetMutationState()->IsType<WildTypeCellMutationState>();
+
+        rest_length = a_rest_length_pop ;
+   }
+   else if(b_apop==true && a_apop==false)
+   {
+       double time_until_death_b = p_cell_B->GetTimeUntilDeath();
+       double b_rest_length_pop = time_until_death_b / p_cell_B->GetApoptosisTime();
+
+        rest_length = b_rest_length_pop;
+   }
+   else if(a_apop==true && b_born==true)
+   {
+        double time_until_death_a = p_cell_A->GetTimeUntilDeath();
+        double a_rest_length_pop = time_until_death_a / p_cell_A->GetApoptosisTime();
+
+        b_rest_length = b_rest_length*p_cell_B->GetAge();
+
+        rest_length = a_rest_length_pop + b_rest_length;
+   }
+   else if(b_apop==true && a_born==true)
+   {
+        double time_until_death_b = p_cell_B->GetTimeUntilDeath();
+        double b_rest_length_pop = time_until_death_b / p_cell_B->GetApoptosisTime();
+
+        a_rest_length = a_rest_length*p_cell_A->GetAge();
+
+        rest_length = b_rest_length_pop + a_rest_length;
+   }
+   else if(a_born==true && b_born==true)
+   {
+        b_rest_length = b_rest_length*p_cell_B->GetAge();
+        a_rest_length = a_rest_length*p_cell_A->GetAge();
+
+        rest_length = a_rest_length*(a_rest_length <= b_rest_length) + b_rest_length*(b_rest_length < a_rest_length);
+   }
+   else
+   {
+       rest_length = a_rest_length + b_rest_length;
+   }
+
+    assert(rest_length <= 1.0+1e-12);
 
     bool is_closer_than_rest_length = (distance_between_nodes - rest_length <= 0);
 

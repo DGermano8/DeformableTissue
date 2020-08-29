@@ -7,5 +7,8 @@ Entering TestPeriodicCubeWithGhosts
 number of cells comp = 200
 number of cells all  = 200
 number of ghosts     = 100
+
+Time taken = 684.909 seconds
+
 Passed
 OK!

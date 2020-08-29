@@ -233,7 +233,7 @@ void AnoikisCellKiller3DWithGhostNodes::CheckAndLabelCellsForApoptosisOrDeath()
 			// double y_location = this->mpCellPopulation->GetLocationOfCellCentre(p_cell)[1];
 			// double z_location = this->mpCellPopulation->GetLocationOfCellCentre(p_cell)[2];
     		
-			// // Make sure cell is well inside tissue and not just an edge
+			// Make sure cell is well inside tissue and not just an edge
 			// if (x_location >= 1.0 && x_location <= mCellPopulationWidth - 1.0)
 			// {
 			// 	if (y_location >= 1.0 && y_location <= mCellPopulationDepth - 1.0)

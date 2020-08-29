@@ -1,7 +1,7 @@
 #include "StromalCellMutationState.hpp"
 
 StromalCellMutationState::StromalCellMutationState()
-    : AbstractCellMutationState(0)
+    : AbstractCellMutationState(1)
 {}
 
 
