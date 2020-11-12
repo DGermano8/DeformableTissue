@@ -1,5 +1,6 @@
 #include "PeriodicBendingForce3dHeightWithGhostNodes.hpp"
 #include "SimulationTime.hpp"
+#include <cmath>
 #include "DomMeshBasedCellPopulationWithGhostNodes.hpp"
 
 PeriodicBendingForce3dHeightWithGhostNodes::PeriodicBendingForce3dHeightWithGhostNodes()
@@ -57,7 +58,6 @@ double PeriodicBendingForce3dHeightWithGhostNodes::GetHeightDependantCurvaturePa
 {
 	return mHeightDependantCurvatureParameter;
 }
-
 
 void PeriodicBendingForce3dHeightWithGhostNodes::SetCircularNonZeroTargetCurvatureRegion(bool setNonZeroTargetCurvatureRegion, double nonZeroTargetCurvature,
 		double radiusOfNonZeroTargetCurvatureRegion, double xCoordinateOfCentreOfNonZeroTargetCurvatureRegion,
@@ -355,20 +355,18 @@ std::vector<c_vector<unsigned, 10> > PeriodicBendingForce3dHeightWithGhostNodes:
 			}
 		}
 
+
 	}
 	
 	for(unsigned i=0; i<4*number_of_cells; i++)
 	{
 		std::vector<unsigned> holder_neighbour;
-		c_vector<unsigned, 10> another_holder_neighbour;
-		//std::cout << i << "    ";
+		c_vector<unsigned, 10> another_holder_neighbour = zero_vector<double>(10);
 		for(unsigned j=0; j<10; j++)
 		{
 			holder_neighbour.push_back(temp_neighbours[i][j]);
 
-		//	std::cout<< temp_neighbours[i][j] << " ";
 		}
-		//std::cout << "\n";
 		
 		another_holder_neighbour[0] = holder_neighbour[0];
 		another_holder_neighbour[1] = holder_neighbour[1];
@@ -382,6 +380,7 @@ std::vector<c_vector<unsigned, 10> > PeriodicBendingForce3dHeightWithGhostNodes:
 		another_holder_neighbour[9] = holder_neighbour[9];
 
 		node_neighbours.push_back(another_holder_neighbour);
+
 	}
 	return node_neighbours;
 
@@ -394,107 +393,65 @@ std::vector<c_vector<unsigned, 3> > PeriodicBendingForce3dHeightWithGhostNodes::
 // Get a pointer to this node in mpExtendedMesh
 std::vector<c_vector<unsigned, 3> > epithelial_triangulation;
 
-for (unsigned extended_node_index=0; extended_node_index<mpExtendedMesh->GetNumNodes(); extended_node_index++)
+
+DomMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<3>*>(&rCellPopulation);
+for (unsigned elem_index=0; elem_index<mpExtendedMesh->GetNumElements(); elem_index++) 
+{ 
+
+    // Get a pointer to the element
+    Element<3,3>* p_element = mpExtendedMesh->GetElement(elem_index);
+        
+    int Node0Index = p_element->GetNodeGlobalIndex(0);
+    int Node1Index = p_element->GetNodeGlobalIndex(1);
+    int Node2Index = p_element->GetNodeGlobalIndex(2);
+    int Node3Index = p_element->GetNodeGlobalIndex(3);
+    int node_index[4] = {Node0Index, Node1Index, Node2Index, Node3Index};
+
+	int node0GlobalIndex = mExtendedMeshNodeIndexMap[Node0Index];
+	int node1GlobalIndex = mExtendedMeshNodeIndexMap[Node1Index];
+	int node2GlobalIndex = mExtendedMeshNodeIndexMap[Node2Index];
+	int node3GlobalIndex = mExtendedMeshNodeIndexMap[Node3Index];
+	int node_global_intex[4] = {node0GlobalIndex, node1GlobalIndex, node2GlobalIndex, node3GlobalIndex};
+
+	for(int j=0; j<4; j++)
     {
-        Node<3>* p_node = mpExtendedMesh->GetNode(extended_node_index);
+		c_vector<unsigned, 3> tri_el = zero_vector<double>(3);
 
-        // Get the corresponding node index in rCellPopulation
-        unsigned node_index = mExtendedMeshNodeIndexMap[extended_node_index];
+        CellPtr p_cell = rCellPopulation.GetCellUsingLocationIndex(node_global_intex[(0+j)%4]);
+        boost::shared_ptr<AbstractCellMutationState> p_state = p_cell->GetMutationState();
 
-        // Get the cell corresponding to this node
-        CellPtr p_cell = rCellPopulation.GetCellUsingLocationIndex(node_index);
+        bool is_0_stromal_cell = (p_state->IsType<StromalCellMutationState>()==true);
 
-        // Get mutation state of cell
-    	boost::shared_ptr<AbstractCellMutationState> p_state = p_cell->GetMutationState();
+        if(is_0_stromal_cell) 
+        {
+            CellPtr p_cell_1 = rCellPopulation.GetCellUsingLocationIndex(node_global_intex[(1+j)%4]);
+            boost::shared_ptr<AbstractCellMutationState> p_state_1 = p_cell_1->GetMutationState();
 
-    	// Get whether cell is dead
-    	bool cell_is_dead = p_cell->IsDead();
+            CellPtr p_cell_2 = rCellPopulation.GetCellUsingLocationIndex(node_global_intex[(2+j)%4]);
+            boost::shared_ptr<AbstractCellMutationState> p_state_2 = p_cell_2->GetMutationState();
+                    
+            CellPtr p_cell_3 = rCellPopulation.GetCellUsingLocationIndex(node_global_intex[(3+j)%4]);
+            boost::shared_ptr<AbstractCellMutationState> p_state_3 = p_cell_3->GetMutationState();
+                    
+            int number_of_epithelial_cell = (p_state_1->IsType<WildTypeCellMutationState>()==true) + (p_state_2->IsType<WildTypeCellMutationState>()==true) + (p_state_3->IsType<WildTypeCellMutationState>()==true);
 
-    	// Get whether this cell is a live epithelial cell
-    	bool is_live_epithelial_cell = (p_state->IsType<WildTypeCellMutationState>()==true) && !cell_is_dead;
-		
-		DomMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<3>*>(&rCellPopulation);
+            if (number_of_epithelial_cell == 3)
+            {
+				tri_el[0] = node_index[(1+j)%4];
+				tri_el[1] = node_index[(2+j)%4];
+				tri_el[2] = node_index[(3+j)%4];
 
-    	if (is_live_epithelial_cell)
-    	{
-    	    // Iterate over elements of mpExtendedMesh containing this node and no ghost nodes
-    		
-			c_vector<unsigned, 3> tri_el;
-
-			// This needs both stromal and epithelial cells... so cant do monolayer..
-    		for (Node<3>::ContainingElementIterator elem_iter = p_node->ContainingElementsBegin();
-		         elem_iter != p_node->ContainingElementsEnd();
-		         ++elem_iter)
-    		{
-				// Get a pointer to the element
-				Element<3,3>* p_element = mpExtendedMesh->GetElement(*elem_iter);
-				
-				// ITERATE OVER NODES owned by this element
-				std::vector<unsigned> temp_triangular_element;
-				bool is_element_connected_to_tissue = false;
-				for (unsigned local_index=0; local_index<4; local_index++)
-				{
-					unsigned nodeBGlobalIndex = p_element->GetNodeGlobalIndex(local_index);
-
-					// Get the corresponding node index in rCellPopulation
-					unsigned neighbour_index = mExtendedMeshNodeIndexMap[nodeBGlobalIndex];
-					CellPtr p_cell = rCellPopulation.GetCellUsingLocationIndex(neighbour_index);
-
-					//if(neighbour_index != nodeBGlobalIndex)
-					//{
-					//	std::cout<< "neighbour_index = " << neighbour_index << "  nodeBGlobalIndex = " << nodeBGlobalIndex << "\n";
-					//}
-
-
-					if (p_cell->GetMutationState()->IsType<WildTypeCellMutationState>())
-					{
-						//std::cout<< "nodeBGlobalIndex = " << nodeBGlobalIndex << " neighbour_index = " << neighbour_index << "\n";
-						// nodeBGlobalIndex -> from extended mesh
-						// neighbour_index -> mapped nodes from original mesh
-						temp_triangular_element.push_back(nodeBGlobalIndex);
-						//temp_triangular_element.push_back(neighbour_index);
-					}
-					else if(p_cell->GetMutationState()->IsType<StromalCellMutationState>() || p_tissue->IsGhostNode(nodeBGlobalIndex))
-					{
-						is_element_connected_to_tissue = true;
-					}
-
-				}
-
-				// This means, we only consider adding if theres 3 epithelial cells AND 1 stromal cell
-				if(temp_triangular_element.size() == 3 && is_element_connected_to_tissue)
-				{
-					std::sort(temp_triangular_element.begin(), temp_triangular_element.end());
-					tri_el[0] = temp_triangular_element[0];
-					tri_el[1] = temp_triangular_element[1];
-					tri_el[2] = temp_triangular_element[2];
-
-					// Check for duplicates
-					bool put_element_in_tri = 1;
-					for(unsigned i=0; i<epithelial_triangulation.size(); i++)
-					{
-						if(epithelial_triangulation[i][0] == tri_el[0])
-						{
-							if(epithelial_triangulation[i][1] == tri_el[1])
-							{
-								if(epithelial_triangulation[i][2] == tri_el[2])
-								{
-									put_element_in_tri = 0;
-								}
-							}
-						}
-					}
-
-					if(put_element_in_tri == 1)
-					{
-						epithelial_triangulation.push_back(tri_el);
-					}
-
-				}
-			}
-			
-		}
+				epithelial_triangulation.push_back(tri_el);
+            }
+                    
+        }
+                
+                
     }
+
+
+}
+
 	return epithelial_triangulation;
 }
 
@@ -504,17 +461,13 @@ std::vector<c_vector<double, 3> > PeriodicBendingForce3dHeightWithGhostNodes::Fi
 	
 	std::vector<c_vector<double, 3> > image_location_per_second_order_neighbours;
 
-	//	a00, a10, a20, a01, a11, a21, a02, a12, a22
-	c_vector<double, 9> ATA;
-	c_vector<double, 3> ATz;
-	c_vector<double, 9> iATA;
+	c_vector<double, 9> ATA = zero_vector<double>(9);
+	c_vector<double, 3> ATz = zero_vector<double>(3);
+	c_vector<double, 9> iATA = zero_vector<double>(9);
 
 	for (unsigned i=0; i<second_order_neighs.size(); i++)
 	{
-	//	unsigned cell_i_ext = mExtendedMeshNodeIndexMap[second_order_neighs[i]];
 		unsigned cell_i_ext =second_order_neighs[i];
-		//int epithelialNodeIndex = second_order_neighs[i];
-		// c_vector<double, 3> epithelial_location = mpExtendedMesh->GetNode(cell_i_ext)->rGetLocation();
 		c_vector<double, 3> epithelial_location = this->mpExtendedMesh->GetNode(cell_i_ext)->rGetLocation();
 
 
@@ -698,18 +651,19 @@ std::vector<c_vector<double, 3> > PeriodicBendingForce3dHeightWithGhostNodes::Fi
 
 	}
 
-	//PRINT_VECTOR(normal_vector);
+	// PRINT_VECTOR(normal_vector);
 
 	double sign_of_curvature = (mNonZeroTargetCurvature > 0) - (mNonZeroTargetCurvature < 0);
 
-	c_vector<double, 3> unit_normal;
+	c_vector<double, 3> unit_normal = zero_vector<double>(3);
 	unit_normal[0] = sign_of_curvature*normal_vector[0]/(sqrt(pow(normal_vector[0],2)+pow(normal_vector[1],2)+1));
 	unit_normal[1] = sign_of_curvature*normal_vector[1]/(sqrt(pow(normal_vector[0],2)+pow(normal_vector[1],2)+1));
 	unit_normal[2] = sign_of_curvature*1.0/(sqrt(pow(normal_vector[0],2)+pow(normal_vector[1],2)+1));
+	// PRINT_VECTOR(unit_normal);
 
 	double radius_from_curvature = 1/sqrt(mNonZeroTargetCurvature*sign_of_curvature);
 
-	c_vector<double, 3> circle_centre;
+	c_vector<double, 3> circle_centre = zero_vector<double>(3);
 	unsigned cell_ii_ext = mExtendedMeshNodeIndexMap[cell_i];
 	
 	// c_vector<double, 3> epithelial_cell_i = mpExtendedMesh->GetNode(cell_ii_ext)->rGetLocation();
@@ -719,6 +673,10 @@ std::vector<c_vector<double, 3> > PeriodicBendingForce3dHeightWithGhostNodes::Fi
 	circle_centre[0]  = radius_from_curvature*unit_normal[0] + epithelial_cell_i[0];
 	circle_centre[1]  = radius_from_curvature*unit_normal[1] + epithelial_cell_i[1];
 	circle_centre[2]  = radius_from_curvature*unit_normal[2] + epithelial_cell_i[2];
+	// PRINT_VECTOR(circle_centre);
+	// PRINT_VECTOR(epithelial_cell_i);
+	
+	double height_of_plane = normal_vector[0]*epithelial_cell_i[0] + normal_vector[1]*epithelial_cell_i[1] + epithelial_cell_i[2];
 
 	//  Note: when we use unit_normal in this loop, we may need to be using normal_vector instead...?
 	for (unsigned i=0; i<second_order_neighs.size(); i++)
@@ -736,6 +694,10 @@ std::vector<c_vector<double, 3> > PeriodicBendingForce3dHeightWithGhostNodes::Fi
 		double beta  = 2*normal_vector[0]*(epithelial_location[0]-circle_centre[0]) + 2*normal_vector[1]*(epithelial_location[1]-circle_centre[1]) + 2*1.0*(epithelial_location[2]-circle_centre[2]);
 		double delta = pow(epithelial_location[0]-circle_centre[0],2) + pow(epithelial_location[1]-circle_centre[1],2) + pow(epithelial_location[2]-circle_centre[2],2) - pow(radius_from_curvature,2);
 
+		// Original!!!!!
+		//
+		// double param_T = (-1.0*beta - sign_of_curvature*sqrt(pow(beta,2) - 4*alpha*delta))/(2.0*alpha);
+		//
 		double param_T = (-1.0*beta - sign_of_curvature*sqrt(pow(beta,2) - 4*alpha*delta))/(2.0*alpha);
 		c_vector<double, 3> point_on_sphere;
 
@@ -754,7 +716,7 @@ std::vector<c_vector<double, 3> > PeriodicBendingForce3dHeightWithGhostNodes::Fi
 			point_on_sphere[1] = normal_vector[1]*param_T + epithelial_location[1];
 			point_on_sphere[2] = 1.0*param_T + epithelial_location[2];
 		}
-		
+		// PRINT_VECTOR(point_on_sphere);
 		
 		
 
@@ -763,7 +725,8 @@ std::vector<c_vector<double, 3> > PeriodicBendingForce3dHeightWithGhostNodes::Fi
 		c_vector<double, 3> point_on_plane;
 		point_on_plane[0] = point_on_sphere[0] - k_point*normal_vector[0];
 		point_on_plane[1] = point_on_sphere[1] - k_point*normal_vector[1];
-		point_on_plane[2] = point_on_sphere[2] - k_point*1.0;
+		// point_on_plane[2] = point_on_sphere[2] - k_point*1.0;
+		point_on_plane[2] = (-1.0*normal_vector[0])*point_on_plane[0] + (-1.0*normal_vector[1])*point_on_plane[1] + height_of_plane;
 
 		double point_on_plane_DOT_point_on_sphere = sqrt(pow(point_on_plane[0]-point_on_sphere[0],2) + pow(point_on_plane[1]-point_on_sphere[1],2) + pow(point_on_plane[2]-point_on_sphere[2],2));
 
@@ -787,13 +750,13 @@ std::vector<c_vector<double, 3> > PeriodicBendingForce3dHeightWithGhostNodes::Fi
 		//	PRINT_2_VARIABLES(param_T, (pow(beta,2) - 4*alpha*delta));
 		//	PRINT_VECTOR(normal_vector);
 		//}
+		// PRINT_VECTOR(temp_cell_location);
 		
 		image_location_per_second_order_neighbours.push_back(temp_cell_location);
 	}
-
+	// std::cout<<"_1_\n";
 	return image_location_per_second_order_neighbours;
 }
-
 
 
 c_vector<double, 3> PeriodicBendingForce3dHeightWithGhostNodes::GetForceDueToDiscreteCurvature(AbstractCellPopulation<3>& rCellPopulation, std::vector<c_vector<unsigned, 3> > rEpithelialMeshVector, std::vector<unsigned> first_order_neighs,  std::vector<unsigned> second_order_neighs, std::vector<c_vector<double, 3> > image_location, unsigned cell_i, unsigned num_cells)
@@ -807,50 +770,49 @@ c_vector<double, 3> PeriodicBendingForce3dHeightWithGhostNodes::GetForceDueToDis
 	  needs (for node IDs)  ->  second_order_neighs 
 	Cell_i					->  cell_i
 	*/
-	//std::cout<<"\n\n";
 	double exponent_parameter = GetExponentParameter();
-	c_vector<double, 3> force_due_to_curvature;
-	force_due_to_curvature[0] = 0.0;
-	force_due_to_curvature[1] = 0.0;
-	force_due_to_curvature[2] = 0.0;
-	//PRINT_VECTOR(force_due_to_curvature);
+	c_vector<double, 3> force_due_to_curvature = zero_vector<double>(3);
+	// force_due_to_curvature[0] = 0.0;
+	// force_due_to_curvature[1] = 0.0;
+	// force_due_to_curvature[2] = 0.0;
 
 	int inverse_sec_neighs[4*num_cells];
 	for(unsigned i=0; i<4*num_cells; i++)
 	{
 		inverse_sec_neighs[i] = 0;
 
-		//std::cout << "i " << i << " s " << second_order_neighs[i] << "\n";
 	}
 
 	for(unsigned i=0; i<second_order_neighs.size(); i++)
 	{
 		inverse_sec_neighs[second_order_neighs[i]] = i;
 
-		//std::cout << "i " << i << " s " << second_order_neighs[i] << "\n";
 	}
 
 
 	// Calculate angles about the first order neighbours in the mesh
-	std::vector<double> angle_sum;
-	std::vector<double> angle_sum_indicats;
-	// std::cout << "\n\n";
+	// std::vector<double> angle_sum;
+	// std::vector<double> angle_sum_indicats;
+
 	for(unsigned j=0; j<first_order_neighs.size(); j++)
 	{
 		double ang_sum = 0.0;
-		c_vector<double, 3> grad_i_phi_j_el;
-		grad_i_phi_j_el[0] = 0.0;
-		grad_i_phi_j_el[1] = 0.0;
-		grad_i_phi_j_el[2] = 0.0;
+		c_vector<double, 3> grad_i_phi_j_el = zero_vector<double>(3);;
+		// grad_i_phi_j_el[0] = 0.0;
+		// grad_i_phi_j_el[1] = 0.0;
+		// grad_i_phi_j_el[2] = 0.0;
 
 		int cell_a = first_order_neighs[j];
 		int inv_cell_a = inverse_sec_neighs[cell_a];
-		c_vector<double, 3> cell_a_loc, cell_b_loc, cell_c_loc;
-		cell_a_loc[0] = image_location[inv_cell_a][0];
-		cell_a_loc[1] = image_location[inv_cell_a][1];
-		cell_a_loc[2] = image_location[inv_cell_a][2];
+		c_vector<double, 3> a_loc, b_loc, c_loc;
+		a_loc[0] = image_location[inv_cell_a][0];
+		a_loc[1] = image_location[inv_cell_a][1];
+		a_loc[2] = image_location[inv_cell_a][2];
 
-		
+		// if(cell_i == 154)
+		// {
+		// 	PRINT_VARIABLE(cell_a);
+		// }
 
 		for(unsigned i=0; i<rEpithelialMeshVector.size(); i++)
 		{
@@ -880,22 +842,27 @@ c_vector<double, 3> PeriodicBendingForce3dHeightWithGhostNodes::GetForceDueToDis
 			if(have_triangle)
 			{
 				inv_cell_b = inverse_sec_neighs[cell_b];
-				cell_b_loc[0] = image_location[inv_cell_b][0];
-				cell_b_loc[1] = image_location[inv_cell_b][1];
-				cell_b_loc[2] = image_location[inv_cell_b][2];
+				b_loc[0] = image_location[inv_cell_b][0];
+				b_loc[1] = image_location[inv_cell_b][1];
+				b_loc[2] = image_location[inv_cell_b][2];
 
 				inv_cell_c = inverse_sec_neighs[cell_c];
-				cell_c_loc[0] = image_location[inv_cell_c][0];
-				cell_c_loc[1] = image_location[inv_cell_c][1];
-				cell_c_loc[2] = image_location[inv_cell_c][2];
+				c_loc[0] = image_location[inv_cell_c][0];
+				c_loc[1] = image_location[inv_cell_c][1];
+				c_loc[2] = image_location[inv_cell_c][2];
 
-				c_vector<double, 3> vect_ab = cell_b_loc - cell_a_loc;
-				c_vector<double, 3> vect_ac = cell_c_loc - cell_a_loc;
+				c_vector<double, 3> vect_ab = b_loc - a_loc;
+				c_vector<double, 3> vect_ac = c_loc - a_loc;
 
-				double mag_ab = sqrt(pow(vect_ab[0],2) + pow(vect_ab[1],2) + pow(vect_ab[2],2));
-				double mag_ac = sqrt(pow(vect_ac[0],2) + pow(vect_ac[1],2) + pow(vect_ac[2],2));
+				// double mag_ab = sqrt(pow(vect_ab[0],2) + pow(vect_ab[1],2) + pow(vect_ab[2],2));
+				// double mag_ac = sqrt(pow(vect_ac[0],2) + pow(vect_ac[1],2) + pow(vect_ac[2],2));
+				double mag_ab = sqrt(pow(b_loc[0] - a_loc[0],2) + pow(b_loc[1] - a_loc[1],2) + pow(b_loc[2] - a_loc[2],2));
+				double mag_ac = sqrt(pow(c_loc[0] - a_loc[0],2) + pow(c_loc[1] - a_loc[1],2) + pow(c_loc[2] - a_loc[2],2));
 
-				double cos_abc = (vect_ab[0]*vect_ac[0] + vect_ab[1]*vect_ac[1] + vect_ab[2]*vect_ac[2])/(mag_ab*mag_ac);
+				double abDotac = (b_loc[0] - a_loc[0])*(c_loc[0] - a_loc[0]) + (b_loc[1] - a_loc[1])*(c_loc[1] - a_loc[1]) + (b_loc[2] - a_loc[2])*(c_loc[2] - a_loc[2]);
+
+				// double cos_abc = (vect_ab[0]*vect_ac[0] + vect_ab[1]*vect_ac[1] + vect_ab[2]*vect_ac[2])/(mag_ab*mag_ac);
+				double cos_abc = (abDotac)/(mag_ab*mag_ac);
 
 				// Think these edge cases, they shouldn't be happening, but they do...
 				if (!isnan(ang_sum))
@@ -922,117 +889,355 @@ c_vector<double, 3> PeriodicBendingForce3dHeightWithGhostNodes::GetForceDueToDis
 					cos_abc = 0;
 				}
 
-				c_vector<double, 3> grad_hold;
+				c_vector<double, 3> grad_hold = zero_vector<double>(3);;
 
 				// Calculate grad_i phi_i
-				if(cell_a == cell_i)
+				if(cell_a == mCellPopulationNodeIndexMap[cell_i])
 				{
-					// TRACE("one");
-					//PRINT_VECTOR(cell_a_loc);
-					//PRINT_VECTOR(cell_b_loc);
-					//PRINT_VECTOR(cell_c_loc);
-					grad_hold = (1.0/(sqrt(1.0 - cos_abc*cos_abc)))*(1.0/(mag_ab*mag_ab*mag_ac*mag_ac))*(mag_ab*(mag_ac-mag_ab*cos_abc)*vect_ac + mag_ac*(mag_ab-mag_ac*cos_abc)*vect_ab);
+					// grad_hold = ( -1.0/sqrt(1.0 - cos_abc*cos_abc) )*(1.0/(mag_ab*mag_ac))*(2.0*a_loc - b_loc - c_loc + (vect_ab[0]*vect_ac[0] + vect_ab[1]*vect_ac[1] + vect_ab[2]*vect_ac[2])*( (b_loc-a_loc)/pow(mag_ab,2) +(c_loc-a_loc)/pow(mag_ac,2) ) );
+					grad_hold = ( -1.0/sqrt(1.0 - pow(cos_abc,2)) )*(1.0/(mag_ab*mag_ac))*(2.0*a_loc - b_loc - c_loc + (abDotac)*( (b_loc-a_loc)/pow(mag_ab,2) +(c_loc-a_loc)/pow(mag_ac,2) ) );
+
 
 					grad_i_phi_j_el += grad_hold;
-					
-					//PRINT_VECTOR(grad_hold);
-					//std::cout << "case 1 " << cell_a << "\n";
+
+					// if(cell_i == 154)
+					// {
+					// 	std::cout<< " a {" << grad_hold[0] << ", " << grad_hold[1] << ", " << grad_hold[2] << "} \n";
+					// 	// PRINT_VECTOR(grad_hold);
+					// }
+
 				}
 				
-				else if(cell_b == cell_i)
+				else if(cell_b == mCellPopulationNodeIndexMap[cell_i])
 				{
-					// TRACE("two");
-					//PRINT_VECTOR(cell_a_loc);
-					//PRINT_VECTOR(cell_b_loc);
-					//PRINT_VECTOR(cell_c_loc);
 
-					grad_hold = (1.0/(sqrt(1.0 - cos_abc*cos_abc))) * (vect_ac/(mag_ab*mag_ac) - cos_abc*vect_ab/(mag_ab*mag_ab));
-					//grad_hold = (1.0/(sqrt(1.0 - cos_abc*cos_abc)))* (1.0/(mag_ac)) * (vect_ab/mag_ab - cos_abc*vect_ac/mag_ac);
+					// grad_hold = (-1.0/(sqrt(1.0 - cos_abc*cos_abc)))*(1.0/(mag_ab*mag_ac))*( c_loc-a_loc + (b_loc-a_loc)*((vect_ab[0]*vect_ac[0] + vect_ab[1]*vect_ac[1] + vect_ab[2]*vect_ac[2]))/pow(mag_ab,2) ) ;
+					grad_hold = (-1.0/(sqrt(1.0 - pow(cos_abc,2))))*(1.0/(mag_ab*mag_ac))*( (c_loc-a_loc) - (b_loc-a_loc)*((abDotac))/pow(mag_ab,2) ) ;
+
 					grad_i_phi_j_el += grad_hold;
+
+					// if(cell_i == 154)
+					// {
+					// 	std::cout<< " b {" << grad_hold[0] << ", " << grad_hold[1] << ", " << grad_hold[2] << "} \n";
+					// 	// PRINT_VECTOR(grad_hold);
+					// }
+
+				}
+				else if(cell_c == mCellPopulationNodeIndexMap[cell_i])
+				{
 					
-					//PRINT_VECTOR(grad_hold);
-					//std::cout << "case 2 " << cell_a << "\n";
-				}
-				else if(cell_c == cell_i)
-				{
-					// TRACE("three");
-					//PRINT_VECTOR(cell_a_loc);
-					//PRINT_VECTOR(cell_b_loc);
-					//PRINT_VECTOR(cell_c_loc);
-					
-					grad_hold = (1.0/(sqrt(1.0 - cos_abc*cos_abc))) * (vect_ab/(mag_ab*mag_ac) - cos_abc*vect_ac/(mag_ac*mag_ac));
-					//grad_hold = (1.0/(sqrt(1.0 - cos_abc*cos_abc)))* (1.0/(mag_ab)) * (vect_ac/mag_ac - cos_abc*vect_ab/mag_ab);
+					// grad_hold = (-1.0/(sqrt(1.0 - cos_abc*cos_abc)))*(1.0/(mag_ab*mag_ac))*( b_loc-a_loc + (c_loc-a_loc)*((vect_ab[0]*vect_ac[0] + vect_ab[1]*vect_ac[1] + vect_ab[2]*vect_ac[2]))/pow(mag_ac,2) ) ;
+					grad_hold = (-1.0/(sqrt(1.0 -  pow(cos_abc,2))))*(1.0/(mag_ab*mag_ac))*( (b_loc-a_loc) - (c_loc-a_loc)*((abDotac))/pow(mag_ac,2) ) ;
+
 					grad_i_phi_j_el += grad_hold;
 
-					//PRINT_VECTOR(grad_hold);
-					//std::cout << "case 3 " << cell_a << "\n";
-				}
-				else
-				{
-					grad_hold[0] = 0.0;
-					grad_hold[1] = 0.0;
-					grad_hold[2] = 0.0;
-					grad_i_phi_j_el += grad_hold;
-				}
+					// if(cell_i == 154)
+					// {
+					// 	std::cout<< " c {" << grad_hold[0] << ", " << grad_hold[1] << ", " << grad_hold[2] << "} \n";
+					// 	// PRINT_VECTOR(grad_hold);
+					// }
 
-				// if (isnan(grad_i_phi_j_el[0]) || isnan(grad_i_phi_j_el[1]) || isnan(grad_i_phi_j_el[2]))
+				}
+				// else
 				// {
-				// 	PRINT_VECTOR(grad_i_phi_j_el);
+				// 	grad_hold[0] = 0.0;
+				// 	grad_hold[1] = 0.0;
+				// 	grad_hold[2] = 0.0;
+				// 	grad_i_phi_j_el += grad_hold;
 				// }
 
-				// if ( cell_i == 154 )
-				// {
-				// 	PRINT_3_VARIABLES(cell_a,cell_b,cell_c);
-				// 	PRINT_VECTOR(grad_hold);
-				// }
 			}
 			
 		}
-		
-		//if(cell_a == cell_i)
-		//{
-		//	PRINT_VECTOR(grad_i_phi_j_el);
-		//}
-		//std::cout << "Angle Sum = " << ang_sum << "\n";
-		//PRINT_VARIABLE(ang_sum);
 
-		angle_sum.push_back(ang_sum);
-		angle_sum_indicats.push_back(cell_a);
 
-		//PRINT_VECTOR(force_due_to_curvature);
-		// Using alpha = 1.5 and beta = 2.0 for now, will fix this later though
-		double sign_of_anlge = (round((2*3.141592653589793 - ang_sum)*pow(10.0,14))/pow(10.0,14) >= 0) - (round((2*3.141592653589793 - ang_sum)*pow(10.0,14))/pow(10.0,14) < 0);
-		// if ( cell_i == 154 )
+		// angle_sum.push_back(ang_sum);
+		// angle_sum_indicats.push_back(cell_a);
+		// if(cell_i == 154)
 		// {
-		// 	double hold = (exponent_parameter)*(sign_of_anlge)*pow(sqrt((2*3.141592653589793 - ang_sum)*(2*3.141592653589793 - ang_sum)),(exponent_parameter-1.0));
-		// 	PRINT_2_VARIABLES(sign_of_anlge, hold);
+		// 	PRINT_VECTOR(grad_i_phi_j_el);
+		// 	std::cout<<"\n";
+		// 	// PRINT_VECTOR(a_loc);
 		// }
-		c_vector<double, 3> force_due_to_curvature_i = (exponent_parameter)*(sign_of_anlge)*pow(sqrt((2*3.141592653589793 - ang_sum)*(2*3.141592653589793 - ang_sum)),(exponent_parameter-1.0))*grad_i_phi_j_el;
+
+		double sign_of_anlge = (round((2*3.141592653589793 - ang_sum)*pow(10.0,14))/pow(10.0,14) >= 0) - (round((2*3.141592653589793 - ang_sum)*pow(10.0,14))/pow(10.0,14) < 0);
+		c_vector<double, 3> force_due_to_curvature_i = 1.0*(exponent_parameter)*sign_of_anlge*pow(sqrt(pow( (2*3.141592653589793 - ang_sum) ,2)),(exponent_parameter-1.0))*grad_i_phi_j_el;
+
+		// c_vector<double, 3> force_due_to_curvature_i = 1.0*(exponent_parameter)*( pow((2*3.141592653589793 - ang_sum),(exponent_parameter-1.0)) )*grad_i_phi_j_el;
+
+		// c_vector<double, 3> force_due_to_curvature_i = 	(1.0/(1.0+exp(-1.0*exponent_parameter*(ang_sum - 2*3.141592653589793)) ) - 0.5 ) *grad_i_phi_j_el;
 
 		force_due_to_curvature +=  force_due_to_curvature_i;
 
-		//PRINT_VECTOR(force_due_to_curvature_i);
-		
-		
+		// if(cell_a == 154)
+		// {
+		// 	PRINT_VARIABLE(ang_sum);
+		// }
 
-		//std::cout << round((2*3.141592653589793 - ang_sum)*pow(10.0,14))/pow(10.0,14) << "\n";
-		//std::cout<< "sign_of_anlge = " << sign_of_anlge << "\n";
 	}
-	
 
-	//PRINT_VECTOR(force_due_to_curvature);
+	// if(cell_i == 154)
+	// 	{
+	// 		// PRINT_VECTOR(force_due_to_curvature);
+	// 		// PRINT_VECTOR(a_loc);
+	// 	}
+	// PRINT_VECTOR(force_due_to_curvature);
+	// std::cout<<"_2_\n";
 
-	//std::cout << "cell_i = " << cell_i << "\n"; 
-	//PRINT_VECTOR(angle_sum);
-	//PRINT_VECTOR(angle_sum_indicats);
-	//PRINT_VECTOR(first_order_neighs);
-	//PRINT_VECTOR(force_due_to_curvature);
-//	std::cout << "\n";
-	
-	
 	
 	return force_due_to_curvature;
 }
+
+// ORIGINAL
+// c_vector<double, 3> PeriodicBendingForce3dHeightWithGhostNodes::GetForceDueToDiscreteCurvature(AbstractCellPopulation<3>& rCellPopulation, std::vector<c_vector<unsigned, 3> > rEpithelialMeshVector, std::vector<unsigned> first_order_neighs,  std::vector<unsigned> second_order_neighs, std::vector<c_vector<double, 3> > image_location, unsigned cell_i, unsigned num_cells)
+// {
+	
+// 	/* 
+// 	Need:
+// 	Traingulation		    ->  rEpithelialMeshVector
+// 	First order neighbours  ->  first_order_neighs 
+// 	image node positions    ->  image_location 
+// 	  needs (for node IDs)  ->  second_order_neighs 
+// 	Cell_i					->  cell_i
+// 	*/
+// 	//std::cout<<"\n\n";
+// 	double exponent_parameter = GetExponentParameter();
+// 	c_vector<double, 3> force_due_to_curvature;
+// 	force_due_to_curvature[0] = 0.0;
+// 	force_due_to_curvature[1] = 0.0;
+// 	force_due_to_curvature[2] = 0.0;
+// 	//PRINT_VECTOR(force_due_to_curvature);
+
+// 	int inverse_sec_neighs[4*num_cells];
+// 	for(unsigned i=0; i<4*num_cells; i++)
+// 	{
+// 		inverse_sec_neighs[i] = 0;
+
+// 		//std::cout << "i " << i << " s " << second_order_neighs[i] << "\n";
+// 	}
+
+// 	for(unsigned i=0; i<second_order_neighs.size(); i++)
+// 	{
+// 		inverse_sec_neighs[second_order_neighs[i]] = i;
+
+// 		//std::cout << "i " << i << " s " << second_order_neighs[i] << "\n";
+// 	}
+
+
+// 	// Calculate angles about the first order neighbours in the mesh
+// 	std::vector<double> angle_sum;
+// 	std::vector<double> angle_sum_indicats;
+// 	// std::cout << "\n\n";
+// 	for(unsigned j=0; j<first_order_neighs.size(); j++)
+// 	{
+// 		double ang_sum = 0.0;
+// 		c_vector<double, 3> grad_i_phi_j_el;
+// 		grad_i_phi_j_el[0] = 0.0;
+// 		grad_i_phi_j_el[1] = 0.0;
+// 		grad_i_phi_j_el[2] = 0.0;
+
+// 		int cell_a = first_order_neighs[j];
+// 		int inv_cell_a = inverse_sec_neighs[cell_a];
+// 		c_vector<double, 3> cell_a_loc, cell_b_loc, cell_c_loc;
+// 		cell_a_loc[0] = image_location[inv_cell_a][0];
+// 		cell_a_loc[1] = image_location[inv_cell_a][1];
+// 		cell_a_loc[2] = image_location[inv_cell_a][2];
+
+		
+
+// 		for(unsigned i=0; i<rEpithelialMeshVector.size(); i++)
+// 		{
+// 			int cell_b, cell_c, inv_cell_b, inv_cell_c;
+// 			bool have_triangle = false;
+
+// 			if(rEpithelialMeshVector[i][0] == cell_a)
+// 			{
+// 				cell_b = rEpithelialMeshVector[i][1];
+// 				cell_c = rEpithelialMeshVector[i][2];
+// 				have_triangle = true;
+// 			}
+// 			else if(rEpithelialMeshVector[i][1] == cell_a)
+// 			{
+// 				cell_b = rEpithelialMeshVector[i][0];
+// 				cell_c = rEpithelialMeshVector[i][2];
+// 				have_triangle = true;
+// 			}
+// 			else if(rEpithelialMeshVector[i][2] == cell_a)
+// 			{
+// 				cell_b = rEpithelialMeshVector[i][0];
+// 				cell_c = rEpithelialMeshVector[i][1];
+// 				have_triangle = true;
+// 			}
+// 			// have_triangle = bool ( (cell_a == cell_i) + (cell_b == cell_i) + (cell_c == cell_i) );
+
+// 			if(have_triangle)
+// 			{
+// 				inv_cell_b = inverse_sec_neighs[cell_b];
+// 				cell_b_loc[0] = image_location[inv_cell_b][0];
+// 				cell_b_loc[1] = image_location[inv_cell_b][1];
+// 				cell_b_loc[2] = image_location[inv_cell_b][2];
+
+// 				inv_cell_c = inverse_sec_neighs[cell_c];
+// 				cell_c_loc[0] = image_location[inv_cell_c][0];
+// 				cell_c_loc[1] = image_location[inv_cell_c][1];
+// 				cell_c_loc[2] = image_location[inv_cell_c][2];
+
+// 				c_vector<double, 3> vect_ab = cell_b_loc - cell_a_loc;
+// 				c_vector<double, 3> vect_ac = cell_c_loc - cell_a_loc;
+
+// 				double mag_ab = sqrt(pow(vect_ab[0],2) + pow(vect_ab[1],2) + pow(vect_ab[2],2));
+// 				double mag_ac = sqrt(pow(vect_ac[0],2) + pow(vect_ac[1],2) + pow(vect_ac[2],2));
+
+// 				double cos_abc = (vect_ab[0]*vect_ac[0] + vect_ab[1]*vect_ac[1] + vect_ab[2]*vect_ac[2])/(mag_ab*mag_ac);
+
+// 				// Think these edge cases, they shouldn't be happening, but they do...
+// 				if (!isnan(ang_sum))
+// 				{
+// 					if (cos_abc >= 0.99999999 || cos_abc == 1)
+// 					{
+// 						//PRINT_VARIABLE("+1");
+// 						ang_sum += 0.0;
+// 						cos_abc = 0.9999;
+// 					}
+// 					else if (cos_abc <= -0.99999999 || cos_abc == -1)
+// 					{
+// 						//PRINT_VARIABLE("-1");
+// 						ang_sum += 3.141592653589793;
+// 						cos_abc = -0.9999;
+// 					}
+// 					else
+// 					{
+// 						ang_sum += acos(cos_abc);
+// 					}
+// 				}
+// 				else if (isnan(ang_sum))
+// 				{
+// 					cos_abc = 0;
+// 				}
+
+// 				c_vector<double, 3> grad_hold;
+
+// 				// Calculate grad_i phi_i
+// 				if(cell_a == mCellPopulationNodeIndexMap[cell_i])
+// 				{
+// 					// TRACE("one");
+// 					//PRINT_VECTOR(cell_a_loc);
+// 					//PRINT_VECTOR(cell_b_loc);
+// 					//PRINT_VECTOR(cell_c_loc);
+// 					grad_hold = (1.0/(sqrt(1.0 - cos_abc*cos_abc)))*(1.0/(mag_ab*mag_ab*mag_ac*mag_ac))*(mag_ab*(mag_ac-mag_ab*cos_abc)*vect_ac + mag_ac*(mag_ab-mag_ac*cos_abc)*vect_ab);
+
+// 					grad_i_phi_j_el += grad_hold;
+					
+// 					//PRINT_VECTOR(grad_hold);
+// 					//std::cout << "case 1 " << cell_a << "\n";
+// 				}
+				
+// 				else if(cell_b == mCellPopulationNodeIndexMap[cell_i])
+// 				{
+// 					// TRACE("two");
+// 					//PRINT_VECTOR(cell_a_loc);
+// 					//PRINT_VECTOR(cell_b_loc);
+// 					//PRINT_VECTOR(cell_c_loc);
+
+// 					grad_hold = (1.0/(sqrt(1.0 - cos_abc*cos_abc))) * (vect_ac/(mag_ab*mag_ac) - cos_abc*vect_ab/(mag_ab*mag_ab));
+// 					//grad_hold = (1.0/(sqrt(1.0 - cos_abc*cos_abc)))* (1.0/(mag_ac)) * (vect_ab/mag_ab - cos_abc*vect_ac/mag_ac);
+// 					grad_i_phi_j_el += grad_hold;
+					
+// 					//PRINT_VECTOR(grad_hold);
+// 					//std::cout << "case 2 " << cell_a << "\n";
+// 				}
+// 				else if(cell_c == mCellPopulationNodeIndexMap[cell_i])
+// 				{
+// 					// TRACE("three");
+// 					//PRINT_VECTOR(cell_a_loc);
+// 					//PRINT_VECTOR(cell_b_loc);
+// 					//PRINT_VECTOR(cell_c_loc);
+					
+// 					grad_hold = (1.0/(sqrt(1.0 - cos_abc*cos_abc))) * (vect_ab/(mag_ab*mag_ac) - cos_abc*vect_ac/(mag_ac*mag_ac));
+// 					//grad_hold = (1.0/(sqrt(1.0 - cos_abc*cos_abc)))* (1.0/(mag_ab)) * (vect_ac/mag_ac - cos_abc*vect_ab/mag_ab);
+// 					grad_i_phi_j_el += grad_hold;
+
+// 					//PRINT_VECTOR(grad_hold);
+// 					//std::cout << "case 3 " << cell_a << "\n";
+// 				}
+// 				else
+// 				{
+// 					grad_hold[0] = 0.0;
+// 					grad_hold[1] = 0.0;
+// 					grad_hold[2] = 0.0;
+// 					grad_i_phi_j_el += grad_hold;
+// 				}
+
+// 				// if (isnan(grad_i_phi_j_el[0]) || isnan(grad_i_phi_j_el[1]) || isnan(grad_i_phi_j_el[2]))
+// 				// {
+// 				// 	PRINT_VECTOR(grad_i_phi_j_el);
+// 				// }
+
+// 				// if ( cell_i == 154 )
+// 				// {
+// 				// 	PRINT_3_VARIABLES(cell_a,cell_b,cell_c);
+// 				// 	PRINT_VECTOR(grad_hold);
+// 				// }
+// 			}
+			
+// 		}
+		
+// 		//if(cell_a == cell_i)
+// 		//{
+// 		//	PRINT_VECTOR(grad_i_phi_j_el);
+// 		//}
+// 		//std::cout << "Angle Sum = " << ang_sum << "\n";
+// 		//PRINT_VARIABLE(ang_sum);
+
+// 		angle_sum.push_back(ang_sum);
+// 		angle_sum_indicats.push_back(cell_a);
+
+// 		//PRINT_VECTOR(force_due_to_curvature);
+// 		// Using alpha = 1.5 and beta = 2.0 for now, will fix this later though
+// 		double sign_of_anlge = (round((2*3.141592653589793 - ang_sum)*pow(10.0,14))/pow(10.0,14) >= 0) - (round((2*3.141592653589793 - ang_sum)*pow(10.0,14))/pow(10.0,14) < 0);
+// 		// if ( cell_i == 154 )
+// 		// {
+// 		// 	double hold = (exponent_parameter)*(sign_of_anlge)*pow(sqrt((2*3.141592653589793 - ang_sum)*(2*3.141592653589793 - ang_sum)),(exponent_parameter-1.0));
+// 		// 	PRINT_2_VARIABLES(sign_of_anlge, hold);
+// 		// }
+// 		// c_vector<double, 3> force_due_to_curvature_i = (exponent_parameter)*pow((2*3.141592653589793 - ang_sum),(exponent_parameter-1.0))*grad_i_phi_j_el;// +
+// 		// c_vector<double, 3> force_due_to_curvature_i = (exponent_parameter)*(sign_of_anlge)*pow(sqrt((2*3.141592653589793 - ang_sum)*(2*3.141592653589793 - ang_sum)),(exponent_parameter-1.0))*grad_i_phi_j_el;// +
+// 														//  (1.1)*(sign_of_anlge)*pow(sqrt((2*3.141592653589793 - ang_sum)*(2*3.141592653589793 - ang_sum)),(1.1-1.0))*grad_i_phi_j_el + 
+// 														//  (2.0)*(sign_of_anlge)*pow(sqrt((2*3.141592653589793 - ang_sum)*(2*3.141592653589793 - ang_sum)),(2.0-1.0))*grad_i_phi_j_el;
+
+// 		// c_vector<double, 3> force_due_to_curvature_i = 1.0*(exponent_parameter)*( pow((2*3.141592653589793 - ang_sum),(exponent_parameter-1.0))*(1.0+pow((2*3.141592653589793 - ang_sum),(exponent_parameter)))*exp(pow((2*3.141592653589793 - ang_sum),(exponent_parameter)))  )*grad_i_phi_j_el;
+		
+// 		// c_vector<double, 3> force_due_to_curvature_i = 1.0*(exponent_parameter)*( (1.0+exponent_parameter*pow((2*3.141592653589793 - ang_sum),(exponent_parameter)))*exp(pow((2*3.141592653589793 - ang_sum),(exponent_parameter)))  )*grad_i_phi_j_el;
+		
+// 		// c_vector<double, 3> force_due_to_curvature_i = 1.0*(exponent_parameter)*exp(pow((2*3.141592653589793 - ang_sum),(exponent_parameter))) * (1.0+pow((2*3.141592653589793 - ang_sum),(exponent_parameter))) * pow((2*3.141592653589793 - ang_sum),(exponent_parameter-1.0)) *grad_i_phi_j_el;
+		
+// 		c_vector<double, 3> force_due_to_curvature_i = 1.0*(exponent_parameter)*( pow((2*3.141592653589793 - ang_sum),(exponent_parameter-1.0)) )*grad_i_phi_j_el;
+// 		// c_vector<double, 3> force_due_to_curvature_i = sign_of_anlge*1.0*(exponent_parameter)*( pow((2*3.141592653589793 - ang_sum),(exponent_parameter-1.0)) )*grad_i_phi_j_el;
+		
+// 		force_due_to_curvature +=  force_due_to_curvature_i;
+
+// 		//PRINT_VECTOR(force_due_to_curvature_i);
+		
+		
+
+// 		//std::cout << round((2*3.141592653589793 - ang_sum)*pow(10.0,14))/pow(10.0,14) << "\n";
+// 		//std::cout<< "sign_of_anlge = " << sign_of_anlge << "\n";
+// 	}
+	
+
+// 	//PRINT_VECTOR(force_due_to_curvature);
+
+// 	//std::cout << "cell_i = " << cell_i << "\n"; 
+// 	//PRINT_VECTOR(angle_sum);
+// 	//PRINT_VECTOR(angle_sum_indicats);
+// 	//PRINT_VECTOR(first_order_neighs);
+// 	//PRINT_VECTOR(force_due_to_curvature);
+// //	std::cout << "\n";
+	
+	
+	
+// 	return force_due_to_curvature;
+// }
 
 // c_vector<unsigned, 2> PeriodicBendingForce3dHeightWithGhostNodes::GetMaxMinEpithelialCells(AbstractCellPopulation<3>& rCellPopulation)
 // {
@@ -1145,18 +1350,13 @@ bool PeriodicBendingForce3dHeightWithGhostNodes::DoesElementContainLongEdge(Abst
 
 // Dom - adds the force to the cell - will use this
 void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCellPopulation<3>& rCellPopulation)
-//void PeriodicBendingForce3dWithGhostNodes::AddForceContribution(std::vector<c_vector<double, 3> >& rForces,
-//                                                                   AbstractCellPopulation<3>& rCellPopulation)
 {
 	DomMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<3>*>(&rCellPopulation);
 
 	unsigned num_cells = rCellPopulation.GetNumRealCells();
-	//unsigned num_nodes = rCellPopulation.GetNumNodes();
+	unsigned num_nodes = rCellPopulation.GetNumNodes();
 	
-	//PRINT_2_VARIABLES(num_cells,num_nodes);
 
-	//std::vector<c_vector<double, 3>> rForces(3*num_cells); // Legacy code
-    
 	// If the width of the periodic domain has not been specified, use the initial width of the cell population
     if (mPeriodicDomainWidth == DOUBLE_UNSET)
     {
@@ -1171,6 +1371,13 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 
     mExtendedMeshNodeIndexMap.clear();
 
+	mCellPopulationNodeIndexMap.clear();
+
+	for(int iter; iter<num_nodes; iter++)
+	{
+		mCellPopulationNodeIndexMap[iter] = -1;
+	}
+
     // Create a vector of nodes for use in constructing mpExtendedMesh
     std::vector<Node<3>*> extended_nodes(4*num_cells);
 
@@ -1183,6 +1390,7 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
          ++cell_iter)
     {
         // First, create and store a copy of this real node and cell
+
         unsigned real_node_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
         c_vector<double, 3> real_node_location = rCellPopulation.GetLocationOfCellCentre(*cell_iter);
 
@@ -1192,7 +1400,8 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 
         // Populate mExtendedMeshNodeIndexMap
         mExtendedMeshNodeIndexMap[count] = real_node_index;
-
+		mCellPopulationNodeIndexMap[real_node_index] = count;
+		
 
         count++;
     }
@@ -1209,7 +1418,6 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 
         // Create a copy of the node corresponding to this cell and store it
         Node<3>* p_real_node = new Node<3>(real_node_index, real_node_location);
-	 //        extended_nodes[count] = p_real_node;
 
         // Compute the location of the image node corresponding to this node
         c_vector<double,3> image_node_location = real_node_location;
@@ -1223,10 +1431,8 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
         }
 
         // Create a copy of the node corresponding to this cell, suitable translated, and store it
-	 //        Node<3>* p_image_node = new Node<3>(num_cells+count, image_node_location);
         Node<3>* p_image_node = new Node<3>(count, image_node_location);
 
-	 //        extended_nodes[num_cells+count] = p_image_node;
         extended_nodes[count] = p_image_node;
 
         // Populate mExtendedMeshNodeIndexMap
@@ -1258,13 +1464,10 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
         }
 
         // Create a copy of the node corresponding to this cell, suitable translated, and store it
-	 //        Node<3>* p_image_node = new Node<3>(num_cells+count, image_node_location);
         Node<3>* p_image_node = new Node<3>(count, image_node_location);
-	 //        extended_nodes[num_cells+count] = p_image_node;
         extended_nodes[count] = p_image_node;
 
         // Populate mExtendedMeshNodeIndexMap
-	 //        mExtendedMeshNodeIndexMap[num_cells+count] = real_node_index;
         mExtendedMeshNodeIndexMap[count] = real_node_index;
 
         count++;
@@ -1309,13 +1512,9 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
         }
 
         // Create a copy of the node corresponding to this cell, suitable translated, and store it
-	 //        Node<3>* p_image_node = new Node<3>(num_cells+count, image_node_location);
         Node<3>* p_image_node = new Node<3>(count, image_node_location);
-	 //        extended_nodes[num_cells+count] = p_image_node;
         extended_nodes[count] = p_image_node;
 
-        // Populate mExtendedMeshNodeIndexMap
-	 //        mExtendedMeshNodeIndexMap[num_cells+count] = real_node_index;
         mExtendedMeshNodeIndexMap[count] = real_node_index;
 
         count++;
@@ -1336,26 +1535,21 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
     
 	///\todo We may need to modify rCellPopulation to ensure thatmMarkedSprings is correct at this point
 
-	// Dom - dont need it
-	//// Identify epithelial-stromal cell pairs
-	//std::vector<c_vector<unsigned, 2> > node_pairs = GetEpithelialTissuePairs(rCellPopulation);
-	//std::cout<<"\n";
-	//PRINT_VARIABLE("Start");
-
 	std::vector<c_vector<unsigned, 3> > epithelial_triangulation = GetEpithelialMesh(rCellPopulation);
 
 	std::vector<c_vector<unsigned, 10> > epithelial_neighbours = GetEpithelialNeighbours(epithelial_triangulation, num_cells);
-	//	int second_order_neighs[100];
-	//std::cout << "num_cells = " << num_cells << "\n";
 
 
-	double basement_membrane_parameter = GetBasementMembraneParameter();
+	double get_basement_membrane_parameter = GetBasementMembraneParameter();
 
 	// c_vector<unsigned, 2> CryptMaxMin = GetMaxMinEpithelialCells(rCellPopulation);
 
 	////
 	double max_height = -10.0;
 	double min_height = 10.0;
+
+	double tissue_max_height = -10.0;
+	double tissue_min_height = 10.0;
 
 	for (AbstractCellPopulation<3>::Iterator cell_iter = rCellPopulation.Begin();
          cell_iter != rCellPopulation.End();
@@ -1385,15 +1579,16 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 	}
 	
 	double CryptHeight = max_height - min_height;
-
 	double heightparameter_ratio = GetHeightDependantCurvatureParameter();
-	double max_height_for_curvature = min_height + heightparameter_ratio*CryptHeight;
-	// PRINT_3_VARIABLES(max_height,min_height,max_height_for_curvature);
-
+	double max_height_for_curvature = min_height + heightparameter_ratio*CryptHeight + 10.0;
+	// std::cout<<"_____________________________________________________________\n\n";
 	for (AbstractCellPopulation<3>::Iterator cell_iter = rCellPopulation.Begin();
          cell_iter != rCellPopulation.End();
          ++cell_iter)
     {
+		
+
+
         // First, create and store a copy of this real node and cell
         unsigned real_node_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
         c_vector<double, 3> real_node_location = rCellPopulation.GetLocationOfCellCentre(*cell_iter);
@@ -1407,7 +1602,7 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
     	bool cell_is_dead = p_cell_i_ext->IsDead();
 		bool is_ghost = p_tissue->IsGhostNode(cell_i_ext);
 		
-		
+				
         if(p_cell_i_ext->GetMutationState()->IsType<WildTypeCellMutationState>() == true && cell_is_dead == false && is_ghost == false)
 		{
 
@@ -1417,13 +1612,13 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 			
 			for(unsigned j=0; j<10; j++)
 			{
-				first_order_neighs[j] = epithelial_neighbours[real_node_index][j];
-				
+				unsigned extended_node_index = mCellPopulationNodeIndexMap[real_node_index];
+				first_order_neighs[j] = epithelial_neighbours[extended_node_index][j];
 						
 				for(unsigned k=0; k<10; k++)
 				{
-
-					second_order_neighs.push_back(epithelial_neighbours[first_order_neighs[j]][k]);
+					unsigned extended_node_index_j = first_order_neighs[j];
+					second_order_neighs.push_back(epithelial_neighbours[extended_node_index_j][k]);
 
 				}
 				
@@ -1441,7 +1636,6 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 			//std::cout<< second_order_neighs.size() << " ";
 
 			c_vector<double, 3> epithelial_location = real_node_location;
-			// PRINT_VECTOR(epithelial_location);
 			
 			std::vector<c_vector<double, 3> > image_location_per_second_order_neighbours;
 
@@ -1452,17 +1646,18 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 			bool epithelial_cell_in_height_target_curvature_region = (epithelial_location[2] < max_height_for_curvature);
 
 			// here we will find
+			double basement_membrane_parameter = 0.0;
 			if(epithelial_cell_in_height_target_curvature_region == true && epithelial_cell_in_disk_target_curvature_region == true)
 			{
 				image_location_per_second_order_neighbours = FitPlaneAndFindImage(rCellPopulation, second_order_neighs, cell_i_ext);
 				
-				basement_membrane_parameter = mBasementMembraneParameter;
+				basement_membrane_parameter = 1.0*get_basement_membrane_parameter;
 
 			}
-			else if((epithelial_cell_in_height_target_curvature_region == false) || (epithelial_cell_in_disk_target_curvature_region == false))
+			else 
 			{
 				// TRACE("no bending cell");
-				basement_membrane_parameter = +1.0*mBasementMembraneParameter;
+				basement_membrane_parameter = +1.0*get_basement_membrane_parameter;
 
 				for (unsigned j=0; j<second_order_neighs.size(); j++)
 				{
@@ -1474,15 +1669,16 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 			std::vector<unsigned> first_order_neighs_vect;
 			for(unsigned j=0; j<10; j++)
 			{
-				first_order_neighs_vect.push_back(epithelial_neighbours[cell_i_ext][j]);
+				first_order_neighs_vect.push_back(epithelial_neighbours[mCellPopulationNodeIndexMap[cell_i_ext]][j]);
+				// first_order_neighs_vect.push_back(epithelial_neighbours[cell_i_ext][j]);
 			}
-			first_order_neighs_vect.push_back(cell_i_ext);
+			first_order_neighs_vect.push_back(mCellPopulationNodeIndexMap[cell_i_ext]);
 			// order and remove doubles
 			std::sort(first_order_neighs_vect.begin(), first_order_neighs_vect.end());
 			first_order_neighs_vect.erase(std::unique(first_order_neighs_vect.begin(), first_order_neighs_vect.end()), first_order_neighs_vect.end());
 			// Remove zero from vector
 			first_order_neighs_vect.erase(std::remove(first_order_neighs_vect.begin(), first_order_neighs_vect.end(), 0), first_order_neighs_vect.end());
-
+			// PRINT_VECTOR(first_order_neighs_vect);
 			/* 
 			* Need:
 			* First order neighbours  ->  first_order_neighs_vect
@@ -1493,14 +1689,20 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 			*/
 
 
-			c_vector<double, 3> force_due_to_curvature;
+			c_vector<double, 3> force_due_to_curvature = zero_vector<double>(3);;
 
 			if(first_order_neighs_vect.size() >= 3)
 			{
 				force_due_to_curvature = GetForceDueToDiscreteCurvature(rCellPopulation, epithelial_triangulation, first_order_neighs_vect, second_order_neighs, image_location_per_second_order_neighbours, cell_i_ext, num_cells);
+
 			}
 			else if(first_order_neighs_vect.size() < 3)
 			{
+				// if(cell_i_ext > 199)
+				// {
+				// 	PRINT_VARIABLE(cell_i_ext);
+					TRACE("Has no neighbours")
+				// }
 				force_due_to_curvature[0] = 0.0;
 				force_due_to_curvature[1] = 0.0;
 				force_due_to_curvature[2] = 0.0;
@@ -1513,11 +1715,15 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 				force_due_to_curvature[1] = 0.0;
 				force_due_to_curvature[2] = 0.0;
 			}
-			
 
-			
 			rCellPopulation.GetNode(cell_i_ext)->AddAppliedForceContribution(basement_membrane_parameter*force_due_to_curvature);
-		}
+			int sim_time = (SimulationTime::Instance()->GetTime())/(SimulationTime::Instance()->GetTimeStep());
+			// if(cell_i_ext == 154 && (sim_time%10 == 0) )
+			// {
+			// 	PRINT_VARIABLE(SimulationTime::Instance()->GetTime());
+			// 	PRINT_VECTOR(force_due_to_curvature);
+			// }
+		}		
 		
 	}
 	
@@ -1547,13 +1753,6 @@ void PeriodicBendingForce3dHeightWithGhostNodes::SetPeriodicDomainDepth(double p
 
 void PeriodicBendingForce3dHeightWithGhostNodes::OutputForceParameters(out_stream& rParamsFile)
 {
-//	*rParamsFile <<  "\t\t\t<UsePositionDependentMembraneForce>"<<  mUsePositionDependentMembraneForce << "</UsePositionDependentMembraneForce> \n" ;
-//	*rParamsFile <<  "\t\t\t<MembraneForceMultiplier>"<<  mMembraneForceMultiplier << "</MembraneForceMultiplier> \n" ;
-//	*rParamsFile <<  "\t\t\t<UseOneWaySprings>"<<  mUseOneWaySprings << "</mUseOneWaySprings> \n" ;
-//	*rParamsFile <<  "\t\t\t<CryptBaseCurvature>"<<  mCryptBaseCurvature << "</CryptBaseCurvature> \n" ;
-//	*rParamsFile <<  "\t\t\t<CryptBaseLevel>"<<  mCryptBaseLevel << "</CryptBaseLevel> \n" ;
-//	*rParamsFile <<  "\t\t\t<LeftBoundary>"<<  mLeftBoundary << "</LeftBoundary> \n" ;
-//	*rParamsFile <<  "\t\t\t<RightBoundary>"<<  mRightBoundary << "</RightBoundary> \n" ;
 	*rParamsFile <<  "\t\t\t<BasementMembraneParameter>"<<  mBasementMembraneParameter << "</BasementMembraneParameter> \n" ;
 	*rParamsFile <<  "\t\t\t<ExponentParameter>"<<  mExponentParameter << "</ExponentParameter> \n" ;
 	*rParamsFile <<  "\t\t\t<HeightDependantCurvatureParameter>"<<  mHeightDependantCurvatureParameter << "</HeightDependantCurvatureParameter> \n" ;

@@ -43,7 +43,8 @@ void PeriodicBoxBoundaryCondition3d::ImposeBoundaryCondition(const std::map<Node
 			// Return node to old location
 			p_node->rGetModifiableLocation()[0] = old_node_location[0];
 			p_node->rGetModifiableLocation()[1] = old_node_location[1];
-			p_node->rGetModifiableLocation()[2] = 0.0;
+			// p_node->rGetModifiableLocation()[2] = 0.0;
+			p_node->rGetModifiableLocation()[2] = mMaxHeightForPinnedCells;
 		}
 
 		// Want to enforce a periodic boundary box, such that cells which move outside the boundaries of the box get
@@ -89,9 +90,12 @@ bool PeriodicBoxBoundaryCondition3d::VerifyBoundaryCondition()
         // Get pointer to this node
         Node<3>* p_node = this->mpCellPopulation->GetNode(node_index);
 
+        // If this node lies below the z=0 boundary (NO! - Dom), or outside of the periodic boundaries, break and return false
         // If this node lies below the z=0 boundary, or outside of the periodic boundaries, break and return false
-        if ( (p_node->rGetLocation()[2] < 0.0) || (p_node->rGetLocation()[0] < 0.0) || (p_node->rGetLocation()[0] > mCellPopulationWidth)
-        		|| (p_node->rGetLocation()[1] < 0.0) || (p_node->rGetLocation()[1] > mCellPopulationDepth) )
+        // if ( (p_node->rGetLocation()[2] < 0.0) || (p_node->rGetLocation()[0] < 0.0) || (p_node->rGetLocation()[0] > mCellPopulationWidth)
+        // 		|| (p_node->rGetLocation()[1] < 0.0) || (p_node->rGetLocation()[1] > mCellPopulationDepth) )
+        if ( (p_node->rGetLocation()[0] < 0.0) || (p_node->rGetLocation()[0] > mCellPopulationWidth)
+          || (p_node->rGetLocation()[1] < 0.0) || (p_node->rGetLocation()[1] > mCellPopulationDepth) )
         {
         	PRINT_2_VARIABLES(node_index, SimulationTime::Instance()->GetTime());
         	PRINT_VECTOR(p_node->rGetLocation());

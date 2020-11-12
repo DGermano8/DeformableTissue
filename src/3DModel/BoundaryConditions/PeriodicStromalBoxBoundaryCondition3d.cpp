@@ -41,7 +41,8 @@ void PeriodicStromalBoxBoundaryCondition3d::ImposeBoundaryCondition(const std::m
 				// Return node to old location
 				p_node->rGetModifiableLocation()[0] = old_node_location[0];
 				p_node->rGetModifiableLocation()[1] = old_node_location[1];
-				p_node->rGetModifiableLocation()[2] = 0.0;
+				// p_node->rGetModifiableLocation()[2] = 0.0;
+				p_node->rGetModifiableLocation()[2] = mMaxHeightForPinnedCells;
 			}
 	
 			// Want to enforce a periodic boundary box on only the stromal cells, such that cells which move outside the 
@@ -88,9 +89,14 @@ bool PeriodicStromalBoxBoundaryCondition3d::VerifyBoundaryCondition()
         // Get pointer to this node
         Node<3>* p_node = this->mpCellPopulation->GetNode(node_index);
 
-        // If this node lies below the z=0 boundary, or outside of the periodic boundaries, break and return false
+        // If this node lies below the z=0 boundary(NO! - Dom), or outside of the periodic boundaries, break and return false
+		// if ( (cell_iter->GetMutationState()->IsType<StromalCellMutationState>()) && 
+        // 		((p_node->rGetLocation()[2] < 0.0) || (p_node->rGetLocation()[0] < 0.0) || (p_node->rGetLocation()[0] > mCellPopulationWidth)
+        // 		|| (p_node->rGetLocation()[1] < 0.0) || (p_node->rGetLocation()[1] > mCellPopulationDepth)) )
+
+        // If this node is outside of the periodic boundaries, break and return false
         if ( (cell_iter->GetMutationState()->IsType<StromalCellMutationState>()) && 
-        		((p_node->rGetLocation()[2] < 0.0) || (p_node->rGetLocation()[0] < 0.0) || (p_node->rGetLocation()[0] > mCellPopulationWidth)
+        		  ((p_node->rGetLocation()[0] < 0.0) || (p_node->rGetLocation()[0] > mCellPopulationWidth)
         		|| (p_node->rGetLocation()[1] < 0.0) || (p_node->rGetLocation()[1] > mCellPopulationDepth)) )
         {
         	boundary_condition_satisfied = false;

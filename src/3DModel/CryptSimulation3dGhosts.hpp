@@ -8,7 +8,7 @@
 
 #include "AbstractMesh.hpp"
 #include "OffLatticeSimulation.hpp"
-#include "MeshBasedCellPopulationWithGhostNodes.hpp"
+#include "DomMeshBasedCellPopulationWithGhostNodes.hpp"
 #include "AbstractVanLeeuwen2009WntSwatCellCycleModel.hpp"
 #include "WildTypeCellMutationState.hpp"
 #include "StromalCellMutationState.hpp"
@@ -46,7 +46,7 @@ protected:
     out_stream mNumCellsResultsFile;
 
     // Helper member that is a static cast of the tissue
-    MeshBasedCellPopulationWithGhostNodes<3>* mpStaticCastCellPopulation;
+    DomMeshBasedCellPopulationWithGhostNodes<3>* mpStaticCastCellPopulation;
 
     // The output file directory for the simulation data - number of popped up cells,
     // average distance between cells etc.

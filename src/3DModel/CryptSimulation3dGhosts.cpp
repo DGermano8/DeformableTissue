@@ -8,7 +8,7 @@ CryptSimulation3dGhosts::CryptSimulation3dGhosts(AbstractCellPopulation<3>& rCel
                           deleteCellPopulationAndForceCollection,
                           initialiseCells)
 {
-    mpStaticCastCellPopulation = static_cast<MeshBasedCellPopulationWithGhostNodes<3>*>(&mrCellPopulation);
+    mpStaticCastCellPopulation = static_cast<DomMeshBasedCellPopulationWithGhostNodes<3>*>(&mrCellPopulation);
     mFoundNonExistentNode = false;
 }
 
@@ -78,18 +78,21 @@ c_vector<double,3> CryptSimulation3dGhosts::CalculateCellDivisionVector(CellPtr 
     	// This is the point at which you generate the error that index > num_nodes
     	if (!mpStaticCastCellPopulation->rGetMesh().GetNode(*neighbour_iter)->IsDeleted())
     	{
-	    	CellPtr p_neighbour_cell = mpStaticCastCellPopulation->GetCellUsingLocationIndex(*neighbour_iter);
+			if(!(mpStaticCastCellPopulation->IsGhostNode(*neighbour_iter)))
+			{	
+				CellPtr p_neighbour_cell = mpStaticCastCellPopulation->GetCellUsingLocationIndex(*neighbour_iter);
 
-	    	// Only want neighbouring epithelial nodes that are not associated to dead cells
-	    	if( (p_neighbour_cell->GetMutationState()->IsType<StromalCellMutationState>()== false)
-	    			&& (!(*p_neighbour_cell).IsDead()) )
-	    	{
-		   		node_index = mpStaticCastCellPopulation->rGetMesh().GetNode(*neighbour_iter)->GetIndex();
-		   		epithelial_neighbour_indices.insert(node_index);
-		   		sum_of_locations[0] += mpStaticCastCellPopulation->rGetMesh().GetNode(*neighbour_iter)->rGetLocation()[0];
-		   		sum_of_locations[1] += mpStaticCastCellPopulation->rGetMesh().GetNode(*neighbour_iter)->rGetLocation()[1];
-		   		sum_of_locations[2] += mpStaticCastCellPopulation->rGetMesh().GetNode(*neighbour_iter)->rGetLocation()[2];
-	    	}
+				// Only want neighbouring epithelial nodes that are not associated to dead cells
+				if( (p_neighbour_cell->GetMutationState()->IsType<StromalCellMutationState>()== false)
+						&& (!(*p_neighbour_cell).IsDead()) )
+				{
+					node_index = mpStaticCastCellPopulation->rGetMesh().GetNode(*neighbour_iter)->GetIndex();
+					epithelial_neighbour_indices.insert(node_index);
+					sum_of_locations[0] += mpStaticCastCellPopulation->rGetMesh().GetNode(*neighbour_iter)->rGetLocation()[0];
+					sum_of_locations[1] += mpStaticCastCellPopulation->rGetMesh().GetNode(*neighbour_iter)->rGetLocation()[1];
+					sum_of_locations[2] += mpStaticCastCellPopulation->rGetMesh().GetNode(*neighbour_iter)->rGetLocation()[2];
+				}
+			}
     	}
     }
     
@@ -153,6 +156,7 @@ c_vector<double,3> CryptSimulation3dGhosts::CalculateCellDivisionVector(CellPtr 
 
 		parent_coords = parent_coords - vector_to_average_epithelial_node;
 		daughter_coords = parent_coords + vector_to_average_epithelial_node;
+		
 
 		// Set the parent to use this location
 		ChastePoint<3> parent_coords_point(parent_coords);
@@ -308,6 +312,8 @@ c_vector<double,3> CryptSimulation3dGhosts::CalculateCellDivisionVector(CellPtr 
 //    unsigned node_index = mrCellPopulation.GetLocationIndexUsingCell(pParentCell);
 //    mrCellPopulation.SetNode(node_index, parent_coords_point);
 //
+	PRINT_VECTOR(daughter_coords);
+	
     return daughter_coords;
 }
  
@@ -388,7 +394,7 @@ bool CryptSimulation3dGhosts::GetInstanceOfNonExistentNode()
 
 std::vector<c_vector<unsigned, 2> > CryptSimulation3dGhosts::GetNeighbouringEpithelialPairs(AbstractCellPopulation<3>& rCellPopulation)
 {
-    MeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<MeshBasedCellPopulationWithGhostNodes<3>*>(&rCellPopulation);
+    DomMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<3>*>(&rCellPopulation);
 
     // Create a vector to record the pairs of nodes corresponding to *joined* epithelial nodes
     std::vector<c_vector<unsigned, 2> > node_pairs;
@@ -423,17 +429,20 @@ std::vector<c_vector<unsigned, 2> > CryptSimulation3dGhosts::GetNeighbouringEpit
                 {
                     unsigned nodeBGlobalIndex = p_element->GetNodeGlobalIndex(local_index);
 
-                    CellPtr p_cell = rCellPopulation.GetCellUsingLocationIndex(nodeBGlobalIndex);
+					if(!(p_tissue->IsGhostNode(nodeBGlobalIndex)))
+					{
+						CellPtr p_cell = rCellPopulation.GetCellUsingLocationIndex(nodeBGlobalIndex);
 
-                    if (p_cell->GetMutationState()->IsType<StromalCellMutationState>()==false)
-                    {
-						// Store the index of each tissue node that is attached to the epithelial
-						// node. There will be repetitions due to iterating over neighbouring elements
-						if (nodeBGlobalIndex != node_index)
+						if (p_cell->GetMutationState()->IsType<StromalCellMutationState>()==false)
 						{
-							neighbouring_epithelial_nodes.push_back(nodeBGlobalIndex);
+							// Store the index of each tissue node that is attached to the epithelial
+							// node. There will be repetitions due to iterating over neighbouring elements
+							if (nodeBGlobalIndex != node_index)
+							{
+								neighbouring_epithelial_nodes.push_back(nodeBGlobalIndex);
+							}
 						}
-                    }
+					}
                 }
 			}
 
@@ -468,7 +477,7 @@ void CryptSimulation3dGhosts::SetupWriteEpithelialCoordinateData()
 /* Outputs: time - average_z_difference - x - y - z - x - y - z - .... */
 void CryptSimulation3dGhosts::WriteEpithelialCoordinateData(double time)
 {
-    MeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<MeshBasedCellPopulationWithGhostNodes<3>*>(&mrCellPopulation);
+    DomMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<3>*>(&mrCellPopulation);
 	
 	// Going to hijack this to output some data I want
 //	

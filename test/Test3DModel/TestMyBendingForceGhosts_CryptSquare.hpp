@@ -41,6 +41,8 @@
 #include "CellAncestorWriter.hpp"
 #include "NodeVelocityWriter.hpp"
 #include "VoronoiDataWriter.hpp"
+#include "MeshModifier.hpp"
+
 
 #include "PetscSetupAndFinalize.hpp"
 
@@ -107,7 +109,7 @@ public:
         unsigned height = 10;      // y
         unsigned ghosts_bottom = 0;       // ghosts > depth
         unsigned ghosts_top = 2;       // ghosts > depth
-        unsigned num_tissue_depth = 6;
+        unsigned num_tissue_depth = 5;
         unsigned num_tissue_beneith_crypt = 2; // If num_tissue_depth < 4 , use 0
 
         unsigned depth = ghosts_bottom + num_tissue_depth + 1.0 + ghosts_top ;        // +1 for epithelial cells -> which we always only have a monolayer
@@ -133,7 +135,7 @@ public:
         // double radius =  2.0;//periodic_width+1.0;
         double radius =  0;//periodic_width+1.0;
         double target_curvature = 0.15; //maximum curvature is 0.2066 -> higher curvature means smaller sphere
-        double beta_parameter = 1.0;
+        double beta_parameter = 0.1;
         double alpha_parameter = 2.0;
 
         double epithelial_height = depth_space*num_tissue_depth + off_set;
@@ -184,10 +186,13 @@ public:
                             is_epithelial_cell[1] = 0;
                         }
                         // The base of the crypt
+                        // else if ( (k == (ghosts_bottom + num_tissue_beneith_crypt + 1.0)  ) && 
+                        //         ( x_coordinate >= centre_x-ghost_radius &&  x_coordinate <= centre_x+ghost_radius ) &&
+                        //         ( y_coordinate >= centre_y-ghost_radius &&  y_coordinate <= centre_y+ghost_radius ) )
                         else if ( (k == (ghosts_bottom + num_tissue_beneith_crypt + 1.0)  ) && 
-                                ( x_coordinate >= centre_x-ghost_radius &&  x_coordinate <= centre_x+ghost_radius ) &&
-                                ( y_coordinate >= centre_y-ghost_radius &&  y_coordinate <= centre_y+ghost_radius ) )
-                        {
+                                ( x_coordinate >= centre_x-epithelial_radius &&  x_coordinate <= centre_x+epithelial_radius ) &&
+                                ( y_coordinate >= centre_y-epithelial_radius &&  y_coordinate <= centre_y+epithelial_radius ) )
+                                {
                             is_epithelial_cell[1] = 1;
                             is_epithelial_cell[2] = 1;
                         }
@@ -401,7 +406,7 @@ public:
         MAKE_PTR_ARGS(PeriodicStromalBoxBoundaryCondition3d, stromal_boundary_condition, (&cell_population));
         stromal_boundary_condition->SetCellPopulationWidth(periodic_width);
         stromal_boundary_condition->SetCellPopulationDepth(periodic_height);
-        stromal_boundary_condition->SetMaxHeightForPinnedCells(-5.0);
+        stromal_boundary_condition->SetMaxHeightForPinnedCells(0.0);
         stromal_boundary_condition->ImposeBoundaryCondition(node_locations_before);
         simulator.AddCellPopulationBoundaryCondition(stromal_boundary_condition);
 
@@ -445,6 +450,11 @@ public:
         MAKE_PTR_ARGS(AnoikisCellKiller3DWithGhostNodes, anoikis, (&cell_population, cut_off, periodic_width, periodic_height));
         simulator.AddCellKiller(anoikis);
 
+
+        MAKE_PTR(MeshModifier<3>, p_modifier);
+        p_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
+        simulator.AddSimulationModifier(p_modifier);
+
         //Test Forces
         
         // for (unsigned i=0; i<cell_population.GetNumNodes(); i++)
@@ -470,7 +480,7 @@ public:
         
         
         // Run for a short time to allow it to deform		        
-    	simulator.SetSamplingTimestepMultiple(10);			// Every hour
+    	simulator.SetSamplingTimestepMultiple(1);			// Every hour
 		simulator.SetEndTime(1);
         simulator.SetDt(0.001);
 

@@ -78,6 +78,9 @@ protected :
     /** A map from node indices in mpExtendedMesh to node indices in the cell population. */
     std::map<unsigned, unsigned> mExtendedMeshNodeIndexMap;
 
+    /** A map from node indices in cell population to node indices in the mpExtendedMesh . */
+    std::map<unsigned, unsigned> mCellPopulationNodeIndexMap;
+
     /** Whether or not you will prescribe a non-zero target curvature region */
     bool mSetNonZeroTargetCurvatureRegion;
 
@@ -122,6 +125,10 @@ public :
     void SetHeightDependantCurvatureParameter(double heightparameter);
 
     double GetHeightDependantCurvatureParameter();
+
+    void SetTissueBase(double tissue_base);
+
+    double GetTissueBase();
 
     /* Setting the boundaries for the non-zero target curvature region
      *

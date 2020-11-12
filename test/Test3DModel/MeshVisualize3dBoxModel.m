@@ -17,16 +17,16 @@ filename = 'results';
 %
 % This requires LoadNonConstantLengthData('filename'), which is in the Chaste anim/matlab folder
 
-addpath /Users/domenicgermano/workspace/Chaste/anim/matlab
-addpath /Users/domenicgermano/workspace/Chaste/projects/DeformableTissue/results/results_from_time_0
+addpath /Users/germanod/workspace/Chaste/anim/matlab
+addpath /Users/germanod/workspace/Chaste/projects/DeformableTissue/results/results_from_time_1
 
 % Visualiser options
 RandomColour = false;		% For cells
-PlotSprings = false;
+PlotSprings = true;
 PlotTissueCells = true;
 PlotCells = false;			% Chinese-lantern type cells
 PlotCellCenters = true;
-PlotGhosts = false;
+PlotGhosts = true;
 NumPtsInCircles = 10;
 Defaultcolor = [0.0,0.0,0.7];
 
@@ -61,7 +61,7 @@ fig=figure;
 pause(0.1)
 %%
 
-for i = numtimes;        % Timestep is 30 seconds
+for i = 1;numtimes;        % Timestep is 30 seconds
     clf 
 
     time = nodedata{i}(1)     % Gives first element of ith row
@@ -73,6 +73,7 @@ for i = numtimes;        % Timestep is 30 seconds
     NumCells = length(xvals);
     NumNodes = length(types);
     
+    %Ele = reshape(elementsdata{i}(2:end)+1,4,length(elementsdata{i}(2:end))/4)';
     Ele = reshape(elementsdata{i}(2:end)+1,4,length(elementsdata{i}(2:end))/4)';
     NumEle = length(Ele(:,1));
 

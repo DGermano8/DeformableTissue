@@ -402,6 +402,7 @@ template<unsigned DIM>
 //                                                                   AbstractCellPopulation<DIM>& rCellPopulation)
 void PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::AddForceContribution(AbstractCellPopulation<DIM>& rCellPopulation)
 {
+    // PRINT_2_VARIABLES("Spring",SimulationTime::Instance()->GetTime());
     // If the width of the periodic domain has not been specified, use the initial width of the cell population
     if (mPeriodicDomainWidth == DOUBLE_UNSET)
     {
@@ -650,77 +651,6 @@ void PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::AddForceContribution
                 count++;
             }
 
-
-            // First, extend the mesh in the x-direction
-
-            // for (typename AbstractCellPopulation<DIM>::Iterator cell_iter = rCellPopulation.Begin();
-            //      cell_iter != rCellPopulation.End();
-            //      ++cell_iter)
-            // {
-            //     //p_tissue->IsGhostNode(p_element->GetNodeGlobalIndex(local_index))
-            //     // First, create and store a copy of this real node and cell
-            //     unsigned real_node_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
-            //     c_vector<double, DIM> real_node_location = rCellPopulation.GetLocationOfCellCentre(*cell_iter);
-
-            //     // Create a copy of the node corresponding to this cell and store it
-            //     Node<DIM>* p_real_node = new Node<DIM>(real_node_index, real_node_location);
-            //     extended_nodes[count] = p_real_node;
-
-            //     // Compute the location of the image node corresponding to this node
-            //     c_vector<double,DIM> image_node_location = real_node_location;
-            //     if (real_node_location[0] >= mPeriodicDomainWidth*0.5)
-            //     {
-            //         image_node_location[0] -= mPeriodicDomainWidth;
-            //     }
-            //     else if (real_node_location[0] <  mPeriodicDomainWidth*0.5)
-            //     {
-            //         image_node_location[0] += mPeriodicDomainWidth;
-            //     }
-
-            //     // Create a copy of the node corresponding to this cell, suitable translated, and store it
-            //     Node<DIM>* p_image_node = new Node<DIM>(num_cells+count, image_node_location);
-            //     extended_nodes[num_cells+count] = p_image_node;
-
-            //     // Populate mExtendedMeshNodeIndexMap
-            //     mExtendedMeshNodeIndexMap[count] = real_node_index;
-            //     mExtendedMeshNodeIndexMap[num_cells+count] = real_node_index;
-
-            //     count++;
-            // }
-
-            // // Second, extend this extended mesh in the y-direction, so that we cover the corners too
-            // // (We don't need to store the real nodes anymore
-
-            // for (typename AbstractCellPopulation<DIM>::Iterator cell_iter = rCellPopulation.Begin();
-            //      cell_iter != rCellPopulation.End();
-            //      ++cell_iter)
-            // {
-            //     // First, create and store a copy of this real node and cell
-            //     unsigned real_node_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
-            //     c_vector<double, DIM> real_node_location = rCellPopulation.GetLocationOfCellCentre(*cell_iter);
-
-            //     // Compute the location of the image node corresponding to this node
-            //     c_vector<double,DIM> image_node_location = real_node_location;
-
-            //     if (real_node_location[1] >= mPeriodicDomainDepth*0.5)
-            //     {
-            //         image_node_location[1] -= mPeriodicDomainDepth;
-            //     }
-            //     else if (real_node_location[1] <  mPeriodicDomainDepth*0.5)
-            //     {
-            //         image_node_location[1] += mPeriodicDomainDepth;
-            //     }
-
-            //     // Create a copy of the node corresponding to this cell, suitable translated, and store it
-            //     Node<DIM>* p_image_node = new Node<DIM>(num_cells+count, image_node_location);
-            //     extended_nodes[num_cells+count] = p_image_node;
-
-            //     // Populate mExtendedMeshNodeIndexMap
-            //     mExtendedMeshNodeIndexMap[num_cells+count] = real_node_index;
-
-            //     count++;
-            // }
-
             // We now construct mpExtendedMesh using extended_nodes
             if (mpExtendedMesh != NULL)
             {
@@ -737,41 +667,73 @@ void PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::AddForceContribution
                 unsigned nodeA_global_index = edge_iterator.GetNodeA()->GetIndex();
                 unsigned nodeB_global_index = edge_iterator.GetNodeB()->GetIndex();
 
+
                 c_vector<double, DIM> force = CalculateForceBetweenNodes(nodeA_global_index, nodeB_global_index, rCellPopulation);
-                // c_vector<double, DIM> neg_force = -1.0*force;
 
-                // Apply this force to any real nodes (i.e. nodes whose indices are less than num_real_nodes)
-                if (nodeA_global_index < num_cells)
+                // Dom - Hijacked "mUseOneWaySprings" to implement stromal cells as ghosts...
+                if(mUseOneWaySprings)
                 {
-                    // easy check to print neighbours
-                    /*
-                    if (nodeA_global_index==19)
+                    if (nodeA_global_index < num_cells)
                     {
-                        std::cout<< nodeB_global_index << " \n ";
-                        PRINT_VECTOR(force);
-                    }
-                    */
+                        unsigned real_A_node_index = mExtendedMeshNodeIndexMap[nodeA_global_index];
+                        unsigned real_B_node_index = mExtendedMeshNodeIndexMap[nodeB_global_index];
 
-                    unsigned real_node_index_A = mExtendedMeshNodeIndexMap[nodeA_global_index];
-                    //rForces[real_node_index_A] += force;
-                   // rCellPopulation.GetNode(real_node_index_A)->AddAppliedForceContribution(force);
-                    rCellPopulation.GetNode(real_node_index_A)->AddAppliedForceContribution(force);
+                        CellPtr p_cell_A = rCellPopulation.GetCellUsingLocationIndex(real_A_node_index);
+                        CellPtr p_cell_B = rCellPopulation.GetCellUsingLocationIndex(real_B_node_index);
+
+
+                        if ( (p_cell_A->GetMutationState()->IsType<WildTypeCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<StromalCellMutationState>() == true) )
+                        {
+                            rCellPopulation.GetNode(real_A_node_index)->AddAppliedForceContribution(zero_vector<double>(DIM));
+                        }
+                        else if( ( (p_cell_A->GetMutationState()->IsType<StromalCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<StromalCellMutationState>() == true) ) 
+                        || ( (p_cell_A->GetMutationState()->IsType<WildTypeCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<WildTypeCellMutationState>() == true) ) 
+                        || ( (p_cell_A->GetMutationState()->IsType<StromalCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<WildTypeCellMutationState>() == true) ) )
+                        {
+                            rCellPopulation.GetNode(real_A_node_index)->AddAppliedForceContribution(force);
+                        }
+
+                    }
+
+                    if (nodeB_global_index < num_cells)
+                    {
+                        unsigned real_A_node_index = mExtendedMeshNodeIndexMap[nodeA_global_index];
+                        unsigned real_B_node_index = mExtendedMeshNodeIndexMap[nodeB_global_index];
+
+                        CellPtr p_cell_A = rCellPopulation.GetCellUsingLocationIndex(real_A_node_index);
+                        CellPtr p_cell_B = rCellPopulation.GetCellUsingLocationIndex(real_B_node_index);
+
+
+                        if ( (p_cell_A->GetMutationState()->IsType<StromalCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<WildTypeCellMutationState>() == true) )
+                        {
+                            rCellPopulation.GetNode(real_B_node_index)->AddAppliedForceContribution(zero_vector<double>(DIM));
+                        }
+                        else if( ( (p_cell_A->GetMutationState()->IsType<StromalCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<StromalCellMutationState>() == true) ) 
+                        || ( (p_cell_A->GetMutationState()->IsType<WildTypeCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<WildTypeCellMutationState>() == true) ) 
+                        || ( (p_cell_A->GetMutationState()->IsType<WildTypeCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<StromalCellMutationState>() == true) ) )
+                        {
+                            rCellPopulation.GetNode(real_B_node_index)->AddAppliedForceContribution(-force);
+                        }
+                        
+                    }
                 }
-                if (nodeB_global_index < num_cells)
+
+                else
                 {
-                    // easy check to print neighbours
-                    /*
-                    if (nodeB_global_index==19)
+                    // Apply this force to any real nodes (i.e. nodes whose indices are less than num_real_nodes)
+                    if (nodeA_global_index < num_cells)
                     {
-                        std::cout<< nodeA_global_index << " \n ";
-                        PRINT_VECTOR(neg_force);
+                        unsigned real_node_index_A = mExtendedMeshNodeIndexMap[nodeA_global_index];
+                        rCellPopulation.GetNode(real_node_index_A)->AddAppliedForceContribution(force);
+                                            
                     }
-                    */
-                    unsigned real_node_index_B = mExtendedMeshNodeIndexMap[nodeB_global_index];
-                    //rForces[real_node_index_B] -= force;
-                   // rCellPopulation.GetNode(real_node_index_B)->AddAppliedForceContribution(neg_force);
-                    rCellPopulation.GetNode(real_node_index_B)->AddAppliedForceContribution(-force);
-                    
+                    if (nodeB_global_index < num_cells)
+                    {
+
+                        unsigned real_node_index_B = mExtendedMeshNodeIndexMap[nodeB_global_index];
+                        rCellPopulation.GetNode(real_node_index_B)->AddAppliedForceContribution(-force);
+                        
+                    }
                 }
             }
            
@@ -793,6 +755,7 @@ c_vector<double, DIM> PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::Cal
                                                                                          AbstractCellPopulation<DIM>& rCellPopulation)
 {
     assert(dynamic_cast<DomMeshBasedCellPopulationWithGhostNodes<DIM>*>(&rCellPopulation) != nullptr);
+    DomMeshBasedCellPopulationWithGhostNodes<DIM>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<DIM>*>(&rCellPopulation);
  //   assert(rCellPopulation.IsMeshBasedCellPopulation());
  //   assert(bool(dynamic_cast<MeshBasedCellPopulation<DIM>*>(&rCellPopulation)))
 
@@ -846,137 +809,85 @@ c_vector<double, DIM> PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::Cal
     // Get the corresponding cells
     CellPtr p_cell_A = rCellPopulation.GetCellUsingLocationIndex(real_A_node_index);
     CellPtr p_cell_B = rCellPopulation.GetCellUsingLocationIndex(real_B_node_index);
-//
-//    double ageA = p_cell_A->GetAge();
-//    double ageB = p_cell_B->GetAge();
-//
-//    assert(!std::isnan(ageA));
-//    assert(!std::isnan(ageB));
-//
-//    /*
-//     * If the cells are both newly divided, then the rest length of the spring
-//     * connecting them grows linearly with time, until 1 hour after division.
-//     */
-//    if (ageA < this->mMeinekeSpringGrowthDuration && ageB < this->mMeinekeSpringGrowthDuration)
-//    {
-//        if (rCellPopulation.IsMeshBasedCellPopulation())
-//        {
-//            MeshBasedCellPopulation<DIM>* p_static_cast_cell_population = static_cast<MeshBasedCellPopulation<DIM>*>(&rCellPopulation);
-//
-//            std::pair<CellPtr,CellPtr> cell_pair = p_static_cast_cell_population->CreateCellPair(p_cell_A, p_cell_B);
-//
-//            if (p_static_cast_cell_population->IsMarkedSpring(cell_pair))
-//            {
-//                // Spring rest length increases from a small value to the normal rest length over 1 hour
-//                double lambda = this->GetMeinekeDivisionRestingSpringLength();
-//                rest_length = lambda + (1.0 - lambda) * ageA/this->mMeinekeSpringGrowthDuration;
-//            }
-//            if (ageA + SimulationTime::Instance()->GetTimeStep() >= this->mMeinekeSpringGrowthDuration)
-//            {
-//                // This spring is about to go out of scope
-//                p_static_cast_cell_population->UnmarkSpring(cell_pair);
-//            }
-//        }
-//        else
-//        {
-//            // Spring rest length increases from mDivisionRestingSpringLength to normal rest length, 1.0, over 1 hour
-//            double lambda = this->GetMeinekeDivisionRestingSpringLength();
-//            rest_length = lambda + (1.0 - lambda) * ageA/this->mMeinekeSpringGrowthDuration;
-//        }
-//    }
-//
-//    double a_rest_length = rest_length*0.5;
-//    double b_rest_length = a_rest_length;
-//
-//    /*
-//     * If either of the cells has begun apoptosis, then the length of the spring
-//     * connecting them decreases linearly with time.
-//     */
-
+    
     // Calculate the rest length of the spring connecting the two nodes
 
     double rest_length = 1.0;
 
     
-
-    double a_rest_length = rest_length*0.5;
-    double b_rest_length = a_rest_length;
-
     ///\todo Extend force class to cope with newly divided cells (#1856)
     // This should do this...?
 
+    double a_rest_length = rest_length*0.5;
+    double b_rest_length = rest_length*0.5;
 
-    if (p_cell_A->GetAge() < 1)
-    {
-        a_rest_length = a_rest_length*p_cell_A->GetAge();
-    }
-    if (p_cell_B->GetAge() < 1)
-    {
-        b_rest_length = b_rest_length*p_cell_B->GetAge();
-    }
-    bool a_born = (p_cell_A->GetAge() < 1);
-    bool b_born = (p_cell_B->GetAge() < 1);
-
-    bool a_apop = p_cell_A->HasApoptosisBegun();
-    bool b_apop = p_cell_B->HasApoptosisBegun();
+    bool is_a_stromal = p_cell_A->GetMutationState()->IsType<StromalCellMutationState>();
+    bool is_b_stromal = p_cell_B->GetMutationState()->IsType<StromalCellMutationState>();
     
-   if(a_apop==true && b_apop==true)
-   {
-       double time_until_death_a = p_cell_A->GetTimeUntilDeath();
-       double a_rest_length_pop = a_rest_length * time_until_death_a / p_cell_A->GetApoptosisTime();
+    bool is_a_epithelial = p_cell_A->GetMutationState()->IsType<WildTypeCellMutationState>();
+    bool is_b_epithelial = p_cell_B->GetMutationState()->IsType<WildTypeCellMutationState>();
 
-       double time_until_death_b = p_cell_B->GetTimeUntilDeath();
-       double b_rest_length_pop = b_rest_length * time_until_death_b / p_cell_B->GetApoptosisTime();
+    bool is_a_ghost = p_tissue->IsGhostNode(real_A_node_index);
+    bool is_b_ghost = p_tissue->IsGhostNode(real_B_node_index);
 
-       rest_length = a_rest_length_pop*(a_rest_length_pop <= b_rest_length_pop) + b_rest_length_pop*(b_rest_length_pop < a_rest_length_pop);
-   }
-   else if(a_apop==true && b_apop==false)
-   {
-       double time_until_death_a = p_cell_A->GetTimeUntilDeath();
-       double a_rest_length_pop = time_until_death_a / p_cell_A->GetApoptosisTime();
-       
-       bool is_b_ep_cell = p_cell_B->GetMutationState()->IsType<WildTypeCellMutationState>();
+    if(is_a_stromal || is_b_stromal)
+    {
+        rest_length = a_rest_length + b_rest_length;
+    }
+    else if(is_a_ghost || is_b_ghost)
+    {
+        rest_length = a_rest_length + b_rest_length;
+    }
+    else if(is_a_epithelial || is_b_epithelial)
+    {
+        AbstractPhaseBasedCellCycleModel* p_model_A = static_cast<AbstractPhaseBasedCellCycleModel*>(p_cell_A->GetCellCycleModel());
+        AbstractPhaseBasedCellCycleModel* p_model_B = static_cast<AbstractPhaseBasedCellCycleModel*>(p_cell_B->GetCellCycleModel());
+    
+        bool a_born = (p_cell_A->GetAge() < p_model_A->GetMDuration()); //
+        bool b_born = (p_cell_B->GetAge() < p_model_B->GetMDuration()); // Should be mphase, right?
 
-        rest_length = a_rest_length_pop ;
-   }
-   else if(b_apop==true && a_apop==false)
-   {
-       double time_until_death_b = p_cell_B->GetTimeUntilDeath();
-       double b_rest_length_pop = time_until_death_b / p_cell_B->GetApoptosisTime();
+        bool a_apop = p_cell_A->HasApoptosisBegun();
+        bool b_apop = p_cell_B->HasApoptosisBegun();
 
-        rest_length = b_rest_length_pop;
-   }
-   else if(a_apop==true && b_born==true)
-   {
-        double time_until_death_a = p_cell_A->GetTimeUntilDeath();
-        double a_rest_length_pop = time_until_death_a / p_cell_A->GetApoptosisTime();
+        if(a_apop==true && (a_born==false || a_born==true ) )
+        {
+            double time_until_death_a = p_cell_A->GetTimeUntilDeath();
+            a_rest_length = a_rest_length * time_until_death_a / p_cell_A->GetApoptosisTime();
+        }
+        if(a_apop==false && a_born==true)
+        {
+            a_rest_length = a_rest_length*(p_cell_A->GetAge()/p_model_A->GetMDuration());
+        }
 
-        b_rest_length = b_rest_length*p_cell_B->GetAge();
 
-        rest_length = a_rest_length_pop + b_rest_length;
-   }
-   else if(b_apop==true && a_born==true)
-   {
-        double time_until_death_b = p_cell_B->GetTimeUntilDeath();
-        double b_rest_length_pop = time_until_death_b / p_cell_B->GetApoptosisTime();
+        if(b_apop==true && (b_born==false || b_born==true) )
+        {
+            double time_until_death_b = p_cell_B->GetTimeUntilDeath();
+            b_rest_length = b_rest_length * time_until_death_b / p_cell_B->GetApoptosisTime();
+        }
+        if(b_apop==false && b_born==true)
+        {
+            b_rest_length = b_rest_length*(p_cell_B->GetAge()/p_model_B->GetMDuration());
+        }
 
-        a_rest_length = a_rest_length*p_cell_A->GetAge();
+        rest_length = a_rest_length + b_rest_length;
 
-        rest_length = b_rest_length_pop + a_rest_length;
-   }
-   else if(a_born==true && b_born==true)
-   {
-        b_rest_length = b_rest_length*p_cell_B->GetAge();
-        a_rest_length = a_rest_length*p_cell_A->GetAge();
+        
 
-        rest_length = a_rest_length*(a_rest_length <= b_rest_length) + b_rest_length*(b_rest_length < a_rest_length);
-   }
-   else
-   {
-       rest_length = a_rest_length + b_rest_length;
-   }
+    }
+    else
+    {
+        rest_length = a_rest_length + b_rest_length;
+    }
 
-    assert(rest_length <= 1.0+1e-12);
+
+    // Might need to do this to make sure ghosts do not pop into the epithelial surface
+    assert(rest_length <= 1.0 + 0.0001);
+
+    if(rest_length > 1)
+    {
+        PRINT_2_VARIABLES(rest_length,SimulationTime::Instance()->GetTime());
+    }
 
     bool is_closer_than_rest_length = (distance_between_nodes - rest_length <= 0);
 
@@ -990,14 +901,16 @@ c_vector<double, DIM> PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::Cal
     /* Want to have one-way springs between epithelial and stromal nodes, so that there is only repulsion due to compression
      * of the spring, but no attraction due to extension
      */
-    if ( (mUseOneWaySprings) && ( ( (p_cell_A->GetMutationState()->IsType<StromalCellMutationState>() == false) && (p_cell_B->GetMutationState()->IsType<StromalCellMutationState>() == true) )
-    	    || ( (p_cell_A->GetMutationState()->IsType<StromalCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<StromalCellMutationState>() == false) ) ) )
-    {
-        if (distance_between_nodes > rest_length)
-        {
-        	return zero_vector<double>(DIM); // c_vector<double,DIM>() is not guaranteed to be fresh memory
-        }
-    }
+// Dom - I've hijacked this indicator to have stromal cells acting as ghost nodes and moved it to the add force section.
+//     if ( (mUseOneWaySprings) && 
+//     ( ( (p_cell_A->GetMutationState()->IsType<StromalCellMutationState>() == false) && (p_cell_B->GetMutationState()->IsType<StromalCellMutationState>() == true) )
+//    || ( (p_cell_A->GetMutationState()->IsType<StromalCellMutationState>() == true)  && (p_cell_B->GetMutationState()->IsType<StromalCellMutationState>() == false) ) ) )
+//     {
+//         if (distance_between_nodes > rest_length)
+//         {
+//         	return zero_vector<double>(DIM); // c_vector<double,DIM>() is not guaranteed to be fresh memory
+//         }
+//     }
 
  //   if (rCellPopulation.IsMeshBasedCellPopulation())
  // if(bool(dynamic_cast<MeshBasedCellPopulation<DIM>*>(&rCellPopulation) != nullptr))
@@ -1028,6 +941,7 @@ c_vector<double, DIM> PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::Cal
             return temp;
         }
     }
+
 }
 
 
@@ -1077,8 +991,6 @@ void PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::OutputForceParameter
 	LinearSpringWithVariableSpringConstantsForce<DIM>::OutputForceParameters(rParamsFile);
 }
 
-
-
 /////////////////////////////////////////////////////////////////////////////
 // Explicit instantiation
 /////////////////////////////////////////////////////////////////////////////
@@ -1090,4 +1002,3 @@ template class PeriodicCryptModelInteractionForceWithGhostNodes<3>;
 // Serialization for Boost >= 1.36
 #include "SerializationExportWrapperForCpp.hpp"
 EXPORT_TEMPLATE_CLASS_SAME_DIMS(PeriodicCryptModelInteractionForceWithGhostNodes)
-

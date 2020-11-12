@@ -3,6 +3,7 @@
 
 #include "LinearSpringWithVariableSpringConstantsForce.hpp"
 #include "StromalCellMutationState.hpp"
+#include "WildTypeCellMutationState.hpp"
 #include "MeshBasedCellPopulation.hpp"
 #include "DomMeshBasedCellPopulationWithGhostNodes.hpp"
 
