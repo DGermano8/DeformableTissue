@@ -114,7 +114,7 @@ void UniformCellKiller3dWithGhostNodes::CheckAndLabelCellsForApoptosisOrDeath()
 
 	// }
 	// how_many_cells_to_kill = 0.5*how_many_cells_to_kill;
-	PRINT_2_VARIABLES(SimulationTime::Instance()->GetTime(),mpCellPopulation->GetNumRealCells());
+	// PRINT_2_VARIABLES(SimulationTime::Instance()->GetTime(),mpCellPopulation->GetNumRealCells());
 
 	bool can_i_kill_cells = (mpCellPopulation->GetNumRealCells()  > mMinCellPopulation);
     // Loop over this vector and kill any cells that it tells you to

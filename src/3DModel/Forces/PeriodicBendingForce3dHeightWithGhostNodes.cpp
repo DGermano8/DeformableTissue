@@ -3,6 +3,11 @@
 #include <cmath>
 #include "DomMeshBasedCellPopulationWithGhostNodes.hpp"
 
+
+#include <iostream>
+#include <fstream>
+
+
 PeriodicBendingForce3dHeightWithGhostNodes::PeriodicBendingForce3dHeightWithGhostNodes()
     : AbstractForce<3>(),
       mBasementMembraneParameter(DOUBLE_UNSET),
@@ -759,7 +764,7 @@ std::vector<c_vector<double, 3> > PeriodicBendingForce3dHeightWithGhostNodes::Fi
 }
 
 
-c_vector<double, 3> PeriodicBendingForce3dHeightWithGhostNodes::GetForceDueToDiscreteCurvature(AbstractCellPopulation<3>& rCellPopulation, std::vector<c_vector<unsigned, 3> > rEpithelialMeshVector, std::vector<unsigned> first_order_neighs,  std::vector<unsigned> second_order_neighs, std::vector<c_vector<double, 3> > image_location, unsigned cell_i, unsigned num_cells)
+c_vector<double, 4> PeriodicBendingForce3dHeightWithGhostNodes::GetForceDueToDiscreteCurvature(AbstractCellPopulation<3>& rCellPopulation, std::vector<c_vector<unsigned, 3> > rEpithelialMeshVector, std::vector<unsigned> first_order_neighs,  std::vector<unsigned> second_order_neighs, std::vector<c_vector<double, 3> > image_location, unsigned cell_i, unsigned num_cells)
 {
 	
 	/* 
@@ -771,7 +776,7 @@ c_vector<double, 3> PeriodicBendingForce3dHeightWithGhostNodes::GetForceDueToDis
 	Cell_i					->  cell_i
 	*/
 	double exponent_parameter = GetExponentParameter();
-	c_vector<double, 3> force_due_to_curvature = zero_vector<double>(3);
+	c_vector<double, 4> force_due_to_curvature = zero_vector<double>(4);
 	// force_due_to_curvature[0] = 0.0;
 	// force_due_to_curvature[1] = 0.0;
 	// force_due_to_curvature[2] = 0.0;
@@ -967,7 +972,15 @@ c_vector<double, 3> PeriodicBendingForce3dHeightWithGhostNodes::GetForceDueToDis
 
 		// c_vector<double, 3> force_due_to_curvature_i = 	(1.0/(1.0+exp(-1.0*exponent_parameter*(ang_sum - 2*3.141592653589793)) ) - 0.5 ) *grad_i_phi_j_el;
 
-		force_due_to_curvature +=  force_due_to_curvature_i;
+		force_due_to_curvature(0) +=  force_due_to_curvature_i(0);
+		force_due_to_curvature(1) +=  force_due_to_curvature_i(1);
+		force_due_to_curvature(2) +=  force_due_to_curvature_i(2);
+		
+		if(cell_a == mCellPopulationNodeIndexMap[cell_i])
+		{
+			force_due_to_curvature(3) = ang_sum;
+		}
+		
 
 		// if(cell_a == 154)
 		// {
@@ -1582,6 +1595,16 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 	double heightparameter_ratio = GetHeightDependantCurvatureParameter();
 	double max_height_for_curvature = min_height + heightparameter_ratio*CryptHeight + 10.0;
 	// std::cout<<"_____________________________________________________________\n\n";
+
+
+	
+	// Uncomment these to print angle_sum data
+	// std::ofstream myfile;
+	// std::string angle_string = "results/angle_string_" + std::to_string(SimulationTime::Instance()->GetTime()) + ".txt";
+	// myfile.open (angle_string);
+
+	myfile << SimulationTime::Instance()->GetTime() << ", ";
+
 	for (AbstractCellPopulation<3>::Iterator cell_iter = rCellPopulation.Begin();
          cell_iter != rCellPopulation.End();
          ++cell_iter)
@@ -1689,7 +1712,7 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 			*/
 
 
-			c_vector<double, 3> force_due_to_curvature = zero_vector<double>(3);;
+			c_vector<double, 4> force_due_to_curvature = zero_vector<double>(4);
 
 			if(first_order_neighs_vect.size() >= 3)
 			{
@@ -1716,7 +1739,15 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 				force_due_to_curvature[2] = 0.0;
 			}
 
-			rCellPopulation.GetNode(cell_i_ext)->AddAppliedForceContribution(basement_membrane_parameter*force_due_to_curvature);
+			c_vector<double, 3> force_curvature = zero_vector<double>(3);
+			force_curvature[0] = force_due_to_curvature[0];
+			force_curvature[1] = force_due_to_curvature[1];
+			force_curvature[2] = force_due_to_curvature[2];
+
+			// myfile  << std::fixed << std::setprecision(12) << force_due_to_curvature[3] << ", ";
+			
+
+			rCellPopulation.GetNode(cell_i_ext)->AddAppliedForceContribution(basement_membrane_parameter*force_curvature);
 			int sim_time = (SimulationTime::Instance()->GetTime())/(SimulationTime::Instance()->GetTimeStep());
 			// if(cell_i_ext == 154 && (sim_time%10 == 0) )
 			// {
@@ -1726,6 +1757,9 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 		}		
 		
 	}
+
+	// myfile.close();
+	
 	
 }
 
