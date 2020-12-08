@@ -120,6 +120,8 @@ void UniformCellKiller3dWithGhostNodes::CheckAndLabelCellsForApoptosisOrDeath()
     // Loop over this vector and kill any cells that it tells you to
     // while (how_many_cells_to_kill > 0)
 	int num_cells_have_i_killed = 0;
+	std::vector<unsigned> cells_which_can_die;
+	
 	if(can_i_kill_cells)
     {
 		// need to do a random permutation here, otherwise we have some of the cells (at start of  list) having overall higher probability
@@ -141,21 +143,40 @@ void UniformCellKiller3dWithGhostNodes::CheckAndLabelCellsForApoptosisOrDeath()
 					double x = this->mpCellPopulation->GetLocationOfCellCentre(*cell_iter)[0];
 					double y = this->mpCellPopulation->GetLocationOfCellCentre(*cell_iter)[1];
 
-					if ( (RandomNumberGenerator::Instance()->ranf() < death_prob_this_timestep) 
-					 && ( (x<mMinXBoundary) || (x>mMaxXBoundary) || (y<mMinYBoundary) || (y>mMaxYBoundary) ) )
+					if (  (x<mMinXBoundary) || (x>mMaxXBoundary) || (y<mMinYBoundary) || (y>mMaxYBoundary) )
 					{
 						
-
-						if( (mpCellPopulation->GetNumRealCells() -  num_cells_have_i_killed) > mMinCellPopulation)
-						{
-							p_cell->StartApoptosis();
-							// how_many_cells_to_kill--;
-							num_cells_have_i_killed++;
-							// break;
-						}
+						cells_which_can_die.push_back(node_index);
+						// if( (mpCellPopulation->GetNumRealCells() -  num_cells_have_i_killed) > mMinCellPopulation)
+						// {
+						// 	p_cell->StartApoptosis();
+						// 	// how_many_cells_to_kill--;
+						// 	num_cells_have_i_killed++;
+						// 	// break;
+						// }
 					}
 
 				}
+			}
+		}
+	}
+
+	// PRINT_3_VARIABLES(p_tissue->GetNumRealCells(),mMinCellPopulation,cells_which_can_die.size());
+
+	std::vector<unsigned> randon_cells;
+	if(can_i_kill_cells)
+	{
+		for(int j=0; j< (mpCellPopulation->GetNumRealCells() - mMinCellPopulation); j++)
+		{
+			int cell_to_kill = int ((cells_which_can_die.size() +1)*(RandomNumberGenerator::Instance()->ranf()));
+
+			PRINT_3_VARIABLES(cell_to_kill,mpCellPopulation->GetNumRealCells(),cells_which_can_die.size());
+
+			CellPtr p_cell = p_tissue->GetCellUsingLocationIndex(cells_which_can_die[cell_to_kill]);
+
+			if( !(p_cell->HasApoptosisBegun()) )
+			{
+				p_cell->StartApoptosis();
 			}
 		}
 	}

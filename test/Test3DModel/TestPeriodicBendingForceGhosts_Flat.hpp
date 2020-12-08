@@ -71,11 +71,11 @@ public:
      */
     void TestPeriodicCubeWithGhosts() throw (Exception)
     {
-    	RandomNumberGenerator::Instance()->Reseed(2);
+    	RandomNumberGenerator::Instance()->Reseed(1);
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "Test_Periodic_noBend";
+        std::string output_directory = "Test_Periodic_go_flat";
 
         unsigned width = 10;	   // x
         unsigned height = 10;      // y
@@ -88,7 +88,7 @@ public:
         double width_space = 1.0;
         double height_space = 1.0*sqrt(0.75);
         double ghost_sep = 1.0;
-        double depth_space = 0.738431690356779; //Magic number for z-spaceing... 
+        double depth_space = 0.738431690356779 * 0.9; //Magic number for z-spaceing... 
         unsigned cells_per_layer = width*height;
         unsigned cell_iter = 0;
 
@@ -111,12 +111,12 @@ public:
 
         double radius =  0;//periodic_width+1.0;
         double target_curvature = -0.2; //maximum curvature is 0.2066 -> higher curvature means smaller sphere
-        double beta_parameter = 0.0*spring_strength;
-        double alpha_parameter = 1.2;
+        double beta_parameter = 1.0*spring_strength;
+        double alpha_parameter = 1.5;
 
         double time_step = 0.001;
-        double end_time = 48.0;
-        double plot_step = 10.0;
+        double end_time = 1;
+        double plot_step = 1.0;
 
         bool include_springs = true;
         bool include_bending = true;
@@ -147,8 +147,8 @@ public:
                     c_vector<double, 3> node_i_new_location;
 
                     //x_coordinate = (double) (i + 0.5*((j%2 + k%2)%2))*width_space;
-                    x_coordinate = (double) (i + 0.5*(j%2 + k%2))*width_space   ;// + 0.1*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
-                    y_coordinate = (double) j*height_space                      ;// + 0.1*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                    x_coordinate = (double) (i + 0.5*(j%2 + k%2))*width_space   + 0.1*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                    y_coordinate = (double) j*height_space                      + 0.1*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
                     
                     if( k == depth)
                     {
@@ -156,16 +156,16 @@ public:
                     }
                     else
                     {
-                        z_coordinate = (double) tissue_base + k*depth_space         ;// +0.125*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                        z_coordinate = (double) tissue_base + k*depth_space        +0.25*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
                     }    
                     if( pow(x_coordinate - 0.5*periodic_width,2)+ pow(y_coordinate - 0.5*periodic_height ,2) <= pow(1.0,2) )
                     {
                         is_transit[cell_iter] = 1;
                     }
-                    if (cell_iter == width*height + 0.5*width*height + 0.5*width)
-                    {
-                        z_coordinate = (double) 5.0 + k*depth_space + 0.1;
-                    }
+                    // if (cell_iter == width*height + 0.5*width*height + 0.5*width)
+                    // {
+                    //     z_coordinate = (double) 5.0 + k*depth_space + 0.1;
+                    // }
                     // if (cell_iter == 155)
                     // {
                     //     z_coordinate = (double) 5.0 + k*depth_space - 0.25;
@@ -312,26 +312,26 @@ public:
             
             UniformG1GenerationalCellCycleModel* p_model = new UniformG1GenerationalCellCycleModel();
             p_model->SetDimension(3);
-            p_model->SetMaxTransitGenerations(1);
+            p_model->SetMaxTransitGenerations(4);
 
             // p_model->SetTransitCellG1Duration(4);
             // p_model->SetSDuration(2);
             // p_model->SetG2Duration(2);
             // p_model->SetMDuration(1);
 
-            p_model->SetTransitCellG1Duration(11);
-            p_model->SetSDuration(8);
-            p_model->SetG2Duration(4);
-            p_model->SetMDuration(1);
-
-            // p_model->SetTransitCellG1Duration(0.5);
-            // p_model->SetSDuration(0.25);
-            // p_model->SetG2Duration(0.25);
+            // p_model->SetTransitCellG1Duration(11);
+            // p_model->SetSDuration(8);
+            // p_model->SetG2Duration(4);
             // p_model->SetMDuration(1);
+
+            p_model->SetTransitCellG1Duration(0.5);
+            p_model->SetSDuration(0.25);
+            p_model->SetG2Duration(0.25);
+            p_model->SetMDuration(1);
             
             CellPtr p_epithelial_cell(new Cell(p_state, p_model));
-            // double birth_time = -8;
-            double birth_time = -RandomNumberGenerator::Instance()->ranf()*(p_model->GetTransitCellG1Duration() + p_model->GetSG2MDuration());
+            double birth_time = -8;
+            // double birth_time = -RandomNumberGenerator::Instance()->ranf()*(p_model->GetTransitCellG1Duration() + p_model->GetSG2MDuration());
 
 
             // if(i == 154)
@@ -363,8 +363,8 @@ public:
             //     birth_time = -10;
             // }
 
-            p_epithelial_cell->SetCellProliferativeType(p_transit_type);
-            // p_epithelial_cell->SetCellProliferativeType(p_differentiated_type);
+            // p_epithelial_cell->SetCellProliferativeType(p_transit_type);
+            p_epithelial_cell->SetCellProliferativeType(p_differentiated_type);
 
             
 			
@@ -454,7 +454,7 @@ public:
 		// Create periodic spring force law
         MAKE_PTR(PeriodicCryptModelInteractionForceWithGhostNodes<3>, periodic_spring_force);
         periodic_spring_force->SetUseOneWaySprings(false); //turning this on makes the stromal cells act as ghosts..
-        periodic_spring_force->SetCutOffLength(1.2);
+        periodic_spring_force->SetCutOffLength(1.5);
         //                     SetEpithelialStromalCellDependentSprings(ind , Ep-Ep, Str-Str, Ep-Str, apcTwoHitStromalMultiplier);
         periodic_spring_force->SetEpithelialStromalCellDependentSprings(true, 1.0,     0.5,     0.5,    1.0);
         periodic_spring_force->SetPeriodicDomainWidth(periodic_width);
@@ -523,7 +523,8 @@ public:
 
         // Add random cell killer for death at the edges
         //                                                              ProbabilityOfDeathInAnHour,    MinXBoundary,                MaxXBoundary,     MinYBoundary,                    MaxYBoundary
-        MAKE_PTR_ARGS(UniformCellKiller3dWithGhostNodes, random_cell_death, (&cell_population, 1.0, 1.5*width_space,  periodic_width-1.5*width_space, 1.5*height_space,  periodic_height-1.5*height_space, num_epithelial_cells+num_tissue_cells));
+        // MAKE_PTR_ARGS(UniformCellKiller3dWithGhostNodes, random_cell_death, (&cell_population, 1.0, 1.5*width_space,  periodic_width-1.5*width_space, 1.5*height_space,  periodic_height-1.5*height_space, num_epithelial_cells+num_tissue_cells));
+        MAKE_PTR_ARGS(UniformCellKiller3dWithGhostNodes, random_cell_death, (&cell_population, 1.0, periodic_width + 1,  0 - 1, periodic_height + 1,  0 - 1 , num_epithelial_cells+num_tissue_cells + 10));
 		simulator.AddCellKiller(random_cell_death);
 
 

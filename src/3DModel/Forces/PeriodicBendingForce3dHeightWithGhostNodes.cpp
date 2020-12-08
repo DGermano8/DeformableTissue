@@ -1599,9 +1599,9 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 
 	
 	// Uncomment these to print angle_sum data
-	// std::ofstream myfile;
-	// std::string angle_string = "results/angle_string_" + std::to_string(SimulationTime::Instance()->GetTime()) + ".txt";
-	// myfile.open (angle_string);
+	std::ofstream myfile;
+	std::string angle_string = "results/angle_string_" + std::to_string(SimulationTime::Instance()->GetTime()) + ".txt";
+	myfile.open (angle_string);
 
 	myfile << SimulationTime::Instance()->GetTime() << ", ";
 
@@ -1724,7 +1724,7 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 				// if(cell_i_ext > 199)
 				// {
 				// 	PRINT_VARIABLE(cell_i_ext);
-					TRACE("Has no neighbours")
+					// TRACE("Has no neighbours")
 				// }
 				force_due_to_curvature[0] = 0.0;
 				force_due_to_curvature[1] = 0.0;
@@ -1733,7 +1733,7 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 			
 			if (isnan(force_due_to_curvature[0]) || isnan(force_due_to_curvature[1]) || isnan(force_due_to_curvature[2]))
 			{
-				PRINT_VECTOR(force_due_to_curvature);
+				// PRINT_VECTOR(force_due_to_curvature);
 				force_due_to_curvature[0] = 0.0;
 				force_due_to_curvature[1] = 0.0;
 				force_due_to_curvature[2] = 0.0;
@@ -1744,7 +1744,7 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 			force_curvature[1] = force_due_to_curvature[1];
 			force_curvature[2] = force_due_to_curvature[2];
 
-			// myfile  << std::fixed << std::setprecision(12) << force_due_to_curvature[3] << ", ";
+			myfile  << std::fixed << std::setprecision(12) << force_due_to_curvature[3] << ", ";
 			
 
 			rCellPopulation.GetNode(cell_i_ext)->AddAppliedForceContribution(basement_membrane_parameter*force_curvature);
@@ -1758,7 +1758,7 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 		
 	}
 
-	// myfile.close();
+	myfile.close();
 	
 	
 }
