@@ -4,11 +4,11 @@ Running 1 test
 
 
 Entering TestPeriodicCubeWithGhosts
-number of cells comp = 300
-number of cells all  = 300
-number of ghosts     = 200
+number of cells comp = 720
+number of cells all  = 720
+number of ghosts     = 180
 
-Time taken = 231.882 seconds
+Time taken = 1.30667 seconds
 
 Passed
 OK!

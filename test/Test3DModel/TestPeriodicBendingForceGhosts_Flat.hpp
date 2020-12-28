@@ -75,20 +75,20 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "Test_Periodic_go_flat";
+        std::string output_directory = "Test_Periodic_rand_tiss_small2";
 
-        unsigned width = 10;	   // x
-        unsigned height = 10;      // y
+        unsigned width = 6;	   // x
+        unsigned height = 30;      // y
         unsigned ghosts_bottom = 0;       // ghosts > depth
-        unsigned ghosts_top = 1;       // ghosts > depth
-        unsigned num_tissue_depth = 2;
+        unsigned ghosts_top = 0;       // ghosts > depth
+        unsigned num_tissue_depth = 3;
         unsigned depth = num_tissue_depth + (ghosts_bottom + ghosts_top) + 1;        // z
 
         // Initialise the tissue in an equilibrum state
-        double width_space = 1.0;
+        double width_space = 1.25;
         double height_space = 1.0*sqrt(0.75);
         double ghost_sep = 1.0;
-        double depth_space = 0.738431690356779 * 0.9; //Magic number for z-spaceing... 
+        double depth_space = 0.738431690356779 *2.0; //Magic number for z-spaceing... 
         unsigned cells_per_layer = width*height;
         unsigned cell_iter = 0;
 
@@ -104,8 +104,8 @@ public:
         // Get the dimensions for the non-zero target curvature region
         // double centre_x = periodic_width*0.5;
         // double centre_y = periodic_height*0.5;
-        double centre_x = 20;
-        double centre_y = 20;
+        double centre_x = 30;
+        double centre_y = 30;
 
         double spring_strength = 20.0;
 
@@ -115,11 +115,11 @@ public:
         double alpha_parameter = 1.5;
 
         double time_step = 0.001;
-        double end_time = 1;
+        double end_time = 0.001;
         double plot_step = 1.0;
 
-        bool include_springs = true;
-        bool include_bending = true;
+        bool include_springs = false;
+        bool include_bending = false;
 
         int is_transit[depth*height*width];
         int num_real_nodes = 0;
@@ -147,16 +147,18 @@ public:
                     c_vector<double, 3> node_i_new_location;
 
                     //x_coordinate = (double) (i + 0.5*((j%2 + k%2)%2))*width_space;
-                    x_coordinate = (double) (i + 0.5*(j%2 + k%2))*width_space   + 0.1*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
-                    y_coordinate = (double) j*height_space                      + 0.1*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                    x_coordinate = (double) (i + 0.5*(j%2 + k%2))*width_space  + 24  + 0.15*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                    y_coordinate = (double) j*height_space                      + 0.15*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
                     
                     if( k == depth)
                     {
-                        z_coordinate = (double) tissue_base + (-1.0)*depth_space;
+                        // z_coordinate = (double) tissue_base + (-1.0)*depth_space;
+                        z_coordinate = (double) tissue_base + (-1.0)*depth_space     +    0.75*cos(0.5*x_coordinate) + 0.5*sin(y_coordinate) + 0.15*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+
                     }
                     else
                     {
-                        z_coordinate = (double) tissue_base + k*depth_space        +0.25*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                        z_coordinate = (double) tissue_base + k*depth_space     +    0.75*cos(0.5*x_coordinate) + 0.5*sin(y_coordinate) + 0.15*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
                     }    
                     if( pow(x_coordinate - 0.5*periodic_width,2)+ pow(y_coordinate - 0.5*periodic_height ,2) <= pow(1.0,2) )
                     {
@@ -436,19 +438,19 @@ public:
 
 
         // MAKE_PTR_ARGS(PeriodicBoxBoundaryCondition3d, boundary_condition, (&cell_population));
-        MAKE_PTR_ARGS(PeriodicBoxBoundaryCondition3dGhosts, boundary_condition, (&cell_population));
-        boundary_condition->SetCellPopulationWidth(periodic_width);
-        boundary_condition->SetCellPopulationDepth(periodic_height);
-        boundary_condition->SetMaxHeightForPinnedCells(0.0);       			      
-        boundary_condition->ImposeBoundaryCondition(node_locations_before);
-        simulator.AddCellPopulationBoundaryCondition(boundary_condition);
+        // MAKE_PTR_ARGS(PeriodicBoxBoundaryCondition3dGhosts, boundary_condition, (&cell_population));
+        // boundary_condition->SetCellPopulationWidth(periodic_width);
+        // boundary_condition->SetCellPopulationDepth(periodic_height);
+        // boundary_condition->SetMaxHeightForPinnedCells(0.0);       			      
+        // boundary_condition->ImposeBoundaryCondition(node_locations_before);
+        // simulator.AddCellPopulationBoundaryCondition(boundary_condition);
 
-        MAKE_PTR_ARGS(PeriodicStromalBoxBoundaryCondition3d, stromal_boundary_condition, (&cell_population));
-        stromal_boundary_condition->SetCellPopulationWidth(periodic_width);
-        stromal_boundary_condition->SetCellPopulationDepth(periodic_height);
-        stromal_boundary_condition->SetMaxHeightForPinnedCells(0.0);
-        stromal_boundary_condition->ImposeBoundaryCondition(node_locations_before);
-        simulator.AddCellPopulationBoundaryCondition(stromal_boundary_condition);
+        // MAKE_PTR_ARGS(PeriodicStromalBoxBoundaryCondition3d, stromal_boundary_condition, (&cell_population));
+        // stromal_boundary_condition->SetCellPopulationWidth(periodic_width);
+        // stromal_boundary_condition->SetCellPopulationDepth(periodic_height);
+        // stromal_boundary_condition->SetMaxHeightForPinnedCells(0.0);
+        // stromal_boundary_condition->ImposeBoundaryCondition(node_locations_before);
+        // simulator.AddCellPopulationBoundaryCondition(stromal_boundary_condition);
 
 
 		// Create periodic spring force law
@@ -467,9 +469,9 @@ public:
 
 
 	    // Create force law
-	    //MAKE_PTR(GeneralisedLinearSpringForce<3>, linear_force);
-	    //linear_force->SetCutOffLength(1.5);
-        //simulator.AddForce(linear_force);
+	    MAKE_PTR(GeneralisedLinearSpringForce<3>, linear_force);
+	    linear_force->SetCutOffLength(1.5);
+        simulator.AddForce(linear_force);
 
 		// Create periodic basement membrane force law
         MAKE_PTR(PeriodicBendingForce3dHeightWithGhostNodes, periodic_bending_force);
