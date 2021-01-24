@@ -38,7 +38,7 @@
 #include "DifferentiatedCellProliferativeType.hpp"
 #include "TransitCellProliferativeType.hpp"
 #include "FixedG1GenerationalCellCycleModel.hpp"
-#include "UniformG1GenerationalCellCycleModel.hpp"
+// #include "UniformG1GenerationalCellCycleModel.hpp"
 #include "CellIdWriter.hpp"
 #include "CellMutationStatesWriter.hpp"
 #include "CellProliferativeTypesWriter.hpp"
@@ -77,18 +77,18 @@ public:
 
         std::string output_directory = "Test_Periodic_rand_tiss_small2";
 
-        unsigned width = 6;	   // x
-        unsigned height = 30;      // y
+        unsigned width = 10;	   // x
+        unsigned height = 10;      // y
         unsigned ghosts_bottom = 0;       // ghosts > depth
-        unsigned ghosts_top = 0;       // ghosts > depth
-        unsigned num_tissue_depth = 3;
+        unsigned ghosts_top = 1;       // ghosts > depth
+        unsigned num_tissue_depth = 2;
         unsigned depth = num_tissue_depth + (ghosts_bottom + ghosts_top) + 1;        // z
 
         // Initialise the tissue in an equilibrum state
-        double width_space = 1.25;
+        double width_space = 1.0;
         double height_space = 1.0*sqrt(0.75);
         double ghost_sep = 1.0;
-        double depth_space = 0.738431690356779 *2.0; //Magic number for z-spaceing... 
+        double depth_space = 0.738431690356779*1.0; //Magic number for z-spaceing... 
         unsigned cells_per_layer = width*height;
         unsigned cell_iter = 0;
 
@@ -111,15 +111,15 @@ public:
 
         double radius =  0;//periodic_width+1.0;
         double target_curvature = -0.2; //maximum curvature is 0.2066 -> higher curvature means smaller sphere
-        double beta_parameter = 1.0*spring_strength;
-        double alpha_parameter = 1.5;
+        double beta_parameter = 2.0*spring_strength;
+        double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 0.001;
-        double plot_step = 1.0;
+        double end_time = 0.01;
+        double plot_step = 10.0;
 
-        bool include_springs = false;
-        bool include_bending = false;
+        bool include_springs = true;
+        bool include_bending = true;
 
         int is_transit[depth*height*width];
         int num_real_nodes = 0;
@@ -147,18 +147,19 @@ public:
                     c_vector<double, 3> node_i_new_location;
 
                     //x_coordinate = (double) (i + 0.5*((j%2 + k%2)%2))*width_space;
-                    x_coordinate = (double) (i + 0.5*(j%2 + k%2))*width_space  + 24  + 0.15*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
-                    y_coordinate = (double) j*height_space                      + 0.15*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                    x_coordinate = (double) (i + 0.5*(j%2 + k%2))*width_space ;
+                    y_coordinate = (double) j*height_space ;
                     
                     if( k == depth)
                     {
-                        // z_coordinate = (double) tissue_base + (-1.0)*depth_space;
-                        z_coordinate = (double) tissue_base + (-1.0)*depth_space     +    0.75*cos(0.5*x_coordinate) + 0.5*sin(y_coordinate) + 0.15*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                        z_coordinate = (double) tissue_base + (-1.0)*depth_space;
+                        // z_coordinate = (double) tissue_base + (-1.0)*depth_space  + 0.15*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
 
                     }
                     else
                     {
-                        z_coordinate = (double) tissue_base + k*depth_space     +    0.75*cos(0.5*x_coordinate) + 0.5*sin(y_coordinate) + 0.15*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                        z_coordinate = (double) tissue_base + k*depth_space;
+                        // z_coordinate = (double) tissue_base + k*depth_space     +  0.15*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
                     }    
                     if( pow(x_coordinate - 0.5*periodic_width,2)+ pow(y_coordinate - 0.5*periodic_height ,2) <= pow(1.0,2) )
                     {
@@ -312,7 +313,9 @@ public:
             // p_model->SetMDuration(2); 
             // p_model->SetDimension(3);
             
-            UniformG1GenerationalCellCycleModel* p_model = new UniformG1GenerationalCellCycleModel();
+            // UniformG1GenerationalCellCycleModel* p_model = new UniformG1GenerationalCellCycleModel();
+            PositionAndUniformG1GenerationalCellCycleModel* p_model = new PositionAndUniformG1GenerationalCellCycleModel();
+            
             p_model->SetDimension(3);
             p_model->SetMaxTransitGenerations(4);
 
@@ -321,19 +324,19 @@ public:
             // p_model->SetG2Duration(2);
             // p_model->SetMDuration(1);
 
-            // p_model->SetTransitCellG1Duration(11);
-            // p_model->SetSDuration(8);
-            // p_model->SetG2Duration(4);
-            // p_model->SetMDuration(1);
-
-            p_model->SetTransitCellG1Duration(0.5);
-            p_model->SetSDuration(0.25);
-            p_model->SetG2Duration(0.25);
+            p_model->SetTransitCellG1Duration(11);
+            p_model->SetSDuration(8);
+            p_model->SetG2Duration(4);
             p_model->SetMDuration(1);
+
+            // p_model->SetTransitCellG1Duration(0.5);
+            // p_model->SetSDuration(0.25);
+            // p_model->SetG2Duration(0.25);
+            // p_model->SetMDuration(1);
             
             CellPtr p_epithelial_cell(new Cell(p_state, p_model));
-            double birth_time = -8;
-            // double birth_time = -RandomNumberGenerator::Instance()->ranf()*(p_model->GetTransitCellG1Duration() + p_model->GetSG2MDuration());
+            // double birth_time = -8;
+            double birth_time = -RandomNumberGenerator::Instance()->ranf()*(p_model->GetTransitCellG1Duration() + p_model->GetSG2MDuration());
 
 
             // if(i == 154)
@@ -365,8 +368,8 @@ public:
             //     birth_time = -10;
             // }
 
-            // p_epithelial_cell->SetCellProliferativeType(p_transit_type);
-            p_epithelial_cell->SetCellProliferativeType(p_differentiated_type);
+            p_epithelial_cell->SetCellProliferativeType(p_transit_type);
+            // p_epithelial_cell->SetCellProliferativeType(p_differentiated_type);
 
             
 			
@@ -438,19 +441,19 @@ public:
 
 
         // MAKE_PTR_ARGS(PeriodicBoxBoundaryCondition3d, boundary_condition, (&cell_population));
-        // MAKE_PTR_ARGS(PeriodicBoxBoundaryCondition3dGhosts, boundary_condition, (&cell_population));
-        // boundary_condition->SetCellPopulationWidth(periodic_width);
-        // boundary_condition->SetCellPopulationDepth(periodic_height);
-        // boundary_condition->SetMaxHeightForPinnedCells(0.0);       			      
-        // boundary_condition->ImposeBoundaryCondition(node_locations_before);
-        // simulator.AddCellPopulationBoundaryCondition(boundary_condition);
+        MAKE_PTR_ARGS(PeriodicBoxBoundaryCondition3dGhosts, boundary_condition, (&cell_population));
+        boundary_condition->SetCellPopulationWidth(periodic_width);
+        boundary_condition->SetCellPopulationDepth(periodic_height);
+        boundary_condition->SetMaxHeightForPinnedCells(0.0);       			      
+        boundary_condition->ImposeBoundaryCondition(node_locations_before);
+        simulator.AddCellPopulationBoundaryCondition(boundary_condition);
 
-        // MAKE_PTR_ARGS(PeriodicStromalBoxBoundaryCondition3d, stromal_boundary_condition, (&cell_population));
-        // stromal_boundary_condition->SetCellPopulationWidth(periodic_width);
-        // stromal_boundary_condition->SetCellPopulationDepth(periodic_height);
-        // stromal_boundary_condition->SetMaxHeightForPinnedCells(0.0);
-        // stromal_boundary_condition->ImposeBoundaryCondition(node_locations_before);
-        // simulator.AddCellPopulationBoundaryCondition(stromal_boundary_condition);
+        MAKE_PTR_ARGS(PeriodicStromalBoxBoundaryCondition3d, stromal_boundary_condition, (&cell_population));
+        stromal_boundary_condition->SetCellPopulationWidth(periodic_width);
+        stromal_boundary_condition->SetCellPopulationDepth(periodic_height);
+        stromal_boundary_condition->SetMaxHeightForPinnedCells(0.0);
+        stromal_boundary_condition->ImposeBoundaryCondition(node_locations_before);
+        simulator.AddCellPopulationBoundaryCondition(stromal_boundary_condition);
 
 
 		// Create periodic spring force law
