@@ -61,7 +61,7 @@ std::vector<c_vector<unsigned,2> > UniformCellKiller3dWithGhostNodes::RemoveByRa
 
 	    if ((!cell_iter->HasApoptosisBegun() && (cell_iter->GetMutationState()->IsType<StromalCellMutationState>()==false)
 	    		&& (RandomNumberGenerator::Instance()->ranf() < death_prob_this_timestep) )
-	    		&& ( (x<mMinXBoundary) || (x>mMaxXBoundary) || (y<mMinYBoundary) || (y>mMaxYBoundary) ) )
+	    		&& ( ((x<mMinXBoundary) || (x>mMaxXBoundary)) || ((y<mMinYBoundary) || (y>mMaxYBoundary)) ) )
 	    {
 	    	// cell_iter->StartApoptosis();
 			// PRINT_3_VARIABLES(cell_iter->GetApoptosisTime(),cell_iter->GetTimeUntilDeath(),SimulationTime::Instance()->GetTime());
@@ -91,6 +91,9 @@ void UniformCellKiller3dWithGhostNodes::CheckAndLabelSingleCellForApoptosis(Cell
 */
 void UniformCellKiller3dWithGhostNodes::CheckAndLabelCellsForApoptosisOrDeath()
 {
+
+	// TRACE("Entering")
+
 	DomMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<3>*> (this->mpCellPopulation);
 	//assert(p_tissue->GetVoronoiTessellation()!=NULL);	// This fails during archiving of a simulation as Voronoi stuff not archived yet
     double death_prob_this_timestep = 1.0 - pow((1.0 - mProbabilityOfDeathInAnHour), SimulationTime::Instance()->GetTimeStep());
@@ -143,7 +146,7 @@ void UniformCellKiller3dWithGhostNodes::CheckAndLabelCellsForApoptosisOrDeath()
 					double x = this->mpCellPopulation->GetLocationOfCellCentre(*cell_iter)[0];
 					double y = this->mpCellPopulation->GetLocationOfCellCentre(*cell_iter)[1];
 
-					if (  (x<mMinXBoundary) || (x>mMaxXBoundary) || (y<mMinYBoundary) || (y>mMaxYBoundary) )
+					if ( ((x<mMinXBoundary) || (x>mMaxXBoundary)) || ((y<mMinYBoundary) || (y>mMaxYBoundary)) )
 					{
 						
 						cells_which_can_die.push_back(node_index);
@@ -204,6 +207,8 @@ void UniformCellKiller3dWithGhostNodes::CheckAndLabelCellsForApoptosisOrDeath()
 		
 
 	}
+	// TRACE("Leaving")
+
 }
 
 void UniformCellKiller3dWithGhostNodes::OutputCellKillerParameters(out_stream& rParamsFile)

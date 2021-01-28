@@ -37,6 +37,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DOMMESHBASEDCELLPOPULATIONWITHGHOSTNODES_HPP_
 
 #include "ChasteSerialization.hpp"
+#include "MutableMesh.hpp"
 #include <boost/serialization/base_object.hpp>
 #include <boost/serialization/vector.hpp>
 
@@ -68,6 +69,9 @@ private:
      */
     double mGhostSpringStiffness;
 
+    double mGhostRestSeperation;
+
+
     /** Needed for serialization. */
     friend class boost::serialization::access;
     /**
@@ -84,12 +88,21 @@ private:
     template<class Archive>
     void serialize(Archive & archive, const unsigned int version)
     {
+        /*
+         * In its current form the code does not allow the direct serialization
+         * of the VertexMesh class, so instead we delete mpVoronoiTessellation.
+         */
+        delete mpVoronoiTessellation;
+        mpVoronoiTessellation = nullptr;
+
         // This needs to be first so that MeshBasedCellPopulation::Validate() doesn't go mental.
         archive & mIsGhostNode;
         archive & mGhostSpringStiffness;
+        archive & mGhostRestSeperation;
         archive & boost::serialization::base_object<MeshBasedCellPopulation<DIM, DIM> >(*this);
         ////
         archive & mWriteVtkAsPointsDom;
+        archive & mOutputMeshInVtkDom;
         ////
     }
 
@@ -113,6 +126,24 @@ private:
 
 protected:
     /**
+     * Pointer to a VertexMesh object that stores the Voronoi tessellation that is dual to
+     * mrMesh. The tessellation is created by calling CreateVoronoiTessellation() and can
+     * be accessed by calling GetVoronoiTessellation().
+     *
+     * The tessellation can be used to compute the area and perimeter (in 2D) or volume and
+     * surface area (in 3D) of the Voronoi element corresponding to each node in the Delaunay
+     * mesh (including ghost nodes) by calling the methods GetVolumeOfVoronoiElement() and
+     * GetSurfaceAreaOfVoronoiElement() respectively. Each of these methods should be called
+     * rather than the relevant method on the VertexMesh. This is because the index of a given
+     * Node in mrMesh may not equal the index of the corresponding VertexElement in
+     * mpVoronoiTessellation; a map between these indices may be accessed by calling the methods
+     * GetDelaunayNodeIndexCorrespondingToVoronoiElementIndex()
+     * and GetVoronoiElementIndexCorrespondingToDelaunayNodeIndex() on mpVoronoiTessellation.
+     */
+    VertexMesh<DIM, DIM>* mpVoronoiTessellation;
+
+
+    /**
      * Overridden method
      *
      * Calls #AcceptCellWriter across the whole population,
@@ -120,9 +151,15 @@ protected:
      */
     virtual void AcceptCellWritersAcrossPopulation();
 
+    //
+    MutableMesh<DIM, DIM>* mpMutableMesh;
+    //
+
     ////
     /** Whether to write cells as points in VTK. */
     bool mWriteVtkAsPointsDom;
+
+    bool mOutputMeshInVtkDom;
     ////
 public:
 
@@ -139,7 +176,8 @@ public:
                                           std::vector<CellPtr>& rCells,
                                           const std::vector<unsigned> locationIndices=std::vector<unsigned>(),
                                           bool deleteMesh=false,
-                                          double ghostSpringStiffness=15.0);
+                                          double ghostSpringStiffness=15.0,
+                                          double mGhostRestSeperation=1.0);
 
     /**
      * Constructor for use by the de-serializer.
@@ -148,12 +186,25 @@ public:
      * @param ghostSpringStiffness spring stiffness used to move the ghost nodes defaults to 15.0.
      */
     DomMeshBasedCellPopulationWithGhostNodes(MutableMesh<DIM, DIM>& rMesh,
-                                          double ghostSpringStiffness=15.0);
+                                          double ghostSpringStiffness=15.0,
+                                          double mGhostRestSeperation=1.0);
 
     /**
      * Empty destructor so archiving works with static libraries.
      */
     virtual ~DomMeshBasedCellPopulationWithGhostNodes();
+
+//
+    /**
+     * @return reference to mrMesh.
+     */
+    MutableMesh<DIM, DIM>& rGetMesh();
+
+    /**
+     * @return const reference to mrMesh (used in archiving).
+     */
+    const MutableMesh<DIM, DIM>& rGetMesh() const;
+//
 
     /**
      * Overridden GetTetrahedralMeshForPdeModifier() method.
@@ -260,6 +311,27 @@ public:
      * @return mWriteVtkAsPoints.
      */
     bool GetWriteVtkAsPointsDom();
+
+    /**
+     * Set mOutputMeshInVtkDom.
+     *
+     * @param mOutputMeshInVtkDom whether to write cells as points in VTK
+     */
+    void SetOutputMeshInVtkDom(bool mOutputMeshInVtkDom);
+    /**
+     * @return mOutputMeshInVtkDom.
+     */
+    bool GetOutputMeshInVtkDom();
+
+    /**
+     * Create a Voronoi tessellation of the mesh.
+     */
+    void CreateVoronoiTessellation();
+
+    /**
+     * @return a reference to mpVoronoiTessellation.
+     */
+    VertexMesh<DIM, DIM>* GetVoronoiTessellation();
 ////
     /**
      * Outputs CellPopulation parameters to file

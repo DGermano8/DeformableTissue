@@ -1598,7 +1598,7 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 
 
 	
-	// Uncomment these to print angle_sum data
+	// Uncomment these to print angle_sum data - NOTE: for this to work, need a "results" folder in Chaste directory
 	std::ofstream myfile;
 	std::string angle_string = "results/angle_string_" + std::to_string(SimulationTime::Instance()->GetTime()) + ".txt";
 	myfile.open (angle_string);

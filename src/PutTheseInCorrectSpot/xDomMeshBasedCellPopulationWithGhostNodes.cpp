@@ -41,8 +41,10 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CellPopulationElementWriter.hpp"
 #include "CellId.hpp"
 #include "Debug.hpp"
+#include "MutableMesh.hpp"
 
-
+#include "WildTypeCellMutationState.hpp"
+#include "StromalCellMutationState.hpp"
 
 
 template<unsigned DIM>
@@ -51,12 +53,21 @@ DomMeshBasedCellPopulationWithGhostNodes<DIM>::DomMeshBasedCellPopulationWithGho
      std::vector<CellPtr>& rCells,
      const std::vector<unsigned> locationIndices,
      bool deleteMesh,
-     double ghostSpringStiffness)
+     double ghostSpringStiffness,
+     double ghostRestSeperation)
              : MeshBasedCellPopulation<DIM,DIM>(rMesh, rCells, locationIndices, deleteMesh, false), // do not call the base class Validate()
+               mpVoronoiTessellation(nullptr),
                mGhostSpringStiffness(ghostSpringStiffness),
-               mWriteVtkAsPointsDom(false)
+               mGhostRestSeperation(ghostRestSeperation),
+               mWriteVtkAsPointsDom(false),
+               mOutputMeshInVtkDom(false)
+               
 
 {
+    //
+    mpMutableMesh = static_cast<MutableMesh<DIM,DIM>* >(&(this->mrMesh));
+    //
+
     if (!locationIndices.empty())
     {
         // Create a set of node indices corresponding to ghost nodes
@@ -89,9 +100,10 @@ DomMeshBasedCellPopulationWithGhostNodes<DIM>::DomMeshBasedCellPopulationWithGho
 
 template<unsigned DIM>
 DomMeshBasedCellPopulationWithGhostNodes<DIM>::DomMeshBasedCellPopulationWithGhostNodes(MutableMesh<DIM, DIM>& rMesh,
-                                                                                  double ghostSpringStiffness)
+                                                                                  double ghostSpringStiffness, double ghostRestSeperation)
     : MeshBasedCellPopulation<DIM,DIM>(rMesh),
-      mGhostSpringStiffness(ghostSpringStiffness)
+      mGhostSpringStiffness(ghostSpringStiffness),
+      mGhostRestSeperation(ghostRestSeperation)
 {
 }
 
@@ -163,7 +175,18 @@ c_vector<double, DIM> DomMeshBasedCellPopulationWithGhostNodes<DIM>::CalculateFo
     double distance_between_nodes = norm_2(unit_difference);
     unit_difference /= distance_between_nodes;
 
-    double rest_length = 1.0;
+    double rest_length;
+    if(this->IsGhostNode(rNodeAGlobalIndex) && this->IsGhostNode(rNodeBGlobalIndex))
+    {
+        // rest_length = mGhostRestSeperation;
+        rest_length = 1.0;
+    }
+    else
+    {
+        // rest_length = 1.0;
+        rest_length = mGhostRestSeperation;
+    }
+    
     double cut_off = 1.5;
     if (distance_between_nodes <= cut_off)
     {
@@ -226,6 +249,23 @@ void DomMeshBasedCellPopulationWithGhostNodes<DIM>::Validate()
         }
     }
 }
+
+//
+template<unsigned DIM>
+MutableMesh<DIM,DIM>& DomMeshBasedCellPopulationWithGhostNodes<DIM>::rGetMesh()
+{
+
+
+    return *mpMutableMesh;
+}
+
+template<unsigned DIM>
+const MutableMesh<DIM,DIM>& DomMeshBasedCellPopulationWithGhostNodes<DIM>::rGetMesh() const
+{
+    return *mpMutableMesh;
+}
+//
+
 
 template<unsigned DIM>
 void DomMeshBasedCellPopulationWithGhostNodes<DIM>::UpdateGhostNodesAfterReMesh(NodeMap& rMap)
@@ -362,6 +402,7 @@ template<unsigned DIM>
 void DomMeshBasedCellPopulationWithGhostNodes<DIM>::WriteVtkResultsToFile(const std::string& rDirectory)
 {
 #ifdef CHASTE_VTK
+// PRINT_VARIABLE((this->mpVoronoiTessellation != nullptr));
     if (this->mpVoronoiTessellation != nullptr)
     {
         unsigned num_timesteps = SimulationTime::Instance()->GetTimeStepsElapsed();
@@ -443,6 +484,110 @@ void DomMeshBasedCellPopulationWithGhostNodes<DIM>::WriteVtkResultsToFile(const 
 
     //PRINT_VECTOR(cell_data_names);
     std::vector<std::vector<double> > cell_data;
+
+    if (mOutputMeshInVtkDom)
+    {
+        // Create mesh writer for VTK output
+        // VtkMeshWriter<DIM, DIM> mesh_writer(rDirectory, "mesh_"+time.str(), false);
+        // mesh_writer.WriteFilesUsingMesh(rGetMesh());
+        // PRINT_VARIABLE(rGetMesh().GetNumNodes());
+        // PRINT_VARIABLE(rGetMesh().GetNumElements());
+
+        // Creat a new mesh
+        MutableMesh<2,3>* pMutableMesh = new MutableMesh<2,3>();
+
+        // Store the nodes from the old mesh
+        std::vector<Node<3>*> nodes;
+
+        double dist_threshold = 2.0;
+
+        for (unsigned node_index=0; node_index<rGetMesh().GetNumNodes(); node_index++)
+        {
+            const c_vector<double, 3>& r_location = rGetMesh().GetNode(node_index)->rGetLocation();
+            nodes.push_back(new Node<3>(node_index, r_location));
+            pMutableMesh->AddNode(new Node<3>(node_index, r_location));
+        }
+
+
+        int element_iter = 0;
+        for (unsigned elem_index=0; elem_index<rGetMesh().GetNumElements(); elem_index++)
+        {    
+
+            Element<DIM,DIM>* pElement=rGetMesh().GetElement(elem_index);
+
+            // PRINT_VARIABLE(pElement);
+
+            for( int j=0; j<1; j++) //for( int j=0; j<4; j++)
+            {
+                unsigned Node0Index = pElement->GetNodeGlobalIndex((0+j)%4);
+                unsigned Node1Index = pElement->GetNodeGlobalIndex((1+j)%4);
+                unsigned Node2Index = pElement->GetNodeGlobalIndex((2+j)%4);
+                unsigned Node3Index = pElement->GetNodeGlobalIndex((3+j)%4);
+
+                const c_vector<double, 3>& r_location0 = rGetMesh().GetNode(Node0Index)->rGetLocation();
+                const c_vector<double, 3>& r_location1 = rGetMesh().GetNode(Node1Index)->rGetLocation();
+                const c_vector<double, 3>& r_location2 = rGetMesh().GetNode(Node2Index)->rGetLocation();
+                const c_vector<double, 3>& r_location3 = rGetMesh().GetNode(Node3Index)->rGetLocation();
+
+
+                double distance_between_nodes_01 = norm_2(r_location0 - r_location1);
+                double distance_between_nodes_02 = norm_2(r_location0 - r_location2);
+                double distance_between_nodes_03 = norm_2(r_location0 - r_location3);
+                double distance_between_nodes_12 = norm_2(r_location1 - r_location2);
+                double distance_between_nodes_13 = norm_2(r_location1 - r_location3);
+                double distance_between_nodes_23 = norm_2(r_location2 - r_location3);
+
+                if( distance_between_nodes_01 <= dist_threshold && distance_between_nodes_03 <= dist_threshold && distance_between_nodes_13 <= dist_threshold )
+                {
+                    std::vector<Node<3>*> ElementNodes0;
+                    ElementNodes0.push_back(nodes[Node0Index]);
+                    ElementNodes0.push_back(nodes[Node1Index]);
+                    ElementNodes0.push_back(nodes[Node3Index]);
+                    pMutableMesh->AddElement(new Element<2,3>(element_iter,ElementNodes0));
+                    element_iter++;
+                }
+
+                if( distance_between_nodes_01 <= dist_threshold && distance_between_nodes_02 <= dist_threshold && distance_between_nodes_12 <= dist_threshold )
+                {
+                    std::vector<Node<3>*> ElementNodes1;
+                    ElementNodes1.push_back(nodes[Node0Index]);
+                    ElementNodes1.push_back(nodes[Node1Index]);
+                    ElementNodes1.push_back(nodes[Node2Index]);
+                    pMutableMesh->AddElement(new Element<2,3>(element_iter,ElementNodes1));
+                    element_iter++;
+                }
+
+                if( distance_between_nodes_02 <= dist_threshold && distance_between_nodes_03 <= dist_threshold && distance_between_nodes_23 <= dist_threshold )
+                {
+                    std::vector<Node<3>*> ElementNodes2;
+                    ElementNodes2.push_back(nodes[Node0Index]);
+                    ElementNodes2.push_back(nodes[Node2Index]);
+                    ElementNodes2.push_back(nodes[Node3Index]);
+                    pMutableMesh->AddElement(new Element<2,3>(element_iter,ElementNodes2));
+                    element_iter++;
+                }
+
+                if( distance_between_nodes_12 <= dist_threshold && distance_between_nodes_13 <= dist_threshold && distance_between_nodes_23 <= dist_threshold )
+                {
+                    std::vector<Node<3>*> ElementNodes3;
+                    ElementNodes3.push_back(nodes[Node1Index]);
+                    ElementNodes3.push_back(nodes[Node2Index]);
+                    ElementNodes3.push_back(nodes[Node3Index]);
+                    pMutableMesh->AddElement(new Element<2,3>(element_iter,ElementNodes3));
+                    element_iter++;
+                }
+
+            }
+        }
+        
+        std::ostringstream time_string;
+        time_string << SimulationTime::Instance()->GetTimeStepsElapsed();
+        std::string results_file = "mesh_results_" + time_string.str();
+        VtkMeshWriter<2,3>* p_vtk_mesh_writer = new VtkMeshWriter<2,3>(rDirectory, results_file, false);
+        p_vtk_mesh_writer->WriteFilesUsingMesh(*pMutableMesh);
+
+        delete pMutableMesh;
+    }
 
     if (mWriteVtkAsPointsDom)
     {
@@ -562,6 +707,137 @@ void DomMeshBasedCellPopulationWithGhostNodes<DIM>::WriteVtkResultsToFile(const 
         
         //PRINT_VARIABLE("Finish");
     }
+
+    if (true)//Change this to true to display nodes without ghosts, but it needs fixing....
+    {
+        //std::cout<< "\n";
+        //PRINT_VARIABLE("Start ");
+        
+        // Create mesh writer for VTK output
+        VtkMeshWriter<DIM, DIM> cells_writer(rDirectory, "results_no_ghost"+time.str(), false);
+
+        
+        // Iterate over any cell writers that are present
+        unsigned num_cells = this->GetNumAllCells();
+        unsigned total_num_nodes = this->mrMesh.GetNumNodes();
+        //PRINT_2_VARIABLES(total_num_nodes, num_cell_data_items);
+        
+        std::vector<double> ghosts(total_num_nodes);
+
+        for (typename std::vector<boost::shared_ptr<AbstractCellWriter<DIM, DIM> > >::iterator cell_writer_iter = this->mCellWriters.begin();
+             cell_writer_iter != this->mCellWriters.end();
+             ++cell_writer_iter)
+        {
+            // Create vector to store VTK cell data
+            std::vector<double> vtk_cell_data(total_num_nodes);
+
+            // Loop over cells
+            for (unsigned node_index=0; node_index<total_num_nodes; node_index++)
+            {
+                // If this node corresponds to a ghost node, set any "cell" data to be -1.0
+                if (this->IsGhostNode(node_index))
+                {
+                    // Populate the vector of VTK cell data
+                    //vtk_cell_data[node_index] = -1.0;
+                }
+                else
+                {
+                    // Get the cell corresponding to this node
+                    CellPtr p_cell = this->GetCellUsingLocationIndex(node_index);
+
+                    // Populate the vector of VTK cell data
+                    vtk_cell_data[node_index] = (*cell_writer_iter)->GetCellDataForVtkOutput(p_cell, this);
+                    //PRINT_VARIABLE((*cell_writer_iter)->GetCellDataForVtkOutput(p_cell, this));
+
+                    cells_writer.AddPointData((*cell_writer_iter)->GetVtkCellDataName(), vtk_cell_data);
+                }
+                
+            }
+
+            
+        }
+        
+        // Loop over cells
+        for (unsigned node_index=0; node_index<total_num_nodes; node_index++)
+        {
+
+            // If this node corresponds to a ghost node, set any "cell" data to be -1.0
+            if (this->IsGhostNode(node_index))
+            {
+                for (unsigned var=0; var<num_cell_data_items; var++)
+                {
+                    //cell_data[var][node_index] = -1;
+                    
+                }
+            }
+            else
+            {
+                // Get the cell corresponding to this node
+                CellPtr p_cell = this->GetCellUsingLocationIndex(node_index);
+
+                for (unsigned var=0; var<num_cell_data_items; var++)
+                {
+                    cell_data[var][node_index] = p_cell->GetCellData()->GetItem(cell_data_names[var]);
+
+                    cells_writer.AddPointData(cell_data_names[var], cell_data[var]);
+                    
+                }
+            }
+            
+        }
+        
+        // for (unsigned var=0; var<num_cell_data_items; var++)
+        // {
+        //     cells_writer.AddPointData(cell_data_names[var], cell_data[var]);
+        // }
+       
+        // Make a copy of the nodes in a disposable mesh for writing
+        {
+            std::vector<Node<DIM>* > nodes;
+            for (unsigned index=0; index<this->mrMesh.GetNumNodes(); index++)
+            {
+            
+            // PRINT_VARIABLE((this->IsGhostNode(index)));
+            
+            if ( (this->IsGhostNode(index)) )
+            {
+                Node<DIM>* p_node = this->mrMesh.GetNode(index);
+
+                nodes.push_back(p_node);
+            }
+            else
+            {
+                Node<DIM>* p_node = this->mrMesh.GetNode(index);
+                nodes.push_back(p_node);
+            }
+            /*    if(!(this->IsGhostNode(index)))
+                {
+                    //TRACE(this->mrMesh.GetNode(index));
+                    Node<DIM>* p_node = this->mrMesh.GetNode(index);
+                    nodes.push_back(p_node);
+                }
+                else if (this->IsGhostNode(index))
+                {
+                    //Do something...
+                }
+                //PRINT_2_VARIABLES(index,(this->IsGhostNode(index)));
+            */
+            }
+            NodesOnlyMesh<DIM> mesh;
+            mesh.ConstructNodesWithoutMesh(nodes, 1.5); // Arbitrary cut off as connectivity not used.
+            cells_writer.WriteFilesUsingMesh(mesh);
+        }
+        //PRINT_2_VARIABLES("Middle",num_timesteps);
+        
+        
+        *(this->mpVtkMetaFile) << "        <DataSet timestep=\"";
+        *(this->mpVtkMetaFile) << num_timesteps;
+        *(this->mpVtkMetaFile) << "\" group=\"\" part=\"0\" file=\"results_";
+        *(this->mpVtkMetaFile) << num_timesteps;
+        *(this->mpVtkMetaFile) << ".vtu\"/>\n";
+        
+        //PRINT_VARIABLE("Finish");
+    }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #endif //CHASTE_VTK
@@ -579,12 +855,46 @@ bool DomMeshBasedCellPopulationWithGhostNodes<DIM>::GetWriteVtkAsPointsDom()
 {
     return mWriteVtkAsPointsDom;
 }
+
+template<unsigned DIM>
+void DomMeshBasedCellPopulationWithGhostNodes<DIM>::SetOutputMeshInVtkDom(bool outputMeshInVtkDom)
+{
+    mOutputMeshInVtkDom = outputMeshInVtkDom;
+}
+
+template<unsigned DIM>
+bool DomMeshBasedCellPopulationWithGhostNodes<DIM>::GetOutputMeshInVtkDom()
+{
+    return mOutputMeshInVtkDom;
+}
+
+/**
+ * The cylindrical mesh is only defined in 2D, hence there is
+ * a separate definition for this method in 3D, which doesn't have the capability
+ * of dealing with periodic boundaries in 3D. This is \todo #1374.
+ */
+template<>
+void DomMeshBasedCellPopulationWithGhostNodes<3>::CreateVoronoiTessellation()
+{
+    delete mpVoronoiTessellation;
+    mpVoronoiTessellation = new VertexMesh<3, 3>(static_cast<MutableMesh<3, 3> &>((this->mrMesh)));
+}
+
+template<unsigned DIM>
+VertexMesh<DIM,DIM>* DomMeshBasedCellPopulationWithGhostNodes<DIM>::GetVoronoiTessellation()
+{
+    assert(mpVoronoiTessellation!=nullptr);
+    return mpVoronoiTessellation;
+}
+
 ////
 template<unsigned DIM>
 void DomMeshBasedCellPopulationWithGhostNodes<DIM>::OutputCellPopulationParameters(out_stream& rParamsFile)
 {
     *rParamsFile << "\t\t<GhostSpringStiffness>" << mGhostSpringStiffness << "</GhostSpringStiffness>\n";
+    *rParamsFile << "\t\t<GhostRestSeperation>" << mGhostRestSeperation << "</GhostRestSeperation>\n";
     *rParamsFile << "\t\t<WriteVtkAsPoints>" << mWriteVtkAsPointsDom << "</WriteVtkAsPoints>\n";
+    *rParamsFile << "\t\t<OutputMeshInVtk>" << mOutputMeshInVtkDom << "</OutputMeshInVtk>\n";
 
     // Call method on direct parent class
     MeshBasedCellPopulation<DIM>::OutputCellPopulationParameters(rParamsFile);

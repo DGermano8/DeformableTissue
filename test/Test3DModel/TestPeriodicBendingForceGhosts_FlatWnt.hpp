@@ -54,7 +54,7 @@
 #include "MeshModifier.hpp"
 #include "MeshRemeshModifier.hpp"
 
-#include "SimpleWntCellCycleModel.hpp"
+#include "DomSimpleWntCellCycleModel.hpp"
 
 
 
@@ -76,10 +76,10 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "Test_Periodic_rand_tiss_small2";
+        std::string output_directory = "Test_Periodic_angle";
 
         unsigned width = 10;	   // x
-        unsigned height = 10;      // y
+        unsigned height = 14;      // y
         unsigned ghosts_bottom = 0;       // ghosts > depth
         unsigned ghosts_top = 1;       // ghosts > depth
         unsigned num_tissue_depth = 2;
@@ -116,7 +116,7 @@ public:
         double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 0.01;
+        double end_time = 14;
         double plot_step = 10.0;
 
         bool include_springs = true;
@@ -315,25 +315,25 @@ public:
             // p_model->SetDimension(3);
             
             // UniformG1GenerationalCellCycleModel* p_model = new UniformG1GenerationalCellCycleModel();
-            SimpleWntCellCycleModel* p_model = new SimpleWntCellCycleModel();
+            DomSimpleWntCellCycleModel* p_model = new DomSimpleWntCellCycleModel();
             
             p_model->SetDimension(3);
             // p_model->SetMaxTransitGenerations(4);
 
-            // p_model->SetTransitCellG1Duration(4);
-            // p_model->SetSDuration(2);
-            // p_model->SetG2Duration(2);
-            // p_model->SetMDuration(1);
-
-            p_model->SetTransitCellG1Duration(11);
-            p_model->SetSDuration(8);
-            p_model->SetG2Duration(4);
+            p_model->SetTransitCellG1Duration(3);
+            p_model->SetSDuration(2);
+            p_model->SetG2Duration(2);
             p_model->SetMDuration(1);
+
+            // p_model->SetTransitCellG1Duration(11);
+            // p_model->SetSDuration(8);
+            // p_model->SetG2Duration(4);
+            // p_model->SetMDuration(1);
 
             // p_model->SetTransitCellG1Duration(0.5);
             // p_model->SetSDuration(0.25);
             // p_model->SetG2Duration(0.25);
-            // p_model->SetMDuration(1);
+            // p_model->SetMDuration(0.5);
             
             CellPtr p_epithelial_cell(new Cell(p_state, p_model));
             // double birth_time = -8;
@@ -401,9 +401,16 @@ public:
         //CryptSimulation3d(rCellPopulation, bool deleteCellPopulationAndForceCollection, bool initialiseCells)
         OffLatticeSimulation<3> simulator(cell_population);
         
-        WntConcentration<3>::Instance()->SetType(RADIAL);
-        WntConcentration<3>::Instance()->SetCellPopulation(cell_population);
-        WntConcentration<3>::Instance()->SetCryptLength(2);
+        DomWntConcentration<3>::Instance()->SetType(DomRADIAL);
+        DomWntConcentration<3>::Instance()->SetCellPopulation(cell_population);
+        DomWntConcentration<3>::Instance()->SetCryptLength(10.0);
+        DomWntConcentration<3>::Instance()->SetCryptCentreX(0.5*periodic_width);
+        DomWntConcentration<3>::Instance()->SetCryptCentreY(0.5*periodic_height);
+        DomWntConcentration<3>::Instance()->SetCryptRadius(2.0);
+        DomWntConcentration<3>::Instance()->SetWntConcentrationParameter(2.0);
+
+        
+
 
         // Pass an adaptive numerical method to the simulation
         boost::shared_ptr<AbstractNumericalMethod<3,3> > p_method(new ForwardEulerNumericalMethod<3,3>());
@@ -532,8 +539,8 @@ public:
 
         // Add random cell killer for death at the edges
         //                                                              ProbabilityOfDeathInAnHour,    MinXBoundary,                MaxXBoundary,     MinYBoundary,                    MaxYBoundary
-        // MAKE_PTR_ARGS(UniformCellKiller3dWithGhostNodes, random_cell_death, (&cell_population, 1.0, 1.5*width_space,  periodic_width-1.5*width_space, 1.5*height_space,  periodic_height-1.5*height_space, num_epithelial_cells+num_tissue_cells));
-        MAKE_PTR_ARGS(UniformCellKiller3dWithGhostNodes, random_cell_death, (&cell_population, 1.0, periodic_width + 1,  0 - 1, periodic_height + 1,  0 - 1 , num_epithelial_cells+num_tissue_cells + 10));
+        MAKE_PTR_ARGS(UniformCellKiller3dWithGhostNodes, random_cell_death, (&cell_population, 1.0, 1.5*width_space,  periodic_width-1.5*width_space, 1.5*height_space,  periodic_height-1.5*height_space, num_epithelial_cells+num_tissue_cells));
+        // MAKE_PTR_ARGS(UniformCellKiller3dWithGhostNodes, random_cell_death, (&cell_population, 1.0, periodic_width + 1,  0 - 1, periodic_height + 1,  0 - 1 , num_epithelial_cells+num_tissue_cells ));
 		simulator.AddCellKiller(random_cell_death);
 
 
