@@ -1,9 +1,6 @@
-%MeshVisualize3dBoxModel(filename)
-clear all;
-filename = 'results';
+function Visualize3dBoxModel_SJ(filename)
 %
 % function Visualize3dBoxModel(filename)
-
 % Reads in <filename>.viznodes, <filename>.vizc;celltypes, <filename>.vizelements and <filename>.vizsetup
 %
 % <filename>.viznodes has form:
@@ -26,10 +23,8 @@ addpath /Users/germanod/workspace/Chaste/projects/results/Test_Periodic_with_ben
 % Visualiser options
 RandomColour = false;		% For cells
 PlotSprings = false;
-PlotTissueCells = true;
-PlotCells = false;			% Chinese-lantern type cells
+PlotCells = true;			% Chinese-lantern type cells
 PlotCellCenters = true;
-PlotGhosts = true;
 NumPtsInCircles = 10;
 Defaultcolor = [0.0,0.0,0.7];
 
@@ -37,7 +32,6 @@ nodesfile = [filename, '.viznodes'];
 celltypesfile = [filename, '.vizcelltypes'];
 elementsfile = [filename, '.vizelements'];
 setupfile = [filename, '.vizsetup'];
-% cellmutationstatefile = [filename, '.vizmutationstates'];
 
 nodedata = LoadNonConstantLengthData(nodesfile);
 celltypesdata = LoadNonConstantLengthData(celltypesfile);
@@ -60,13 +54,11 @@ sphereZ = sphereZ;
 
 numtimes = length(nodedata);
 
-%close all
+close all
 fig=figure;
-pause(0.1)
-%%
+pause()
 
-for i = 1:10;        % Timestep is 30 seconds
-    clf 
+for i = 1:10        % Timestep is 30 seconds
 
     time = nodedata{i}(1)     % Gives first element of ith row
 
@@ -77,42 +69,17 @@ for i = 1:10;        % Timestep is 30 seconds
     NumCells = length(xvals);
     NumNodes = length(types);
     
-    %Ele = reshape(elementsdata{i}(2:end)+1,4,length(elementsdata{i}(2:end))/4)';
-%     Ele = reshape(elementsdata{i}(2:end)+1,3,length(elementsdata{i}(2:end))/3)';
-%     NumEle = length(Ele(:,1));
+    Ele = reshape(elementsdata{i}(2:end)+1,3,length(elementsdata{i}(2:end))/3)';
+    NumEle = length(Ele(:,1));
 
     % Plot CellCenters
     
     if (PlotCellCenters)
         for j=1:NumCells
-            
-            if(j <= length(types))
-                if (types(j) == 0)
-                    CellColour = [0 0 0];        % Black (stem) epithelial cells
-
-                elseif (types(j) == 1)
-                    CellColour = [0 0 1];        % Yellow (transit) epithelial cells
-
-                elseif (types(j) == 2)
-                    CellColour = [1 0 1];        % Pink (differentiated) tissue cells
-                end
-                Colour = CellColour;
-    %           plot3(xvals(j),yvals(j), zvals(j), 'o','Color',Colour)
-                scatter3(xvals(j),yvals(j), zvals(j), 50,'filled','MarkerFaceColor',Colour)
+            %if (types(j) <3)
+                plot3(xvals(j),yvals(j), zvals(j), 'ko')
                 hold on
-            
-            elseif (PlotGhosts)
-                CellColour = [0.4 0.4 0.4];  % Grey cells - could be ghosts or apoptotic
-                Colour = CellColour;
-    %           plot3(xvals(j),yvals(j), zvals(j), 'o','Color',Colour)
-                scatter3(xvals(j),yvals(j), zvals(j), 50,'filled','MarkerFaceColor',Colour)
-                hold on
-            end         
-            
-%             Colour = CellColour;
-% %           plot3(xvals(j),yvals(j), zvals(j), 'o','Color',Colour)
-%             scatter3(xvals(j),yvals(j), zvals(j), 50,'filled','MarkerFaceColor',Colour)
-%             hold on
+            %end
         end
     end
     
@@ -140,7 +107,7 @@ for i = 1:10;        % Timestep is 30 seconds
         for k=1:NumEle
             EdgeIndices = [1,1,1,2,2,3;
                 2,3,4,3,4,4];
-            for j=1:6
+            for j=1:2
                 CellSeparation(Ele(k,EdgeIndices(:,j))) = CellSeparation(Ele(k,EdgeIndices(:,j))) ...
                     + norm([xvals(Ele(k,EdgeIndices(1,j)))-xvals(Ele(k,EdgeIndices(2,j)));
                     yvals(Ele(k,EdgeIndices(1,j)))-yvals(Ele(k,EdgeIndices(2,j)));
@@ -164,26 +131,24 @@ for i = 1:10;        % Timestep is 30 seconds
             
             % Trying to plot cell colours according to proliferative state
             
-            if(j <= length(types))
-                if (types(j) == 2)
-                    CellColour = [0 0 0];        % Black (stem) epithelial cells
+            if (types(j) == 0)
+                CellColour = [0 0 0];        % Black (stem) epithelial cells
+                
+            elseif (types(j) == 1)
+                CellColour = [1 1 0];        % Yellow (transit) epithelial cells
 
-                elseif (types(j) == 1)
-                    CellColour = [0 0 1];        % Yellow (transit) epithelial cells
-
-                elseif (types(j) == 0)
-                    CellColour = [1 0 1];        % Pink (differentiated) tissue cells
-                end
+            elseif (types(j) == 2)
+                CellColour = [1 0 1];        % Pink (differentiated) tissue cells
+                
             else
                 CellColour = [0.4 0.4 0.4];  % Grey cells - could be ghosts or apoptotic
-            end        
+            end         
             
             Colour = CellColour;
-            %if (types(j) <3)
-            %if (types(j) == 2 )
-                surf (CellX, CellY, CellZ, 'FaceColor', Colour, 'FaceAlpha', 0.25) ;
+            if (types(j) <3)
+                surf (CellX, CellY, CellZ, 'FaceColor', Colour, 'FaceAlpha', 0.5) ;
                 hold on
-            %end
+            end
         end
     end
 
@@ -196,34 +161,27 @@ for i = 1:10;        % Timestep is 30 seconds
         end
     end
 
-    %view(3)
-    az = 45;
-    el = 5;
-    view(az, el);
+    view(3)				
 %    axis([-1,16,-1,16,-1,6]);				
 %     axis([-1,7,-1,7,-1,6]);				
-    title({sprintf('Time = %2.3f', time);' '})
-
-    %pause(0.1)
+    pause(0.1)
     drawnow
     grid off
     M(i) = getframe(fig);
     
-    
     pause(0.01);
+    clf    
 end
-       
 
-% folder = '/Users/germanod/Workspace/Chaste/projects/results_from_time_0/';
-% 
-% writerObj = VideoWriter( strcat(folder,'BoxModel3DMovie'),'Motion JPEG AVI');
-% writerObj.Quality = 100;
-% writerObj.FrameRate = 10;
-% open(writerObj);
-% for i=1:length(M)
-%     frame_obj = M(i) ;    
-%     writeVideo(writerObj, frame_obj);
-% end
-% close(writerObj);
+
+writerObj = VideoWriter( strcat(folder,'BoxModel3DMovie'),'Motion JPEG AVI');
+writerObj.Quality = 100;
+writerObj.FrameRate = 10;
+open(writerObj);
+for i=1:length(M)
+frame_obj = M(i) ;    
+writeVideo(writerObj, frame_obj);
+end
+close(writerObj);
 
 %movie2avi(M,'BoxModel3DMovie','fps', 5)
