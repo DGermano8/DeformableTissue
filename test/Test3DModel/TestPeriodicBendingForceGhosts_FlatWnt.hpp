@@ -53,6 +53,7 @@
 
 #include "MeshModifier.hpp"
 #include "MeshRemeshModifier.hpp"
+#include "PeriodicRemeshCellsModifier.hpp"
 
 #include "DomSimpleWntCellCycleModel.hpp"
 
@@ -76,13 +77,13 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "Test_Periodic_angle";
+        std::string output_directory = "Test_Periodic_with_bend_large_Anoikis_no_noise";
 
         unsigned width = 10;	   // x
         unsigned height = 14;      // y
         unsigned ghosts_bottom = 0;       // ghosts > depth
         unsigned ghosts_top = 1;       // ghosts > depth
-        unsigned num_tissue_depth = 2;
+        unsigned num_tissue_depth = 1;
         unsigned depth = num_tissue_depth + (ghosts_bottom + ghosts_top) + 1;        // z
 
         // Initialise the tissue in an equilibrum state
@@ -116,7 +117,7 @@ public:
         double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 14;
+        double end_time = 32;
         double plot_step = 10.0;
 
         bool include_springs = true;
@@ -318,17 +319,17 @@ public:
             DomSimpleWntCellCycleModel* p_model = new DomSimpleWntCellCycleModel();
             
             p_model->SetDimension(3);
-            // p_model->SetMaxTransitGenerations(4);
+            // p_model->SetMaxTransitGenerations(100);
 
-            p_model->SetTransitCellG1Duration(3);
-            p_model->SetSDuration(2);
-            p_model->SetG2Duration(2);
-            p_model->SetMDuration(1);
-
-            // p_model->SetTransitCellG1Duration(11);
-            // p_model->SetSDuration(8);
-            // p_model->SetG2Duration(4);
+            // p_model->SetTransitCellG1Duration(3);
+            // p_model->SetSDuration(2);
+            // p_model->SetG2Duration(2);
             // p_model->SetMDuration(1);
+
+            p_model->SetTransitCellG1Duration(11);
+            p_model->SetSDuration(8);
+            p_model->SetG2Duration(4);
+            p_model->SetMDuration(1);
 
             // p_model->SetTransitCellG1Duration(0.5);
             // p_model->SetSDuration(0.25);
@@ -470,7 +471,7 @@ public:
 		// Create periodic spring force law
         MAKE_PTR(PeriodicCryptModelInteractionForceWithGhostNodes<3>, periodic_spring_force);
         periodic_spring_force->SetUseOneWaySprings(false); //turning this on makes the stromal cells act as ghosts..
-        periodic_spring_force->SetCutOffLength(1.5);
+        periodic_spring_force->SetCutOffLength(1.75);
         //                     SetEpithelialStromalCellDependentSprings(ind , Ep-Ep, Str-Str, Ep-Str, apcTwoHitStromalMultiplier);
         periodic_spring_force->SetEpithelialStromalCellDependentSprings(true, 1.0,     0.5,     0.5,    1.0);
         periodic_spring_force->SetPeriodicDomainWidth(periodic_width);
@@ -483,9 +484,9 @@ public:
 
 
 	    // Create force law
-	    MAKE_PTR(GeneralisedLinearSpringForce<3>, linear_force);
-	    linear_force->SetCutOffLength(1.5);
-        simulator.AddForce(linear_force);
+	    // MAKE_PTR(GeneralisedLinearSpringForce<3>, linear_force);
+	    // linear_force->SetCutOffLength(1.5);
+        // simulator.AddForce(linear_force);
 
 		// Create periodic basement membrane force law
         MAKE_PTR(PeriodicBendingForce3dHeightWithGhostNodes, periodic_bending_force);
@@ -517,7 +518,7 @@ public:
         // MAKE_PTR_ARGS(SloughingCellKiller3DWithGhostNodes, sloughing, (&cell_population, periodic_width, periodic_height));
         // simulator.AddCellKiller(sloughing);
 
-        double cut_off = 2.0;
+        double cut_off = 4.0;
         // Add anoikis cell killer
         MAKE_PTR_ARGS(AnoikisCellKiller3DWithGhostNodes, anoikis, (&cell_population, cut_off, periodic_width, periodic_height));
         simulator.AddCellKiller(anoikis);
@@ -535,6 +536,15 @@ public:
         p_modifier->SetDepth(periodic_height);
 
         simulator.AddSimulationModifier(p_modifier);
+
+        MAKE_PTR(PeriodicRemeshCellsModifier<3>, p_per_modifier);
+        p_per_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
+        p_per_modifier->SetWidth(periodic_width);
+        p_per_modifier->SetDepth(periodic_height);
+
+        simulator.AddSimulationModifier(p_per_modifier);
+
+        
 
 
         // Add random cell killer for death at the edges

@@ -1599,11 +1599,10 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 
 	
 	// Uncomment these to print angle_sum data - NOTE: for this to work, need a "results" folder in Chaste directory
-	std::ofstream myfile;
-	std::string angle_string = "results/angle_string_" + std::to_string(SimulationTime::Instance()->GetTime()) + ".txt";
-	myfile.open (angle_string);
-
-	myfile << SimulationTime::Instance()->GetTime() << ", ";
+	// std::ofstream myfile;
+	// std::string angle_string = "results/angle_string_" + std::to_string(SimulationTime::Instance()->GetTime()) + ".txt";
+	// myfile.open (angle_string);
+	// myfile << SimulationTime::Instance()->GetTime() << ", ";
 
 	for (AbstractCellPopulation<3>::Iterator cell_iter = rCellPopulation.Begin();
          cell_iter != rCellPopulation.End();
@@ -1744,7 +1743,7 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 			force_curvature[1] = force_due_to_curvature[1];
 			force_curvature[2] = force_due_to_curvature[2];
 
-			myfile  << std::fixed << std::setprecision(12) << force_due_to_curvature[3] << ", ";
+			// myfile  << std::fixed << std::setprecision(12) << force_due_to_curvature[3] << ", ";
 			
 
 			rCellPopulation.GetNode(cell_i_ext)->AddAppliedForceContribution(basement_membrane_parameter*force_curvature);
@@ -1758,7 +1757,7 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 		
 	}
 
-	myfile.close();
+	// myfile.close();
 	
 	
 }

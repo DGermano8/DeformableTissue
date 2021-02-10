@@ -119,7 +119,21 @@ void UniformCellKiller3dWithGhostNodes::CheckAndLabelCellsForApoptosisOrDeath()
 	// how_many_cells_to_kill = 0.5*how_many_cells_to_kill;
 	// PRINT_2_VARIABLES(SimulationTime::Instance()->GetTime(),mpCellPopulation->GetNumRealCells());
 
-	bool can_i_kill_cells = (mpCellPopulation->GetNumRealCells()  > mMinCellPopulation);
+	int number_of_apoptic_cells = 0;
+	for (AbstractCellPopulation<3>::Iterator cell_iter = p_tissue->Begin();
+    	 cell_iter != p_tissue->End();
+    	 ++cell_iter)
+	{
+		unsigned node_index = p_tissue->GetNodeCorrespondingToCell(*cell_iter)->GetIndex();
+		CellPtr p_cell = p_tissue->GetCellUsingLocationIndex(node_index);
+
+		if( (p_cell->GetMutationState()->IsType<WildTypeCellMutationState>()==true) && (p_cell->HasApoptosisBegun()) )
+		{
+			number_of_apoptic_cells++;
+		}
+	}
+
+	bool can_i_kill_cells = (mpCellPopulation->GetNumRealCells() - number_of_apoptic_cells  > mMinCellPopulation);
     // Loop over this vector and kill any cells that it tells you to
     // while (how_many_cells_to_kill > 0)
 	int num_cells_have_i_killed = 0;
@@ -149,7 +163,11 @@ void UniformCellKiller3dWithGhostNodes::CheckAndLabelCellsForApoptosisOrDeath()
 					if ( ((x<mMinXBoundary) || (x>mMaxXBoundary)) || ((y<mMinYBoundary) || (y>mMaxYBoundary)) )
 					{
 						
-						cells_which_can_die.push_back(node_index);
+						if( !(p_cell->HasApoptosisBegun()) )
+						{
+							cells_which_can_die.push_back(node_index);
+						}
+						// cells_which_can_die.push_back(node_index);
 						// if( (mpCellPopulation->GetNumRealCells() -  num_cells_have_i_killed) > mMinCellPopulation)
 						// {
 						// 	p_cell->StartApoptosis();
@@ -171,7 +189,7 @@ void UniformCellKiller3dWithGhostNodes::CheckAndLabelCellsForApoptosisOrDeath()
 	{
 		for(int j=0; j< (mpCellPopulation->GetNumRealCells() - mMinCellPopulation); j++)
 		{
-			int cell_to_kill = int ((cells_which_can_die.size() +1)*(RandomNumberGenerator::Instance()->ranf()));
+			int cell_to_kill = int ((cells_which_can_die.size() )*(RandomNumberGenerator::Instance()->ranf()));
 
 			PRINT_3_VARIABLES(cell_to_kill,mpCellPopulation->GetNumRealCells(),cells_which_can_die.size());
 
@@ -181,6 +199,7 @@ void UniformCellKiller3dWithGhostNodes::CheckAndLabelCellsForApoptosisOrDeath()
 			{
 				p_cell->StartApoptosis();
 			}
+			TRACE("Killed");
 		}
 	}
 
@@ -198,10 +217,10 @@ void UniformCellKiller3dWithGhostNodes::CheckAndLabelCellsForApoptosisOrDeath()
 			if(p_cell_A->HasApoptosisBegun())
 			{
 				// PRINT_2_VARIABLES(cell_iter->GetTimeUntilDeath(),SimulationTime::Instance()->GetTime());
-				// if (p_cell_A->GetTimeUntilDeath() <= 2*SimulationTime::Instance()->GetTimeStep())
-				// {
+				if (p_cell_A->GetTimeUntilDeath() <= 2*SimulationTime::Instance()->GetTimeStep())
+				{
 					p_cell_A->Kill();
-				// }
+				}
 			}
 		}
 		

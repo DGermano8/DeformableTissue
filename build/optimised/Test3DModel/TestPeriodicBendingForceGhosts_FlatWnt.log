@@ -4,35 +4,48 @@ Running 1 test
 
 
 Entering TestPeriodicCubeWithGhosts
-number of cells comp = 420
-number of cells all  = 420
+number of cells comp = 280
+number of cells all  = 280
 number of ghosts     = 280
-DEBUG: cell_to_kill = 27, mpCellPopulation->GetNumRealCells() = 421, cells_which_can_die.size() = 50
-DEBUG: cell_to_kill = 32, mpCellPopulation->GetNumRealCells() = 421, cells_which_can_die.size() = 59
-DEBUG: cell_to_kill = 1, mpCellPopulation->GetNumRealCells() = 421, cells_which_can_die.size() = 61
-DEBUG: cell_to_kill = 50, mpCellPopulation->GetNumRealCells() = 421, cells_which_can_die.size() = 62
-DEBUG: cell_to_kill = 34, mpCellPopulation->GetNumRealCells() = 421, cells_which_can_die.size() = 61
-DEBUG: cell_to_kill = 13, mpCellPopulation->GetNumRealCells() = 421, cells_which_can_die.size() = 60
-DEBUG: cell_to_kill = 52, mpCellPopulation->GetNumRealCells() = 421, cells_which_can_die.size() = 59
-DEBUG: cell_to_kill = 28, mpCellPopulation->GetNumRealCells() = 421, cells_which_can_die.size() = 58
-DEBUG: cell_to_kill = 29, mpCellPopulation->GetNumRealCells() = 421, cells_which_can_die.size() = 57
-DEBUG: cell_to_kill = 42, mpCellPopulation->GetNumRealCells() = 421, cells_which_can_die.size() = 57
-DEBUG: cell_to_kill = 21, mpCellPopulation->GetNumRealCells() = 421, cells_which_can_die.size() = 56
-DEBUG: cell_to_kill = 25, mpCellPopulation->GetNumRealCells() = 421, cells_which_can_die.size() = 54
-DEBUG: cell_to_kill = 21, mpCellPopulation->GetNumRealCells() = 421, cells_which_can_die.size() = 54
-DEBUG: cell_to_kill = 7, mpCellPopulation->GetNumRealCells() = 421, cells_which_can_die.size() = 52
-DEBUG: cell_to_kill = 23, mpCellPopulation->GetNumRealCells() = 421, cells_which_can_die.size() = 51
-DEBUG: cell_to_kill = 29, mpCellPopulation->GetNumRealCells() = 421, cells_which_can_die.size() = 50
-DEBUG: cell_to_kill = 41, mpCellPopulation->GetNumRealCells() = 421, cells_which_can_die.size() = 52
-DEBUG: cell_to_kill = 7, mpCellPopulation->GetNumRealCells() = 421, cells_which_can_die.size() = 52
-DEBUG: cell_to_kill = 48, mpCellPopulation->GetNumRealCells() = 421, cells_which_can_die.size() = 52
-DEBUG: cell_to_kill = 47, mpCellPopulation->GetNumRealCells() = 421, cells_which_can_die.size() = 51
-DEBUG: cell_to_kill = 44, mpCellPopulation->GetNumRealCells() = 421, cells_which_can_die.size() = 50
-DEBUG: cell_to_kill = 14, mpCellPopulation->GetNumRealCells() = 421, cells_which_can_die.size() = 49
-DEBUG: cell_to_kill = 37, mpCellPopulation->GetNumRealCells() = 421, cells_which_can_die.size() = 47
-DEBUG: cell_to_kill = 44, mpCellPopulation->GetNumRealCells() = 421, cells_which_can_die.size() = 46
+DEBUG: cell_to_kill = 34, mpCellPopulation->GetNumRealCells() = 281, cells_which_can_die.size() = 63
+DEBUG: Killed
+DEBUG: cell_to_kill = 34, mpCellPopulation->GetNumRealCells() = 281, cells_which_can_die.size() = 64
+DEBUG: Killed
+DEBUG: cell_to_kill = 1, mpCellPopulation->GetNumRealCells() = 281, cells_which_can_die.size() = 63
+DEBUG: Killed
+DEBUG: cell_to_kill = 49, mpCellPopulation->GetNumRealCells() = 282, cells_which_can_die.size() = 62
+DEBUG: Killed
+DEBUG: cell_to_kill = 42, mpCellPopulation->GetNumRealCells() = 282, cells_which_can_die.size() = 62
+DEBUG: Killed
+DEBUG: Cell removed by Anoikis
+DEBUG: cell_to_kill = 3, mpCellPopulation->GetNumRealCells() = 281, cells_which_can_die.size() = 60
+DEBUG: Killed
+DEBUG: Cell removed by Anoikis
+DEBUG: cell_to_kill = 9, mpCellPopulation->GetNumRealCells() = 281, cells_which_can_die.size() = 59
+DEBUG: Killed
+DEBUG: cell_to_kill = 12, mpCellPopulation->GetNumRealCells() = 281, cells_which_can_die.size() = 59
+DEBUG: Killed
+DEBUG: cell_to_kill = 7, mpCellPopulation->GetNumRealCells() = 281, cells_which_can_die.size() = 60
+DEBUG: Killed
+DEBUG: cell_to_kill = 40, mpCellPopulation->GetNumRealCells() = 282, cells_which_can_die.size() = 59
+DEBUG: Killed
+DEBUG: cell_to_kill = 4, mpCellPopulation->GetNumRealCells() = 282, cells_which_can_die.size() = 59
+DEBUG: Killed
+DEBUG: cell_to_kill = 52, mpCellPopulation->GetNumRealCells() = 281, cells_which_can_die.size() = 58
+DEBUG: Killed
+DEBUG: Cell removed by Anoikis
+DEBUG: cell_to_kill = 3, mpCellPopulation->GetNumRealCells() = 281, cells_which_can_die.size() = 57
+DEBUG: Killed
+DEBUG: cell_to_kill = 43, mpCellPopulation->GetNumRealCells() = 281, cells_which_can_die.size() = 57
+DEBUG: Killed
+DEBUG: cell_to_kill = 25, mpCellPopulation->GetNumRealCells() = 282, cells_which_can_die.size() = 56
+DEBUG: Killed
+DEBUG: cell_to_kill = 32, mpCellPopulation->GetNumRealCells() = 282, cells_which_can_die.size() = 56
+DEBUG: Killed
+DEBUG: Cell removed by Anoikis
+DEBUG: Cell removed by Anoikis
 
-Time taken = 3606.35 seconds
+Time taken = 5744.84 seconds
 
 Passed
 OK!

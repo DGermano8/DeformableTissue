@@ -238,7 +238,7 @@ void AnoikisCellKiller3DWithGhostNodes::CheckAndLabelCellsForApoptosisOrDeath()
 			
     		CellPtr p_cell = p_tissue->GetCellUsingLocationIndex(cells_to_remove[i][0]);
 			p_cell->Kill();
-			// TRACE("Cell removed");
+			TRACE("Cell removed by Anoikis");
 			
 			// c_vector<double, 3> node_A_location = p_tissue->GetNode(cells_to_remove[i][0])->rGetLocation();
 
