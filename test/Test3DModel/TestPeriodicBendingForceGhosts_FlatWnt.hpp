@@ -117,7 +117,7 @@ public:
         double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 32;
+        double end_time = 2.0;
         double plot_step = 10.0;
 
         bool include_springs = true;
@@ -537,12 +537,12 @@ public:
 
         simulator.AddSimulationModifier(p_modifier);
 
-        MAKE_PTR(PeriodicRemeshCellsModifier<3>, p_per_modifier);
-        p_per_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
-        p_per_modifier->SetWidth(periodic_width);
-        p_per_modifier->SetDepth(periodic_height);
+        // MAKE_PTR(PeriodicRemeshCellsModifier<3>, p_per_modifier);
+        // p_per_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
+        // p_per_modifier->SetWidth(periodic_width);
+        // p_per_modifier->SetDepth(periodic_height);
 
-        simulator.AddSimulationModifier(p_per_modifier);
+        // simulator.AddSimulationModifier(p_per_modifier);
 
         
 
