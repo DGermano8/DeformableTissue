@@ -44,6 +44,7 @@
 #include "CellAncestorWriter.hpp"
 #include "CellPopulationEpithelialWriter.hpp"
 #include "VoronoiDataWriter.hpp"
+#include "NodeVelocityWriter.hpp"
 
 #include "PetscSetupAndFinalize.hpp"
 #include "ForwardEulerNumericalMethod.hpp"
@@ -117,7 +118,7 @@ public:
         double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 2.0;
+        double end_time = 1.0;
         double plot_step = 10.0;
 
         bool include_springs = true;
@@ -429,7 +430,9 @@ public:
         cell_population.AddCellWriter<CellProliferativeTypesWriter>();
         cell_population.AddCellWriter<CellAncestorWriter>();
         cell_population.AddPopulationWriter<CellPopulationEpithelialWriter>();
-        
+        cell_population.AddPopulationWriter<NodeVelocityWriter>();
+
+
         //cell_population.AddPopulationWriter<VoronoiDataWriter>(); // paraview is pretty pointless at viewing this, worth looking into
         
         //cell_population.WriteVtkResultsToFile(output_directory);

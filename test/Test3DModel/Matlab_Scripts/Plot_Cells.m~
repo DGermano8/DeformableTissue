@@ -27,6 +27,18 @@ numtimes = length(nodedata);
 x_centre = 0.5 * 10;
 y_centre = 0.5 * sqrt(0.75) * 14;
 
+% tissue size
+width = 10;
+hight = 14;
+
+ghost = 1 + 1;
+stromal = 1;
+epithelial = 1;
+
+initial_cells = (stromal + epithelial)*width*hight;
+
+ghost_number = ghost * width * hight;
+
 %%
 figure;
 t0_dist = zeros(1,length(nodedata{1}(2:3:end-2)));
@@ -56,22 +68,35 @@ for i = 1:numtimes
     if i ==1
         t0_xvals = xvals;
         t0_yvals = yvals;
+        
+        t1_xvals = xvals;
+        t1_yvals = yvals;
     end
     
-    t2_dist = zeros(1,NumCells);
     
-    for j=1:280%[1 50 100 150 200 250 280]  -> 280 is a magic number! this is to do with nodes and cell numbers not alinging
-            
+    additional_it = [];
+    if (initial_cells + ghost_number < NumCells)
+        
+        additional_it = (1:NumCells-(initial_cells + ghost_number)) + initial_cells;
+        
+    end
+    
+    cell_ids = [1:initial_cells additional_it];
+    t2_dist = zeros(1,length(cell_ids));
+
+    for j=cell_ids%[1 50 100 150 200 250 280]  -> 280 is a magic number! this is to do with nodes and cell numbers not alinging
+        
         if(j <= length(types))
+            CellColour = [0 0 0];
         	if (types(j) == 0)
                 CellColour = [0 0 0];        % Black (stem) epithelial cells
 
             elseif (types(j) == 6)
-                CellColour = [0 0 1];        % Yellow (transit) epithelial cells
+                CellColour = [1 0 0];        % Yellow (transit) epithelial cells
             elseif (types(j) == 1)
             	CellColour = [0 0 1];
             elseif (types(j) == 2)
-            	CellColour = [1 0 0];        % Pink (differentiated) tissue cells
+            	CellColour = [1 0 1];        % Pink (differentiated) tissue cells
             elseif(types(j) == 3)
             	CellColour = [1 0 0]; 
             end
@@ -95,24 +120,27 @@ for i = 1:numtimes
         
         t2_dist(j) = sqrt( (xvals(j) - x_centre).^2 + (yvals(j) - y_centre).^2 );
         
-        if ismember(types(j),[1 2 3 6])
+        if (ismember(types(j),[1 2 3 6]) &&  length(t2_dist)==length(t1_dist) && length(t0_dist)==length(t2_dist))
             hold on;
             if ismember(types(j),[1 2 3 6])
 
             % distance itself
-            subplot(2,2,1)
+            subplot(1,2,1)
             hold on;
+            title('distance')
+%             plot( [previous_time time], [t1_dist(j) t2_dist(j)],'-','color',Colour)
             plot( [previous_time time], [t1_dist(j) t2_dist(j)],'-','color',Colour)
 
             % maybe we need the derivative of the distance?
-            subplot(2,2,2)
+            subplot(1,2,2)
             hold on;
+            title('speed')
             plot( [previous_time time], [t1_dist(j) - t0_dist(j) t2_dist(j) - t1_dist(j)],'-','color',Colour)
         
 %             if ismember(types(j),[1])
-                subplot(2,2,3)
-                hold on;
-                plot( [t0_xvals(j) xvals(j)], [t0_yvals(j) yvals(j)],'-','color',Colour)
+%                 subplot(2,2,3)
+%                 hold on;
+%                 plot( [t0_xvals(j) xvals(j)], [t0_yvals(j) yvals(j)],'-','color',Colour)
            end
         end
         
@@ -123,8 +151,11 @@ for i = 1:numtimes
     t1_dist = t2_dist;
     previous_time = time;
     
-    t0_xvals = xvals;
-    t0_yvals = yvals;
+    t0_xvals = t1_xvals;
+    t0_yvals = t1_yvals;
+    
+    t1_xvals = xvals;
+    t1_yvals = yvals;
     
     
 end

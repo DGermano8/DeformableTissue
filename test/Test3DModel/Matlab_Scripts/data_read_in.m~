@@ -1,0 +1,24 @@
+clear all;
+close all;
+
+addpath /Users/domenicgermano/workspace/Chaste/anim/matlab
+
+addpath /Users/domenicgermano/workspace/Chaste/projects/results/Test_Periodic_with_bend_large_Anoikis_no_noise_1/results_from_time_0
+
+filename = 'results';
+
+nodesfile = [filename, '.viznodes'];
+celltypesfile = [filename, '.vizcelltypes'];
+
+nodedata = LoadNonConstantLengthData(nodesfile);
+celltypesdata = LoadNonConstantLengthData(celltypesfile);
+
+%%
+nodeVelocityRaw = readtable('nodevelocities.dat');
+
+dimensionData = size(nodeVelocityRaw);
+
+timeData = table2array(nodeVelocityRaw(1:dimensionData(1),1));
+
+for i = 1:dimensionData(1)
+nodeData_i = table2array(nodeVelocityRaw(1:dimensionData(1),1));
