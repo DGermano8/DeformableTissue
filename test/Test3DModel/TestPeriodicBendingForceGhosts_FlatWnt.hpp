@@ -78,7 +78,7 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "Test_Periodic_with_bend_large_Anoikis_no_noise";
+        std::string output_directory = "Test_writter";
 
         unsigned width = 10;	   // x
         unsigned height = 14;      // y
@@ -118,8 +118,8 @@ public:
         double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 1.0;
-        double plot_step = 10.0;
+        double end_time = 0.001;
+        double plot_step = 1.0;
 
         bool include_springs = true;
         bool include_bending = true;
@@ -428,7 +428,7 @@ public:
         cell_population.AddCellWriter<CellIdWriter>();
         cell_population.AddCellWriter<CellMutationStatesWriter>();
         cell_population.AddCellWriter<CellProliferativeTypesWriter>();
-        cell_population.AddCellWriter<CellAncestorWriter>();
+        // cell_population.AddCellWriter<CellAncestorWriter>();
         cell_population.AddPopulationWriter<CellPopulationEpithelialWriter>();
         cell_population.AddPopulationWriter<NodeVelocityWriter>();
 
