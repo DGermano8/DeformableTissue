@@ -33,6 +33,7 @@
 #include "TrianglesMeshWriter.hpp"
 #include "Debug.hpp"
 //#include "FixedBoundaries3d.hpp"
+#include "DensityDependantCellKiller3DWithGhostNodes.hpp"
 
 #include "DifferentiatedCellProliferativeType.hpp"
 #include "TransitCellProliferativeType.hpp"
@@ -45,6 +46,7 @@
 #include "CellPopulationEpithelialWriter.hpp"
 #include "VoronoiDataWriter.hpp"
 #include "NodeVelocityWriter.hpp"
+
 
 #include "PetscSetupAndFinalize.hpp"
 #include "ForwardEulerNumericalMethod.hpp"
@@ -78,10 +80,10 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "Test_writter";
+        std::string output_directory = "Test_writter_7";
 
         unsigned width = 10;	   // x
-        unsigned height = 14;      // y
+        unsigned height = 10;      // y
         unsigned ghosts_bottom = 0;       // ghosts > depth
         unsigned ghosts_top = 1;       // ghosts > depth
         unsigned num_tissue_depth = 1;
@@ -118,8 +120,8 @@ public:
         double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 0.001;
-        double plot_step = 1.0;
+        double end_time = 48;
+        double plot_step = 10.0;
 
         bool include_springs = true;
         bool include_bending = true;
@@ -322,15 +324,15 @@ public:
             p_model->SetDimension(3);
             // p_model->SetMaxTransitGenerations(100);
 
-            // p_model->SetTransitCellG1Duration(3);
-            // p_model->SetSDuration(2);
-            // p_model->SetG2Duration(2);
-            // p_model->SetMDuration(1);
-
-            p_model->SetTransitCellG1Duration(11);
-            p_model->SetSDuration(8);
-            p_model->SetG2Duration(4);
+            p_model->SetTransitCellG1Duration(5);
+            p_model->SetSDuration(4);
+            p_model->SetG2Duration(2);
             p_model->SetMDuration(1);
+
+            // p_model->SetTransitCellG1Duration(11);
+            // p_model->SetSDuration(8);
+            // p_model->SetG2Duration(4);
+            // p_model->SetMDuration(1);
 
             // p_model->SetTransitCellG1Duration(0.5);
             // p_model->SetSDuration(0.25);
@@ -474,9 +476,9 @@ public:
 		// Create periodic spring force law
         MAKE_PTR(PeriodicCryptModelInteractionForceWithGhostNodes<3>, periodic_spring_force);
         periodic_spring_force->SetUseOneWaySprings(false); //turning this on makes the stromal cells act as ghosts..
-        periodic_spring_force->SetCutOffLength(1.75);
+        periodic_spring_force->SetCutOffLength(1.25);
         //                     SetEpithelialStromalCellDependentSprings(ind , Ep-Ep, Str-Str, Ep-Str, apcTwoHitStromalMultiplier);
-        periodic_spring_force->SetEpithelialStromalCellDependentSprings(true, 1.0,     0.5,     0.5,    1.0);
+        periodic_spring_force->SetEpithelialStromalCellDependentSprings(true, 1.0,     1.0,     0.5,    1.0);
         periodic_spring_force->SetPeriodicDomainWidth(periodic_width);
         periodic_spring_force->SetPeriodicDomainDepth(periodic_height);
         periodic_spring_force->SetMeinekeSpringStiffness(spring_strength);
@@ -520,11 +522,15 @@ public:
         // Add cell sloughing
         // MAKE_PTR_ARGS(SloughingCellKiller3DWithGhostNodes, sloughing, (&cell_population, periodic_width, periodic_height));
         // simulator.AddCellKiller(sloughing);
-
+        
         double cut_off = 4.0;
+        double density_threshold = 0.95;
         // Add anoikis cell killer
         MAKE_PTR_ARGS(AnoikisCellKiller3DWithGhostNodes, anoikis, (&cell_population, cut_off, periodic_width, periodic_height));
         simulator.AddCellKiller(anoikis);
+        
+        MAKE_PTR_ARGS(DensityDependantCellKiller3DWithGhostNodes, density, (&cell_population, cut_off, density_threshold, periodic_width, periodic_height));
+        simulator.AddCellKiller(density);
 
         // std::string output_directory = "Test_WithSpringsBending_randz_alpha_2";
         simulator.SetOutputDirectory(output_directory);	 
@@ -552,9 +558,9 @@ public:
 
         // Add random cell killer for death at the edges
         //                                                              ProbabilityOfDeathInAnHour,    MinXBoundary,                MaxXBoundary,     MinYBoundary,                    MaxYBoundary
-        MAKE_PTR_ARGS(UniformCellKiller3dWithGhostNodes, random_cell_death, (&cell_population, 1.0, 1.5*width_space,  periodic_width-1.5*width_space, 1.5*height_space,  periodic_height-1.5*height_space, num_epithelial_cells+num_tissue_cells));
-        // MAKE_PTR_ARGS(UniformCellKiller3dWithGhostNodes, random_cell_death, (&cell_population, 1.0, periodic_width + 1,  0 - 1, periodic_height + 1,  0 - 1 , num_epithelial_cells+num_tissue_cells ));
-		simulator.AddCellKiller(random_cell_death);
+        // MAKE_PTR_ARGS(UniformCellKiller3dWithGhostNodes, random_cell_death, (&cell_population, 1.0, 1.5*width_space,  periodic_width-1.5*width_space, 1.5*height_space,  periodic_height-1.5*height_space, num_epithelial_cells+num_tissue_cells));
+        // // MAKE_PTR_ARGS(UniformCellKiller3dWithGhostNodes, random_cell_death, (&cell_population, 1.0, periodic_width + 1,  0 - 1, periodic_height + 1,  0 - 1 , num_epithelial_cells+num_tissue_cells ));
+		// simulator.AddCellKiller(random_cell_death);
 
 
         // //Test Forces
