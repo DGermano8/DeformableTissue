@@ -80,7 +80,7 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "Test_writter_7";
+        std::string output_directory = "Test_writter_9";
 
         unsigned width = 10;	   // x
         unsigned height = 10;      // y
@@ -120,7 +120,7 @@ public:
         double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 48;
+        double end_time = 24;
         double plot_step = 10.0;
 
         bool include_springs = true;
@@ -476,7 +476,7 @@ public:
 		// Create periodic spring force law
         MAKE_PTR(PeriodicCryptModelInteractionForceWithGhostNodes<3>, periodic_spring_force);
         periodic_spring_force->SetUseOneWaySprings(false); //turning this on makes the stromal cells act as ghosts..
-        periodic_spring_force->SetCutOffLength(1.25);
+        periodic_spring_force->SetCutOffLength(1.5);
         //                     SetEpithelialStromalCellDependentSprings(ind , Ep-Ep, Str-Str, Ep-Str, apcTwoHitStromalMultiplier);
         periodic_spring_force->SetEpithelialStromalCellDependentSprings(true, 1.0,     1.0,     0.5,    1.0);
         periodic_spring_force->SetPeriodicDomainWidth(periodic_width);

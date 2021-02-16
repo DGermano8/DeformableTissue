@@ -1,15 +1,14 @@
 clear all;
 filename = 'results';
 
-% addpath /Users/germanod/workspace/Chaste/anim/matlab
-addpath /Users/domenicgermano/workspace/Chaste/anim/matlab
+addpath /Users/germanod/workspace/Chaste/anim/matlab
+% addpath /Users/domenicgermano/workspace/Chaste/anim/matlab
 
-% folder = '/Users/germanod/workspace/Chaste/projects/results/Test_Periodic_with_bend_large_Anoikis_no_noise/results_from_time_0';
-folder = '/Users/domenicgermano/workspace/Chaste/projects/results/Test_Periodic_with_bend_large_Anoikis_no_noise_2/results_from_time_0';
+folder = '/Users/germanod/workspace/Chaste/projects/results/Test_writter_7/results_from_time_0';
+% folder = '/Users/domenicgermano/workspace/Chaste/projects/results/Test_Periodic_with_bend_large_Anoikis_no_noise_2/results_from_time_0';
 
-% addpath /Users/germanod/workspace/Chaste/projects/results/Test_Periodic_with_bend_large_Anoikis_no_noise/results_from_time_0
-addpath /Users/domenicgermano/workspace/Chaste/projects/results/Test_Periodic_with_bend_large_Anoikis_no_noise_2/results_from_time_0
-
+addpath /Users/germanod/workspace/Chaste/projects/results/Test_writter_7/results_from_time_0
+% addpath /Users/domenicgermano/workspace/Chaste/projects/results/Test_Periodic_with_bend_large_Anoikis_no_noise_2/results_from_time_0
 
 nodesfile = [filename, '.viznodes'];
 celltypesfile = [filename, '.vizcelltypes'];
@@ -29,7 +28,7 @@ y_centre = 0.5 * sqrt(0.75) * 14;
 
 % tissue size
 width = 10;
-hight = 14;
+hight = 10;
 
 ghost = 1 + 1;
 stromal = 1;

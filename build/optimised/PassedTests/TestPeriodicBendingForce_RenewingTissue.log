@@ -1,0 +1,157 @@
+Running 1 test
+
+ ***** Test3dBoxModel.hpp *****
+
+
+Entering TestPeriodicCubeWithGhosts
+number of cells comp = 300
+number of cells all  = 300
+number of ghosts     = 200
+DEBUG: cell_to_kill = 86, mpCellPopulation->GetNumRealCells() = 301, cells_which_can_die.size() = 94
+DEBUG: Killed
+DEBUG: Cell removed by Anoikis
+DEBUG: cell_to_kill = 4, mpCellPopulation->GetNumRealCells() = 302, cells_which_can_die.size() = 93
+DEBUG: Killed
+DEBUG: cell_to_kill = 52, mpCellPopulation->GetNumRealCells() = 302, cells_which_can_die.size() = 93
+DEBUG: Killed
+DEBUG: cell_to_kill = 64, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 92
+DEBUG: Killed
+DEBUG: cell_to_kill = 21, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 92
+DEBUG: Killed
+DEBUG: cell_to_kill = 9, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 92
+DEBUG: Killed
+DEBUG: cell_to_kill = 49, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 92
+DEBUG: Killed
+DEBUG: cell_to_kill = 47, mpCellPopulation->GetNumRealCells() = 301, cells_which_can_die.size() = 93
+DEBUG: Killed
+DEBUG: cell_to_kill = 53, mpCellPopulation->GetNumRealCells() = 302, cells_which_can_die.size() = 91
+DEBUG: Killed
+DEBUG: cell_to_kill = 80, mpCellPopulation->GetNumRealCells() = 302, cells_which_can_die.size() = 91
+DEBUG: Killed
+DEBUG: cell_to_kill = 75, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 93
+DEBUG: Killed
+DEBUG: cell_to_kill = 35, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 93
+DEBUG: Killed
+DEBUG: cell_to_kill = 36, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 93
+DEBUG: Killed
+DEBUG: cell_to_kill = 50, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 93
+DEBUG: Killed
+DEBUG: Cell removed by Anoikis
+DEBUG: Cell removed by Anoikis
+DEBUG: Cell removed by Anoikis
+DEBUG: Cell removed by Anoikis
+DEBUG: cell_to_kill = 93, mpCellPopulation->GetNumRealCells() = 301, cells_which_can_die.size() = 97
+DEBUG: Killed
+DEBUG: cell_to_kill = 60, mpCellPopulation->GetNumRealCells() = 302, cells_which_can_die.size() = 97
+DEBUG: Killed
+DEBUG: cell_to_kill = 7, mpCellPopulation->GetNumRealCells() = 302, cells_which_can_die.size() = 97
+DEBUG: Killed
+DEBUG: cell_to_kill = 54, mpCellPopulation->GetNumRealCells() = 303, cells_which_can_die.size() = 95
+DEBUG: Killed
+DEBUG: cell_to_kill = 89, mpCellPopulation->GetNumRealCells() = 303, cells_which_can_die.size() = 95
+DEBUG: Killed
+DEBUG: cell_to_kill = 38, mpCellPopulation->GetNumRealCells() = 303, cells_which_can_die.size() = 95
+DEBUG: Killed
+DEBUG: cell_to_kill = 57, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 93
+DEBUG: Killed
+DEBUG: cell_to_kill = 14, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 93
+DEBUG: Killed
+DEBUG: cell_to_kill = 30, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 93
+DEBUG: Killed
+DEBUG: cell_to_kill = 53, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 93
+DEBUG: Killed
+DEBUG: cell_to_kill = 82, mpCellPopulation->GetNumRealCells() = 305, cells_which_can_die.size() = 89
+DEBUG: Killed
+DEBUG: cell_to_kill = 74, mpCellPopulation->GetNumRealCells() = 305, cells_which_can_die.size() = 89
+DEBUG: Killed
+DEBUG: cell_to_kill = 61, mpCellPopulation->GetNumRealCells() = 305, cells_which_can_die.size() = 89
+DEBUG: Killed
+DEBUG: cell_to_kill = 49, mpCellPopulation->GetNumRealCells() = 305, cells_which_can_die.size() = 89
+DEBUG: Killed
+DEBUG: cell_to_kill = 88, mpCellPopulation->GetNumRealCells() = 305, cells_which_can_die.size() = 89
+DEBUG: Killed
+DEBUG: cell_to_kill = 87, mpCellPopulation->GetNumRealCells() = 301, cells_which_can_die.size() = 95
+DEBUG: Killed
+DEBUG: cell_to_kill = 11, mpCellPopulation->GetNumRealCells() = 302, cells_which_can_die.size() = 93
+DEBUG: Killed
+DEBUG: cell_to_kill = 16, mpCellPopulation->GetNumRealCells() = 302, cells_which_can_die.size() = 93
+DEBUG: Killed
+DEBUG: cell_to_kill = 21, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 89
+DEBUG: Killed
+DEBUG: cell_to_kill = 9, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 89
+DEBUG: Killed
+DEBUG: cell_to_kill = 76, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 89
+DEBUG: Killed
+DEBUG: cell_to_kill = 25, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 89
+DEBUG: Killed
+DEBUG: cell_to_kill = 90, mpCellPopulation->GetNumRealCells() = 301, cells_which_can_die.size() = 93
+DEBUG: Killed
+DEBUG: cell_to_kill = 1, mpCellPopulation->GetNumRealCells() = 302, cells_which_can_die.size() = 91
+DEBUG: Killed
+DEBUG: cell_to_kill = 73, mpCellPopulation->GetNumRealCells() = 302, cells_which_can_die.size() = 91
+DEBUG: Killed
+DEBUG: Cell removed by Anoikis
+DEBUG: cell_to_kill = 66, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 88
+DEBUG: Killed
+DEBUG: cell_to_kill = 65, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 88
+DEBUG: Killed
+DEBUG: cell_to_kill = 37, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 88
+DEBUG: Killed
+DEBUG: cell_to_kill = 48, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 88
+DEBUG: Killed
+DEBUG: cell_to_kill = 61, mpCellPopulation->GetNumRealCells() = 301, cells_which_can_die.size() = 99
+DEBUG: Killed
+DEBUG: cell_to_kill = 63, mpCellPopulation->GetNumRealCells() = 302, cells_which_can_die.size() = 97
+DEBUG: Killed
+DEBUG: cell_to_kill = 1, mpCellPopulation->GetNumRealCells() = 302, cells_which_can_die.size() = 97
+DEBUG: Killed
+DEBUG: cell_to_kill = 25, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 93
+DEBUG: Killed
+DEBUG: cell_to_kill = 18, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 93
+DEBUG: Killed
+DEBUG: cell_to_kill = 6, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 93
+DEBUG: Killed
+DEBUG: cell_to_kill = 23, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 93
+DEBUG: Killed
+DEBUG: cell_to_kill = 28, mpCellPopulation->GetNumRealCells() = 301, cells_which_can_die.size() = 97
+DEBUG: Killed
+DEBUG: cell_to_kill = 93, mpCellPopulation->GetNumRealCells() = 302, cells_which_can_die.size() = 95
+DEBUG: Killed
+DEBUG: cell_to_kill = 78, mpCellPopulation->GetNumRealCells() = 302, cells_which_can_die.size() = 95
+DEBUG: Killed
+DEBUG: cell_to_kill = 3, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 91
+DEBUG: Killed
+DEBUG: cell_to_kill = 44, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 91
+DEBUG: Killed
+DEBUG: cell_to_kill = 74, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 91
+DEBUG: Killed
+DEBUG: cell_to_kill = 55, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 91
+DEBUG: Killed
+DEBUG: Cell removed by Anoikis
+DEBUG: cell_to_kill = 60, mpCellPopulation->GetNumRealCells() = 301, cells_which_can_die.size() = 91
+DEBUG: Killed
+DEBUG: cell_to_kill = 6, mpCellPopulation->GetNumRealCells() = 302, cells_which_can_die.size() = 91
+DEBUG: Killed
+DEBUG: cell_to_kill = 69, mpCellPopulation->GetNumRealCells() = 302, cells_which_can_die.size() = 91
+DEBUG: Killed
+DEBUG: cell_to_kill = 73, mpCellPopulation->GetNumRealCells() = 301, cells_which_can_die.size() = 97
+DEBUG: Killed
+DEBUG: cell_to_kill = 24, mpCellPopulation->GetNumRealCells() = 302, cells_which_can_die.size() = 95
+DEBUG: Killed
+DEBUG: cell_to_kill = 9, mpCellPopulation->GetNumRealCells() = 302, cells_which_can_die.size() = 95
+DEBUG: Killed
+DEBUG: cell_to_kill = 47, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 91
+DEBUG: Killed
+DEBUG: cell_to_kill = 76, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 91
+DEBUG: Killed
+DEBUG: cell_to_kill = 84, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 91
+DEBUG: Killed
+DEBUG: cell_to_kill = 56, mpCellPopulation->GetNumRealCells() = 304, cells_which_can_die.size() = 91
+DEBUG: Killed
+
+Time taken = 4048.99 seconds
+
+Passed
+OK!
+Chaste warning: in file global/src/checkpointing/Identifiable.cpp at line 106: Unable to determine the class type. If you are using C++ serialization may not be set up correctly. 
+ If you are using Python this behaviour is expected.

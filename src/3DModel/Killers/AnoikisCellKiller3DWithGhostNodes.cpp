@@ -214,6 +214,7 @@ std::vector<c_vector<unsigned,2> > AnoikisCellKiller3DWithGhostNodes::RemoveByAn
 */
 void AnoikisCellKiller3DWithGhostNodes::CheckAndLabelCellsForApoptosisOrDeath()
 {
+	TRACE("Anoikis In")
 	DomMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<3>*> (this->mpCellPopulation);
 
 	//This needs fixing
@@ -260,7 +261,7 @@ void AnoikisCellKiller3DWithGhostNodes::CheckAndLabelCellsForApoptosisOrDeath()
 			
     	}
     }
-	
+	TRACE("Anoikis Out")
 }
 
 

@@ -72,16 +72,16 @@ std::set<unsigned> DensityDependantCellKiller3DWithGhostNodes::GetNeighbouringNo
 	    	// Don't want to include the original node or ghost nodes
 			if(!p_tissue->IsGhostNode(neighbour_global_index))
 			{
-				CellPtr p_cell_n = p_tissue->GetCellUsingLocationIndex(neighbour_global_index);
-				double x_location_n = this->mpCellPopulation->GetLocationOfCellCentre(p_cell_n)[0];
-				double y_location_n = this->mpCellPopulation->GetLocationOfCellCentre(p_cell_n)[1];
-				double z_location_n = this->mpCellPopulation->GetLocationOfCellCentre(p_cell_n)[2];
+				// CellPtr p_cell_n = p_tissue->GetCellUsingLocationIndex(neighbour_global_index);
+				// double x_location_n = this->mpCellPopulation->GetLocationOfCellCentre(p_cell_n)[0];
+				// double y_location_n = this->mpCellPopulation->GetLocationOfCellCentre(p_cell_n)[1];
+				// double z_location_n = this->mpCellPopulation->GetLocationOfCellCentre(p_cell_n)[2];
 
 				// bool less_than_cutt_off = pow((x_location-x_location_n),2)+pow((y_location-y_location_n),2)+pow((z_location-z_location_n),2) < pow(mCutOffLength,2);
 
 				if( (neighbour_global_index != nodeIndex))
 				{
-					neighbouring_node_indices.insert(neighbour_global_index);
+					neighbouring_node_indices.insert(neighbour_extended_index);
 				}
 			}
 			// else if(p_tissue->IsGhostNode(neighbour_global_index))
@@ -122,7 +122,7 @@ bool DensityDependantCellKiller3DWithGhostNodes::IsCellTooSmall(MutableMesh<3,3>
    							++neighbour_iter)
 	{
 		unsigned global_index = ExtendedMeshNodeIndexMap[*neighbour_iter];
-		CellPtr p_cell_n = p_tissue->GetCellUsingLocationIndex(*neighbour_iter);
+		CellPtr p_cell_n = p_tissue->GetCellUsingLocationIndex(global_index);
 
 
 		// Check how many stromal cells its conected to
@@ -372,6 +372,7 @@ std::vector<c_vector<unsigned,2> > DensityDependantCellKiller3DWithGhostNodes::R
 		}
 	}
 
+	delete mpExtendedMesh;
 	return cells_to_remove;
 }
 
@@ -381,6 +382,7 @@ std::vector<c_vector<unsigned,2> > DensityDependantCellKiller3DWithGhostNodes::R
 */
 void DensityDependantCellKiller3DWithGhostNodes::CheckAndLabelCellsForApoptosisOrDeath()
 {
+	TRACE("Density In")
 	DomMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<3>*> (this->mpCellPopulation);
 
     // Get the information at this timestep for each node index that says whether to remove by anoikis 
@@ -404,7 +406,6 @@ void DensityDependantCellKiller3DWithGhostNodes::CheckAndLabelCellsForApoptosisO
 			if( !(p_cell->HasApoptosisBegun()) )
 			{
 				p_cell->StartApoptosis();
-				// TRACE("Cell Apoptosis Begun");
 
 			}
 			
@@ -445,13 +446,16 @@ void DensityDependantCellKiller3DWithGhostNodes::CheckAndLabelCellsForApoptosisO
 				if (p_cell_A->GetTimeUntilDeath() <= 2*SimulationTime::Instance()->GetTimeStep())
 				{
 					p_cell_A->Kill();
+					TRACE("Cell Removed By Density");
+
 				}
 			}
 		}
 		
 
 	}
-	
+	TRACE("Density Out")
+
 }
 
 
