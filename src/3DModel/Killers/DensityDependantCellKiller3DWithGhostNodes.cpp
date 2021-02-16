@@ -382,7 +382,7 @@ std::vector<c_vector<unsigned,2> > DensityDependantCellKiller3DWithGhostNodes::R
 */
 void DensityDependantCellKiller3DWithGhostNodes::CheckAndLabelCellsForApoptosisOrDeath()
 {
-	TRACE("Density In")
+	// TRACE("Density In")
 	DomMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<3>*> (this->mpCellPopulation);
 
     // Get the information at this timestep for each node index that says whether to remove by anoikis 
@@ -446,7 +446,7 @@ void DensityDependantCellKiller3DWithGhostNodes::CheckAndLabelCellsForApoptosisO
 				if (p_cell_A->GetTimeUntilDeath() <= 2*SimulationTime::Instance()->GetTimeStep())
 				{
 					p_cell_A->Kill();
-					TRACE("Cell Removed By Density");
+					// TRACE("Cell Removed By Density");
 
 				}
 			}
@@ -454,7 +454,7 @@ void DensityDependantCellKiller3DWithGhostNodes::CheckAndLabelCellsForApoptosisO
 		
 
 	}
-	TRACE("Density Out")
+	// TRACE("Density Out")
 
 }
 

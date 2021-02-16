@@ -80,7 +80,7 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "Test_writter_9";
+        std::string output_directory = "Test_FlatWnt";
 
         unsigned width = 10;	   // x
         unsigned height = 10;      // y
@@ -120,7 +120,7 @@ public:
         double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 24;
+        double end_time = 1;
         double plot_step = 10.0;
 
         bool include_springs = true;
