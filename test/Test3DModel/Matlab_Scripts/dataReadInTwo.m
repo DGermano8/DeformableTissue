@@ -1,10 +1,10 @@
 clear all;
 close all;
 
-addpath /Users/domenicgermano/workspace/Chaste/anim/matlab
+addpath /Users/domenicgermano/workspace/ChasteDom/anim/matlab
 % addpath /Users/germanod/workspace/Chaste/anim/matlab
 
-addpath /Users/domenicgermano/workspace/Chaste/projects/results/WntFlat_maintain
+addpath /Users/domenicgermano/workspace/ChasteDom/projects/results/WntFlat_maintain
 % addpath /Users/germanod/workspace/Chaste/projects/results/Test_Periodic_with_bend_large_Anoikis_no_noise_vel_o/results_from_time_0
 
 filename = 'results';
@@ -124,27 +124,50 @@ end
 %%
 
 for i = 1:(length(holder_init)/7)
-    for j=1:length(t1_centre_dist(:,1))
+    for j=1:(length(t1_centre_dist(:,1))-1)
         if (t1_centre_dist(j,i) == 0)
-            t1_centre_dist(j,i) = NaN;
+            t1_centre_dist_post(j,i) = NaN;
+        elseif abs(t1_centre_dist(j+1,i) - t1_centre_dist(j,i)) > 0.5
+            t1_centre_dist_post(j,i) = NaN;
+        else
+            t1_centre_dist_post(j,i) = t1_centre_dist(j,i);
         end
+        
         if (t1_velocity_i(j,i) == 0)
-            t1_velocity_i(j,i) = NaN;
+            t1_velocity_i_post(j,i) = NaN;
+        else
+            t1_velocity_i_post(j,i) = t1_velocity_i(j,i);
         end
+        
     end
+    
+    j = length(t1_centre_dist(:,1));
+        if (t1_centre_dist(j,i) == 0)
+            t1_centre_dist_post(j,i) = NaN;
+        else
+            t1_centre_dist_post(j,i) = t1_centre_dist(j,i);
+        end
+        
+        if (t1_velocity_i(j,i) == 0)
+            t1_velocity_i_post(j,i) = NaN;
+        else
+            t1_velocity_i_post(j,i) = t1_velocity_i(j,i);
+        end
+    
 end
 
-
+%%
+figure;
 for i = 1:(length(holder_init)/7)
     
     subplot(1,2,1)
     hold on;
     title('distance')
-    plot(t1_centre_dist(:,i))
+    plot(t1_centre_dist_post(:,i))
     
     subplot(1,2,2)
     hold on;
     title('speed')
-    plot(t1_velocity_i(:,i))
+    plot(t1_velocity_i_post(:,i))
 
 end

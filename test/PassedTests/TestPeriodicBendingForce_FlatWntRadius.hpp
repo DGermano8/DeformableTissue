@@ -69,18 +69,18 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "FlatWntRadius";
+        std::string output_directory = "FlatWntRadius_T";
 
-        unsigned width = 10;	   // x
-        unsigned height = 10;      // y
+        unsigned width = 12;	   // x
+        unsigned height = 14;      // y
         unsigned ghosts_bottom = 0;       // ghosts > depth
         unsigned ghosts_top = 1;       // ghosts > depth
-        unsigned num_tissue_depth = 1;
+        unsigned num_tissue_depth = 2;
         unsigned depth = num_tissue_depth + (ghosts_bottom + ghosts_top) + 1;        // z
 
         // Initialise the tissue in an equilibrum state
-        double width_space = 1.0;
-        double height_space = 1.0*sqrt(0.75);
+        double width_space = 0.96;
+        double height_space = 0.96*sqrt(0.75);
         double ghost_sep = 1.0;
         double depth_space = 0.738431690356779*1.0; //Magic number for z-spaceing... 
         unsigned cells_per_layer = width*height;
@@ -131,7 +131,6 @@ public:
                 isGhost = true;
             }
 
-
             for (unsigned j=0; j<height; j++)
             {    
                 for (unsigned i=0; i<width; i++)
@@ -168,8 +167,8 @@ public:
                     nodes.push_back(new Node<3>(cell_iter,  false,  x_coordinate, y_coordinate, z_coordinate));
                     cell_iter++;
 
-                    }
                 }
+            }
         }
         tissue_middle = tissue_middle/num_real_nodes;
 
@@ -279,9 +278,6 @@ public:
         DomWntConcentration<3>::Instance()->SetCryptRadius(2.0);
         DomWntConcentration<3>::Instance()->SetWntConcentrationParameter(2.0);
 
-        
-
-
         // Pass an adaptive numerical method to the simulation
         boost::shared_ptr<AbstractNumericalMethod<3,3> > p_method(new ForwardEulerNumericalMethod<3,3>());
         p_method->SetUseAdaptiveTimestep(false);
@@ -299,7 +295,6 @@ public:
         // cell_population.AddCellWriter<CellAncestorWriter>();
         cell_population.AddPopulationWriter<CellPopulationEpithelialWriter>();
         cell_population.AddPopulationWriter<NodeVelocityWriter>();
-
 
         //cell_population.AddPopulationWriter<VoronoiDataWriter>(); // paraview is pretty pointless at viewing this, worth looking into
         
@@ -376,11 +371,12 @@ public:
         
         double cut_off = 4.0;
         double density_threshold = 0.95;
+        double domain_tol = 2.0;
         // Add anoikis cell killer
         MAKE_PTR_ARGS(AnoikisCellKiller3DWithGhostNodes, anoikis, (&cell_population, cut_off, periodic_width, periodic_height));
         simulator.AddCellKiller(anoikis);
-        
-        MAKE_PTR_ARGS(DensityDependantCellKiller3DWithGhostNodes, density, (&cell_population, cut_off, density_threshold, periodic_width, periodic_height));
+
+        MAKE_PTR_ARGS(DensityDependantCellKiller3DWithGhostNodes, density, (&cell_population, domain_tol, density_threshold, periodic_width, periodic_height));
         simulator.AddCellKiller(density);
 
         simulator.SetOutputDirectory(output_directory);	 
@@ -391,11 +387,11 @@ public:
         p_modifier->SetDepth(periodic_height);
         simulator.AddSimulationModifier(p_modifier);
 
-        MAKE_PTR(PeriodicRemeshCellsModifier<3>, p_per_modifier);
-        p_per_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
-        p_per_modifier->SetWidth(periodic_width);
-        p_per_modifier->SetDepth(periodic_height);
-        simulator.AddSimulationModifier(p_per_modifier);
+        // MAKE_PTR(PeriodicRemeshCellsModifier<3>, p_per_modifier);
+        // p_per_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
+        // p_per_modifier->SetWidth(periodic_width);
+        // p_per_modifier->SetDepth(periodic_height);
+        // simulator.AddSimulationModifier(p_per_modifier);
 
         // Add random cell killer for death at the edges
         //                                                              ProbabilityOfDeathInAnHour,    MinXBoundary,                MaxXBoundary,     MinYBoundary,                    MaxYBoundary

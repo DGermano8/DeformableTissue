@@ -140,7 +140,7 @@ bool DensityDependantCellKiller3DWithGhostNodes::IsCellTooSmall(MutableMesh<3,3>
 			double y_location = this->mpCellPopulation->GetLocationOfCellCentre(p_cell)[1];
 			double z_location = this->mpCellPopulation->GetLocationOfCellCentre(p_cell)[2];
 
-     		c_vector<double, 3> epithelial_location = ExtendedMesh->GetNode(global_index)->rGetLocation();
+     		c_vector<double, 3> epithelial_location = ExtendedMesh->GetNode(*neighbour_iter)->rGetLocation();
 
 			average_cell_distance = average_cell_distance + sqrt( pow(x_location - epithelial_location[0],2) + pow(y_location - epithelial_location[1],2) + pow(z_location - epithelial_location[2],2));
 			num_epithelial_neighbours += 1;
@@ -169,7 +169,7 @@ bool DensityDependantCellKiller3DWithGhostNodes::IsCellTooSmall(MutableMesh<3,3>
 std::vector<c_vector<unsigned,2> > DensityDependantCellKiller3DWithGhostNodes::RemoveByAnoikis()
 {
 	DomMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<3>*> (this->mpCellPopulation);
-	double domain_tollerance = 2.0;
+	double domain_tollerance = mCutOffLength;
 
 
 	unsigned num_cells = p_tissue->GetNumRealCells();
