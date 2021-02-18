@@ -69,18 +69,18 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "FlatWntRadius_T";
+        std::string output_directory = "FlatWntRadius_Curve_three";
 
-        unsigned width = 12;	   // x
-        unsigned height = 14;      // y
+        unsigned width = 10;	   // x
+        unsigned height = 10;      // y
         unsigned ghosts_bottom = 0;       // ghosts > depth
         unsigned ghosts_top = 1;       // ghosts > depth
-        unsigned num_tissue_depth = 2;
+        unsigned num_tissue_depth = 1;
         unsigned depth = num_tissue_depth + (ghosts_bottom + ghosts_top) + 1;        // z
 
         // Initialise the tissue in an equilibrum state
-        double width_space = 0.96;
-        double height_space = 0.96*sqrt(0.75);
+        double width_space = 1.0;
+        double height_space = 1.0*sqrt(0.75);
         double ghost_sep = 1.0;
         double depth_space = 0.738431690356779*1.0; //Magic number for z-spaceing... 
         unsigned cells_per_layer = width*height;
@@ -96,20 +96,20 @@ public:
         double x_coordinate, y_coordinate, z_coordinate;
 
         // Get the dimensions for the non-zero target curvature region
-        // double centre_x = periodic_width*0.5;
-        // double centre_y = periodic_height*0.5;
-        double centre_x = 30;
-        double centre_y = 30;
+        double centre_x = periodic_width*0.5;
+        double centre_y = periodic_height*0.5;
+        // double centre_x = 30;
+        // double centre_y = 30;
 
         double spring_strength = 20.0;
 
-        double radius =  0;//periodic_width+1.0;
+        double radius =  2.0;//periodic_width+1.0;
         double target_curvature = -0.2; //maximum curvature is 0.2066 -> higher curvature means smaller sphere
-        double beta_parameter = 2.0*spring_strength;
+        double beta_parameter = 1.0*spring_strength;
         double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 0.1;
+        double end_time = 12;
         double plot_step = 10.0;
 
         bool include_springs = true;
@@ -272,7 +272,7 @@ public:
         
         DomWntConcentration<3>::Instance()->SetType(DomRADIAL);
         DomWntConcentration<3>::Instance()->SetCellPopulation(cell_population);
-        DomWntConcentration<3>::Instance()->SetCryptLength(10.0);
+        DomWntConcentration<3>::Instance()->SetCryptLength(20.0);
         DomWntConcentration<3>::Instance()->SetCryptCentreX(0.5*periodic_width);
         DomWntConcentration<3>::Instance()->SetCryptCentreY(0.5*periodic_height);
         DomWntConcentration<3>::Instance()->SetCryptRadius(2.0);

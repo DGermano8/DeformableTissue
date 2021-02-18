@@ -205,7 +205,7 @@ double DomWntConcentration<DIM>::GetWntLevel(double height, double rad_diff)
     {
         if ((height >= -1e-9) && (height < mWntConcentrationParameter*GetCryptLength()))
         {
-            wnt_level = 1.0 - height/(mWntConcentrationParameter*GetCryptLength());
+            wnt_level = 1.0 - height/(GetCryptLength());
         }
         else
         {
@@ -220,7 +220,7 @@ double DomWntConcentration<DIM>::GetWntLevel(double height, double rad_diff)
         {
             if ((height >= -1e-9) && (height < mWntConcentrationParameter*GetCryptLength()))
             {
-                wnt_level = 1.0 - height/(mWntConcentrationParameter*GetCryptLength());
+                wnt_level = 1.0 - height/(GetCryptLength());
             }
             else
             {

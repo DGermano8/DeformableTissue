@@ -407,7 +407,7 @@ public:
         
         DomWntConcentration<3>::Instance()->SetType(DomRADIAL);
         DomWntConcentration<3>::Instance()->SetCellPopulation(cell_population);
-        DomWntConcentration<3>::Instance()->SetCryptLength(10.0);
+        DomWntConcentration<3>::Instance()->SetCryptLength(20.0);
         DomWntConcentration<3>::Instance()->SetCryptCentreX(0.5*periodic_width);
         DomWntConcentration<3>::Instance()->SetCryptCentreY(0.5*periodic_height);
         DomWntConcentration<3>::Instance()->SetCryptRadius(2.0);
