@@ -360,7 +360,6 @@ public:
             simulator.AddForce(periodic_bending_force);
         }
 
-
         MAKE_PTR(DriftPreventForce<3>, p_drift_force);
         p_drift_force->SetTissueMiddle(tissue_middle);
         simulator.AddForce(p_drift_force);
