@@ -353,6 +353,7 @@ public:
 
 		// Create periodic basement membrane force law
         MAKE_PTR(PeriodicBendingForce3dHeightWithGhostNodes, periodic_bending_force);
+        periodic_bending_force->SetOutputDirectory(output_directory);
         periodic_bending_force->SetHeightDependantCurvatureParameter(1.2);
         periodic_bending_force->SetBasementMembraneParameter(beta_parameter);
         periodic_bending_force->SetExponentParameter(alpha_parameter);

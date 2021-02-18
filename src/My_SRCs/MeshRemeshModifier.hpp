@@ -62,7 +62,7 @@ class MeshRemeshModifier : public AbstractCellBasedSimulationModifier<DIM,DIM>
     void serialize(Archive & archive, const unsigned int version)
     {
         archive & boost::serialization::base_object<AbstractCellBasedSimulationModifier<DIM,DIM> >(*this);
-        archive & mOutputDirectory;;
+        archive & mOutputDirectory;
         archive & mWidth;
         archive & mDepth;
     }

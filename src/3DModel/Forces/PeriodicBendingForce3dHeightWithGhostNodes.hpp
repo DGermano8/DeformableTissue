@@ -54,6 +54,7 @@ private :
         archive & mRadiusOfNonZeroTargetCurvatureRegion;
         archive & mXCoordinateOfCentreOfNonZeroTargetCurvatureRegion;
         archive & mYCoordinateOfCentreOfNonZeroTargetCurvatureRegion;
+        archive & mOutputDirectory;
     }
 
 
@@ -96,8 +97,12 @@ protected :
     /** y-coordinate of the centre of the circular non-zero target curvature region */
     double mYCoordinateOfCentreOfNonZeroTargetCurvatureRegion;
 
+    std::string mOutputDirectory;
+
 
 public :
+
+    virtual void SetOutputDirectory(std::string outputDirectory);
 
     /**
      * Constructor.

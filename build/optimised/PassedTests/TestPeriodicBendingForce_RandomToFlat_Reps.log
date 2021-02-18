@@ -1,0 +1,43 @@
+Running 1 test
+
+ ***** Test3dBoxModel.hpp *****
+
+
+Entering TestPeriodicCubeWithGhosts
+number of cells comp = 72
+number of cells all  = 72
+number of ghosts     = 72
+number of cells comp = 72
+number of cells all  = 72
+number of ghosts     = 72
+number of cells comp = 72
+number of cells all  = 72
+number of ghosts     = 72
+number of cells comp = 72
+number of cells all  = 72
+number of ghosts     = 72
+number of cells comp = 72
+number of cells all  = 72
+number of ghosts     = 72
+number of cells comp = 72
+number of cells all  = 72
+number of ghosts     = 72
+number of cells comp = 72
+number of cells all  = 72
+number of ghosts     = 72
+number of cells comp = 72
+number of cells all  = 72
+number of ghosts     = 72
+number of cells comp = 72
+number of cells all  = 72
+number of ghosts     = 72
+number of cells comp = 72
+number of cells all  = 72
+number of ghosts     = 72
+
+Time taken = 4.10485 seconds
+
+Passed
+OK!
+Chaste warning: in file global/src/checkpointing/Identifiable.cpp at line 106: Unable to determine the class type. If you are using C++ serialization may not be set up correctly. 
+ If you are using Python this behaviour is expected.
