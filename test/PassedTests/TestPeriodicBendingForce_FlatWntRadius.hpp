@@ -75,7 +75,7 @@ public:
         unsigned height = 14;      // y
         unsigned ghosts_bottom = 0;       // ghosts > depth
         unsigned ghosts_top = 1;       // ghosts > depth
-        unsigned num_tissue_depth = 2;
+        unsigned num_tissue_depth = 1;
         unsigned depth = num_tissue_depth + (ghosts_bottom + ghosts_top) + 1;        // z
 
         // Initialise the tissue in an equilibrum state
@@ -109,7 +109,7 @@ public:
         double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 0.1;
+        double end_time = 0.01;
         double plot_step = 10.0;
 
         bool include_springs = true;
@@ -347,6 +347,7 @@ public:
 
 		// Create periodic basement membrane force law
         MAKE_PTR(PeriodicBendingForce3dHeightWithGhostNodes, periodic_bending_force);
+        periodic_bending_force->SetOutputDirectory(output_directory);
         periodic_bending_force->SetHeightDependantCurvatureParameter(1.2);
         periodic_bending_force->SetBasementMembraneParameter(beta_parameter);
         periodic_bending_force->SetExponentParameter(alpha_parameter);
