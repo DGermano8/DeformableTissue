@@ -74,13 +74,13 @@ public:
         {
             std::vector<Node<3>*> nodes;
 
-            std::string output_directory = "RandomToFlat_Rep_" + std::to_string(repeat);
+            std::string output_directory = "RandomToFlat_Rep2_" + std::to_string(repeat);
 
-            unsigned width = 6;	   // x
-            unsigned height = 6;      // y
+            unsigned width = 12;	   // x
+            unsigned height = 14;      // y
             unsigned ghosts_bottom = 0;       // ghosts > depth
             unsigned ghosts_top = 1;       // ghosts > depth
-            unsigned num_tissue_depth = 1;
+            unsigned num_tissue_depth = 2;
             unsigned depth = num_tissue_depth + (ghosts_bottom + ghosts_top) + 1;        // z
 
             // Initialise the tissue in an equilibrum state
@@ -107,11 +107,11 @@ public:
 
             double radius =  0;//periodic_width+1.0;
             double target_curvature = -0.2; //maximum curvature is 0.2066 -> higher curvature means smaller sphere
-            double beta_parameter = 2.0*spring_strength;
+            double beta_parameter = 1.0*spring_strength;
             double alpha_parameter = 1.2;
 
             double time_step = 0.001;
-            double end_time = 0.01;
+            double end_time = 2;
             double plot_step = 10.0;
 
             bool include_springs = true;

@@ -4,38 +4,38 @@ Running 1 test
 
 
 Entering TestPeriodicCubeWithGhosts
-number of cells comp = 72
-number of cells all  = 72
-number of ghosts     = 72
-number of cells comp = 72
-number of cells all  = 72
-number of ghosts     = 72
-number of cells comp = 72
-number of cells all  = 72
-number of ghosts     = 72
-number of cells comp = 72
-number of cells all  = 72
-number of ghosts     = 72
-number of cells comp = 72
-number of cells all  = 72
-number of ghosts     = 72
-number of cells comp = 72
-number of cells all  = 72
-number of ghosts     = 72
-number of cells comp = 72
-number of cells all  = 72
-number of ghosts     = 72
-number of cells comp = 72
-number of cells all  = 72
-number of ghosts     = 72
-number of cells comp = 72
-number of cells all  = 72
-number of ghosts     = 72
-number of cells comp = 72
-number of cells all  = 72
-number of ghosts     = 72
+number of cells comp = 504
+number of cells all  = 504
+number of ghosts     = 336
+number of cells comp = 504
+number of cells all  = 504
+number of ghosts     = 336
+number of cells comp = 504
+number of cells all  = 504
+number of ghosts     = 336
+number of cells comp = 504
+number of cells all  = 504
+number of ghosts     = 336
+number of cells comp = 504
+number of cells all  = 504
+number of ghosts     = 336
+number of cells comp = 504
+number of cells all  = 504
+number of ghosts     = 336
+number of cells comp = 504
+number of cells all  = 504
+number of ghosts     = 336
+number of cells comp = 504
+number of cells all  = 504
+number of ghosts     = 336
+number of cells comp = 504
+number of cells all  = 504
+number of ghosts     = 336
+number of cells comp = 504
+number of cells all  = 504
+number of ghosts     = 336
 
-Time taken = 4.10485 seconds
+Time taken = 6010.97 seconds
 
 Passed
 OK!
