@@ -68,13 +68,13 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "RenewingTissue";
+        std::string output_directory = "RenewingTissue_2202";
 
         unsigned width = 10;	   // x
-        unsigned height = 10;      // y
+        unsigned height = 12;      // y
         unsigned ghosts_bottom = 0;       // ghosts > depth
         unsigned ghosts_top = 1;       // ghosts > depth
-        unsigned num_tissue_depth = 2;
+        unsigned num_tissue_depth = 1;
         unsigned depth = num_tissue_depth + (ghosts_bottom + ghosts_top) + 1;        // z
 
         // Initialise the tissue in an equilibrum state
@@ -229,17 +229,17 @@ public:
             FixedG1GenerationalCellCycleModel* p_model = new FixedG1GenerationalCellCycleModel();
             
             p_model->SetDimension(3);
-            p_model->SetMaxTransitGenerations(4);
+            p_model->SetMaxTransitGenerations(0);
 
-            // p_model->SetTransitCellG1Duration(4);
-            // p_model->SetSDuration(2);
-            // p_model->SetG2Duration(2);
-            // p_model->SetMDuration(1);
-
-            p_model->SetTransitCellG1Duration(11);
-            p_model->SetSDuration(8);
-            p_model->SetG2Duration(4);
+            p_model->SetTransitCellG1Duration(4);
+            p_model->SetSDuration(2);
+            p_model->SetG2Duration(2);
             p_model->SetMDuration(1);
+
+            // p_model->SetTransitCellG1Duration(11);
+            // p_model->SetSDuration(8);
+            // p_model->SetG2Duration(4);
+            // p_model->SetMDuration(1);
 
             // p_model->SetTransitCellG1Duration(0.5);
             // p_model->SetSDuration(0.25);

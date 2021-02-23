@@ -5,7 +5,7 @@ close all;
 addpath /Users/germanod/workspace/ChasteDom/anim/matlab
 
 % addpath /Users/domenicgermano/workspace/ChasteDom/projects/results/WntFlat_maintain
-addpath /Users/germanod/workspace/ChasteDom/results/FlatWntRadius_2202_03/results_from_time_0
+addpath /Users/germanod/workspace/ChasteDom/results/FlatWntRadius_2202_02/results_from_time_0
 
 filename = 'results';
 
@@ -146,13 +146,12 @@ t1_velocity_i = zeros(1,(length(holder_init))/7);
 % t1_velocity_i = zeros(1,(dimensionData(2)-1)/7);
 
 
-number_to_do = 20;
-interval = 20;
+number_to_do = 200;
 
 radius_intervals = zeros(number_to_do,101);
 counter_intervals = zeros(number_to_do,101);
 count = 1;
-for i = (length(timeData)- number_to_do*interval+interval):interval:length(timeData);
+for i = (length(timeData)- number_to_do*10+10):10:length(timeData);
     
     time = timeData(i);
     
@@ -211,10 +210,6 @@ for i = (length(timeData)- number_to_do*interval+interval):interval:length(timeD
             end
             prev_int = this_int;
         end
-        if (t1_centre_dist(matlab_node_numb) >= prev_int )
-            radius_intervals(count,101) = radius_intervals(count,101) + t1_velocity_i(matlab_node_numb);
-            counter_intervals(count,101) = radius_intervals(count,101) + 1;
-        end
        
     end
     
@@ -234,14 +229,14 @@ av_velocity = zeros(1,101);
 for k = 1:101
     av_velocity(k) = sum(radius_intervals(:,k))/sum(counter_intervals(:,k));
 end
-plot(0:((1/100)*max_radius):((1)*max_radius),av_velocity,'ko')
+plot(0:((1/100)*max_radius):((99/100)*max_radius),av_velocity,'ko')
 
 figure
 for k = 1:number_to_do
 hold on
 plot(0:((1/100)*max_radius):((1)*max_radius),radius_intervals(k,:),'o','color',[0.8 0.8 0.8])
 end
-plot(0:((1/100)*max_radius):((1)*max_radius),av_velocity,'ko','linewidth',2)
+plot(0:((1/100)*max_radius):((99/100)*max_radius),av_velocity,'ko','linewidth',2)
 
 %%
 

@@ -358,8 +358,8 @@ std::vector<c_vector<unsigned,2> > DensityDependantCellKiller3DWithGhostNodes::R
 
 					
 					// Make sure cell is well inside tissue and not just an edge
-					if (x_location <= domain_tollerance || x_location >= mCellPopulationWidth - domain_tollerance ||
-						y_location <= domain_tollerance*sqrt(0.75) || y_location >= mCellPopulationDepth - domain_tollerance*sqrt(0.75))
+					if ( x_location <= domain_tollerance || x_location >= mCellPopulationWidth - domain_tollerance ||
+						 y_location <= domain_tollerance || y_location >= mCellPopulationDepth - domain_tollerance   )
 					{
 						// TRACE("Got A Cell");
 						individual_node_information[1] = 1;

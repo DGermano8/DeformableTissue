@@ -69,10 +69,10 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "FlatWntRadius_Curve_three";
+        std::string output_directory = "FlatWntRadius_2202_04";
 
         unsigned width = 10;	   // x
-        unsigned height = 10;      // y
+        unsigned height = 12;      // y
         unsigned ghosts_bottom = 0;       // ghosts > depth
         unsigned ghosts_top = 1;       // ghosts > depth
         unsigned num_tissue_depth = 1;
@@ -96,10 +96,10 @@ public:
         double x_coordinate, y_coordinate, z_coordinate;
 
         // Get the dimensions for the non-zero target curvature region
-        double centre_x = periodic_width*0.5;
-        double centre_y = periodic_height*0.5;
-        // double centre_x = 30;
-        // double centre_y = 30;
+        // double centre_x = periodic_width*0.5;
+        // double centre_y = periodic_height*0.5;
+        double centre_x = 30;
+        double centre_y = 30;
 
         double spring_strength = 20.0;
 
@@ -109,7 +109,7 @@ public:
         double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 0.01;
+        double end_time = 24;
         double plot_step = 10.0;
 
         bool include_springs = true;
@@ -225,9 +225,9 @@ public:
             p_model->SetDimension(3);
             // p_model->SetMaxTransitGenerations(100);
 
-            p_model->SetTransitCellG1Duration(5);
-            p_model->SetSDuration(4);
-            p_model->SetG2Duration(2);
+            p_model->SetTransitCellG1Duration(4);
+            p_model->SetSDuration(2);
+            p_model->SetG2Duration(1);
             p_model->SetMDuration(1);
 
             // p_model->SetTransitCellG1Duration(11);
@@ -261,7 +261,6 @@ public:
 
         DomMeshBasedCellPopulationWithGhostNodes<3> cell_population(mesh, cells, real_node_indices); //ghost_sep
         assert(cell_population.GetNumRealCells() != 0);
-
         
         // Set the division rule for our population to be the random direction division rule
         // boost::shared_ptr<AbstractCentreBasedDivisionRule<3,3> > p_division_rule_to_set(new PlanarDivisionRule<3,3>());
@@ -275,14 +274,13 @@ public:
         DomWntConcentration<3>::Instance()->SetCryptLength(20.0);
         DomWntConcentration<3>::Instance()->SetCryptCentreX(0.5*periodic_width);
         DomWntConcentration<3>::Instance()->SetCryptCentreY(0.5*periodic_height);
-        DomWntConcentration<3>::Instance()->SetCryptRadius(2.0);
+        DomWntConcentration<3>::Instance()->SetCryptRadius(1.0);
         DomWntConcentration<3>::Instance()->SetWntConcentrationParameter(2.0);
 
         // Pass an adaptive numerical method to the simulation
         boost::shared_ptr<AbstractNumericalMethod<3,3> > p_method(new ForwardEulerNumericalMethod<3,3>());
         p_method->SetUseAdaptiveTimestep(false);
         simulator.SetNumericalMethod(p_method);
-
 
 //        cell_population.InitialiseCells();
 
@@ -370,11 +368,11 @@ public:
         // simulator.AddForce(p_random_force);
         
         double cut_off = 4.0;
-        double density_threshold = 0.95;
-        double domain_tol = 2.0;
+        double density_threshold = 0.975;
+        double domain_tol = 1.0;
         // Add anoikis cell killer
-        MAKE_PTR_ARGS(AnoikisCellKiller3DWithGhostNodes, anoikis, (&cell_population, cut_off, periodic_width, periodic_height));
-        simulator.AddCellKiller(anoikis);
+        // MAKE_PTR_ARGS(AnoikisCellKiller3DWithGhostNodes, anoikis, (&cell_population, cut_off, periodic_width, periodic_height));
+        // simulator.AddCellKiller(anoikis);
 
         MAKE_PTR_ARGS(DensityDependantCellKiller3DWithGhostNodes, density, (&cell_population, domain_tol, density_threshold, periodic_width, periodic_height));
         simulator.AddCellKiller(density);
