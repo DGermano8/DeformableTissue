@@ -2,30 +2,34 @@
 #define TEST3DBOXMODEL_HPP_
 
 #include <cxxtest/TestSuite.h>
+#include "Timer.hpp"
 
 // Must be included before other cell_based headers
-#include "CellBasedSimulationArchiver.hpp"
+// #include "CellBasedSimulationArchiver.hpp"
 
-#include "TrianglesMeshReader.hpp"
+// #include "TrianglesMeshReader.hpp"
 #include "OffLatticeSimulation.hpp"
-#include "GeneralisedLinearSpringForce.hpp"
-#include "SimpleWntCellCycleModel.hpp"
+// #include "GeneralisedLinearSpringForce.hpp"
 #include "DomMeshBasedCellPopulationWithGhostNodes.hpp"
 #include "AbstractCellBasedTestSuite.hpp"
 #include "WildTypeCellMutationState.hpp"
 #include "StromalCellMutationState.hpp"
-#include "CellsGenerator.hpp"
-#include "RandomMotionForce.hpp"
+// #include "CellsGenerator.hpp"
+
+#include "AbstractTwoBodyInteractionForce.hpp"
+
+
+// #include "RandomMotionForce.hpp"
 #include "PeriodicCryptModelInteractionForceWithGhostNodes.hpp"
 #include "PeriodicBendingForce3dHeightWithGhostNodes.hpp"
-#include "SloughingCellKiller3DWithGhostNodes.hpp"
+// #include "SloughingCellKiller3DWithGhostNodes.hpp"
 #include "AnoikisCellKiller3DWithGhostNodes.hpp"
 #include "UniformCellKiller3dWithGhostNodes.hpp"
-#include "PeriodicBoxBoundaryCondition3d.hpp"
 #include "PeriodicBoxBoundaryCondition3dGhosts.hpp"
 #include "PeriodicStromalBoxBoundaryCondition3d.hpp"
-#include "TrianglesMeshWriter.hpp"
+// #include "TrianglesMeshWriter.hpp"
 #include "Debug.hpp"
+#include "DensityDependantCellKiller3DWithGhostNodes.hpp"
 
 #include "DifferentiatedCellProliferativeType.hpp"
 #include "TransitCellProliferativeType.hpp"
@@ -33,19 +37,19 @@
 #include "CellIdWriter.hpp"
 #include "CellMutationStatesWriter.hpp"
 #include "CellProliferativeTypesWriter.hpp"
-#include "CellAncestorWriter.hpp"
-#include "CellPopulationEpithelialWriter.hpp"
-#include "VoronoiDataWriter.hpp"
+// #include "CellAncestorWriter.hpp"
+// #include "CellPopulationEpithelialWriter.hpp"
+// #include "VoronoiDataWriter.hpp"
+#include "NodeVelocityWriter.hpp"
 
 #include "PetscSetupAndFinalize.hpp"
-#include "ForwardEulerNumericalMethod.hpp"
+// #include "ForwardEulerNumericalMethod.hpp"
 #include "PlanarDivisionRule.hpp"
 #include "DriftPreventForce.hpp"
 
-
-#include "MeshModifier.hpp"
+// #include "MeshModifier.hpp"
 #include "MeshRemeshModifier.hpp"
-#include "PeriodicRemeshCellsModifier.hpp"
+// #include "PeriodicRemeshCellsModifier.hpp"
 
 
 
@@ -67,19 +71,18 @@ public:
     	RandomNumberGenerator::Instance()->Reseed(1);
         
         
-        auto t1 = std::chrono::high_resolution_clock::now();
-
-        for (int repeat = 0; repeat < 10; repeat ++)
+        Timer::Reset();
+        for (int repeat = 0; repeat < 2; repeat ++)
         {
             std::vector<Node<3>*> nodes;
 
-            std::string output_directory = "RandomToFlat_Rep2_" + std::to_string(repeat);
+            std::string output_directory = "RepSweep_RandomToFlat_Rep2_" + std::to_string(repeat);
 
             unsigned width = 12;	   // x
             unsigned height = 14;      // y
             unsigned ghosts_bottom = 0;       // ghosts > depth
-            unsigned ghosts_top = 1;       // ghosts > depth
-            unsigned num_tissue_depth = 2;
+            unsigned ghosts_top = 2;       // ghosts > depth
+            unsigned num_tissue_depth = 1;
             unsigned depth = num_tissue_depth + (ghosts_bottom + ghosts_top) + 1;        // z
 
             // Initialise the tissue in an equilibrum state
@@ -107,10 +110,10 @@ public:
             double radius =  0;//periodic_width+1.0;
             double target_curvature = -0.2; //maximum curvature is 0.2066 -> higher curvature means smaller sphere
             double beta_parameter = 1.0*spring_strength;
-            double alpha_parameter = 1.2;
+            double alpha_parameter = 1.5;
 
             double time_step = 0.001;
-            double end_time = 2;
+            double end_time = 0.1;
             double plot_step = 10.0;
 
             bool include_springs = true;
@@ -119,19 +122,19 @@ public:
             int is_transit[depth*height*width];
             int num_real_nodes = 0;
 
+            
             std::vector<unsigned> ghost_node_indices, real_node_indices;
-            for (unsigned k=0; k<(depth + 1 ); k++) //+1 puts a layer of ghosts on the bottom
+            for (unsigned k=0; k<=(depth); k++) //+1 puts a layer of ghosts on the bottom
             {
-                isGhost = false;
-                if(k < ghosts_bottom || k > ghosts_bottom + num_tissue_depth)
+                isGhost = true;
+                if(k < num_tissue_depth + 1)
                 {
-                    isGhost = true;
+                    isGhost = false;
                 }
-                if(k == depth)
-                {
-                    isGhost = true;
-                }
-
+                // if(k == depth)
+                // {
+                //     isGhost = true;
+                // }
 
                 for (unsigned j=0; j<height; j++)
                 {    
@@ -143,21 +146,22 @@ public:
 
                         x_coordinate = (double) (i + 0.5*(j%2 + k%2))*width_space       + 0.15*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
                         y_coordinate = (double) j*height_space                          + 0.15*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+
+                        // z_coordinate = (double) tissue_base + k*depth_space;
                         
                         if( k == depth)
                         {
                             z_coordinate = (double) tissue_base + (-1.0)*depth_space    + 0.15*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
-
                         }
                         else
                         {
-                            z_coordinate = (double) tissue_base + k*depth_space         +  0.15*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
-                        }    
+                            z_coordinate = (double) tissue_base + k*depth_space         + 0.15*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                        }
+
                         if( pow(x_coordinate - 0.5*periodic_width,2)+ pow(y_coordinate - 0.5*periodic_height ,2) <= pow(1.0,2) )
                         {
                             is_transit[cell_iter] = 1;
                         }
-                            
                         if(isGhost)
                         {
                             ghost_node_indices.push_back(cell_iter);
@@ -169,13 +173,11 @@ public:
                             real_node_indices.push_back(cell_iter);
                         }
                         nodes.push_back(new Node<3>(cell_iter,  false,  x_coordinate, y_coordinate, z_coordinate));
+                        
                         cell_iter++;
 
-
-
-                        }
                     }
-
+                }
             }
             tissue_middle = tissue_middle/num_real_nodes;
 
@@ -272,9 +274,9 @@ public:
             
 
             // Pass an adaptive numerical method to the simulation
-            boost::shared_ptr<AbstractNumericalMethod<3,3> > p_method(new ForwardEulerNumericalMethod<3,3>());
-            p_method->SetUseAdaptiveTimestep(false);
-            simulator.SetNumericalMethod(p_method);
+            // boost::shared_ptr<AbstractNumericalMethod<3,3> > p_method(new ForwardEulerNumericalMethod<3,3>());
+            // p_method->SetUseAdaptiveTimestep(false);
+            // simulator.SetNumericalMethod(p_method);
 
 
             //        cell_population.InitialiseCells();
@@ -285,8 +287,8 @@ public:
             cell_population.AddCellWriter<CellIdWriter>();
             cell_population.AddCellWriter<CellMutationStatesWriter>();
             cell_population.AddCellWriter<CellProliferativeTypesWriter>();
-            cell_population.AddCellWriter<CellAncestorWriter>();
-            cell_population.AddPopulationWriter<CellPopulationEpithelialWriter>();
+            // cell_population.AddCellWriter<CellAncestorWriter>();
+            // cell_population.AddPopulationWriter<CellPopulationEpithelialWriter>();
             
             //cell_population.AddPopulationWriter<VoronoiDataWriter>(); // paraview is pretty pointless at viewing this, worth looking into
             
@@ -295,7 +297,7 @@ public:
             cell_population.SetWriteVtkAsPointsDom(true);
             //std::cout<<cell_population.GetWriteVtkAsPoints() << "\n";
             //PRINT_VARIABLE(cell_population.GetWriteVtkAsPoints());
-            cell_population.SetOutputMeshInVtkDom(false);
+            // cell_population.SetOutputMeshInVtkDom(false);
 
 
 
@@ -330,7 +332,7 @@ public:
             periodic_spring_force->SetUseOneWaySprings(false); //turning this on makes the stromal cells act as ghosts..
             periodic_spring_force->SetCutOffLength(1.25);
             //                     SetEpithelialStromalCellDependentSprings(ind , Ep-Ep, Str-Str, Ep-Str, apcTwoHitStromalMultiplier);
-            periodic_spring_force->SetEpithelialStromalCellDependentSprings(true, 1.0,     0.5,     0.5,    1.0);
+            periodic_spring_force->SetEpithelialStromalCellDependentSprings(true, 1.0,     1.0,     0.5,    1.0);
             periodic_spring_force->SetPeriodicDomainWidth(periodic_width);
             periodic_spring_force->SetPeriodicDomainDepth(periodic_height);
             periodic_spring_force->SetMeinekeSpringStiffness(spring_strength);
@@ -355,9 +357,9 @@ public:
             }
 
 
-            MAKE_PTR(DriftPreventForce<3>, p_drift_force);
-            p_drift_force->SetTissueMiddle(tissue_middle);
-            simulator.AddForce(p_drift_force);
+            // MAKE_PTR(DriftPreventForce<3>, p_drift_force);
+            // p_drift_force->SetTissueMiddle(tissue_middle);
+            // simulator.AddForce(p_drift_force);
 
             // Prevents getting stuck in a local minimums -> used to help break symmetry in cell anoikus
             // MAKE_PTR(RandomMotionForce<3>, p_random_force);
@@ -378,12 +380,11 @@ public:
 
             simulator.AddSimulationModifier(p_modifier);
 
-            MAKE_PTR(PeriodicRemeshCellsModifier<3>, p_per_modifier);
-            p_per_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
-            p_per_modifier->SetWidth(periodic_width);
-            p_per_modifier->SetDepth(periodic_height);
-
-            simulator.AddSimulationModifier(p_per_modifier);
+            // MAKE_PTR(PeriodicRemeshCellsModifier<3>, p_per_modifier);
+            // p_per_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
+            // p_per_modifier->SetWidth(periodic_width);
+            // p_per_modifier->SetDepth(periodic_height);
+            // simulator.AddSimulationModifier(p_per_modifier);
 
 
 
@@ -404,9 +405,7 @@ public:
 		    SimulationTime::Instance()->SetStartTime(0.0);
 
         }
-        auto t2 = std::chrono::high_resolution_clock::now();
-        auto duration = pow(10.0,-6)*(std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count());
-        std::cout << "\nTime taken = " << duration << " seconds\n\n";
+        Timer::Print("Time Ellapsed");
         
         
     }     

@@ -1603,12 +1603,16 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 	// std::cout<<"_____________________________________________________________\n\n";
 	
 	// Uncomment these to print angle_sum data - NOTE: for this to work, need a "results" folder in Chaste directory
-	// std::ofstream myfile;
-	// // std::string angle_string = "results/angle_string_" + std::to_string(SimulationTime::Instance()->GetTime()) + ".txt";
+	std::ofstream myfile;
+	// std::string angle_string = "results/angle_string_" + std::to_string(SimulationTime::Instance()->GetTime()) + ".txt";
+	// // imac
 	// std::string angle_string = "/tmp/germanod/testoutput/" + mOutputDirectory + "/angle_string_" + std::to_string(SimulationTime::Instance()->GetTime()) + ".txt";
-	// // std::string angle_string = "/tmp/domenicgermano/testoutput/" + mOutputDirectory + "/angle_string_" + std::to_string(SimulationTime::Instance()->GetTime()) + ".txt";
-	// myfile.open (angle_string);
-	// myfile << SimulationTime::Instance()->GetTime() << ", ";
+	// // server
+	// std::string angle_string = "/tmp/germanod/testoutput/" + mOutputDirectory + "/angle_string_" + std::to_string(SimulationTime::Instance()->GetTime()) + ".txt";
+	// // macbook
+	std::string angle_string = "/tmp/dgermano/testoutput/" + mOutputDirectory + "/angle_string_" + std::to_string(SimulationTime::Instance()->GetTime()) + ".txt";
+	myfile.open (angle_string);
+	myfile << SimulationTime::Instance()->GetTime() << ", ";
 
 	for (AbstractCellPopulation<3>::Iterator cell_iter = rCellPopulation.Begin();
          cell_iter != rCellPopulation.End();
@@ -1745,7 +1749,7 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 			force_curvature[1] = force_due_to_curvature[1];
 			force_curvature[2] = force_due_to_curvature[2];
 
-			// myfile  << std::fixed << std::setprecision(12) << force_due_to_curvature[3] << ", ";
+			myfile  << std::fixed << std::setprecision(12) << force_due_to_curvature[3] << ", ";
 			if((p_cell_i_ext->GetAge()) < 1)
 			{
 				basement_membrane_parameter = (p_cell_i_ext->GetAge()) *get_basement_membrane_parameter;
@@ -1766,7 +1770,7 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 		
 	}
 
-	// myfile.close();
+	myfile.close();
 	
 	
 }

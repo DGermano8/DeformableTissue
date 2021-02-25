@@ -1,43 +1,41 @@
-Running 1 test
+Running 1 test--------------------------------------------------------------------------
+[[50193,1],0]: A high-performance Open MPI point-to-point messaging module
+was unable to find any relevant network interfaces:
+
+Module: OpenFabrics (openib)
+  Host: osborne-server
+
+Another transport will be used instead, although this may result in
+lower performance.
+--------------------------------------------------------------------------
+
 
  ***** Test3dBoxModel.hpp *****
 
 
 Entering TestPeriodicCubeWithGhosts
-number of cells comp = 504
-number of cells all  = 504
-number of ghosts     = 336
-number of cells comp = 504
-number of cells all  = 504
-number of ghosts     = 336
-number of cells comp = 504
-number of cells all  = 504
-number of ghosts     = 336
-number of cells comp = 504
-number of cells all  = 504
-number of ghosts     = 336
-number of cells comp = 504
-number of cells all  = 504
-number of ghosts     = 336
-number of cells comp = 504
-number of cells all  = 504
-number of ghosts     = 336
-number of cells comp = 504
-number of cells all  = 504
-number of ghosts     = 336
-number of cells comp = 504
-number of cells all  = 504
-number of ghosts     = 336
-number of cells comp = 504
-number of cells all  = 504
-number of ghosts     = 336
-number of cells comp = 504
-number of cells all  = 504
-number of ghosts     = 336
+[0]PETSC ERROR: ------------------------------------------------------------------------
+[0]PETSC ERROR: Caught signal number 11 SEGV: Segmentation Violation, probably memory access out of range
+[0]PETSC ERROR: Try option -start_in_debugger or -on_error_attach_debugger
+[0]PETSC ERROR: or see http://www.mcs.anl.gov/petsc/documentation/faq.html#valgrind
+[0]PETSC ERROR: or try http://valgrind.org on GNU/linux and Apple Mac OS X to find memory corruption errors
+[0]PETSC ERROR: configure using --with-debugging=yes, recompile, link, and run 
+[0]PETSC ERROR: to get more information on the crash.
+[0]PETSC ERROR: --------------------- Error Message --------------------------------------------------------------
+[0]PETSC ERROR: Signal received
+[0]PETSC ERROR: See http://www.mcs.anl.gov/petsc/documentation/faq.html for trouble shooting.
+[0]PETSC ERROR: Petsc Release Version 3.6.2, Oct, 02, 2015 
+[0]PETSC ERROR: projects/DeformableTissue/build/optimised/PassedTests/TestPeriodicBendingForce_RandomToFlat_RepsRunner on a x86_64-linux-gnu-real named osborne-server by dgermano Thu Feb 25 14:24:43 2021
+[0]PETSC ERROR: Configure options --build=x86_64-linux-gnu --prefix=/usr --includedir=${prefix}/include --mandir=${prefix}/share/man --infodir=${prefix}/share/info --sysconfdir=/etc --localstatedir=/var --with-silent-rules=0 --libdir=${prefix}/lib/x86_64-linux-gnu --libexecdir=${prefix}/lib/x86_64-linux-gnu --with-maintainer-mode=0 --with-dependency-tracking=0 --with-debugging=0 --shared-library-extension=_real --with-hypre=1 --with-hypre-dir=/usr --with-clanguage=C++ --with-c-support --with-shared-libraries --useThreads 0 --with-fortran-interfaces=1 --with-mpi-dir=/usr/lib/openmpi --with-blas-lib=-lblas --with-lapack-lib=-llapack --with-blacs=1 --with-blacs-lib="-lblacsCinit-openmpi -lblacs-openmpi" --with-scalapack=1 --with-scalapack-lib=-lscalapack-openmpi --with-mumps=1 --with-mumps-include="[]" --with-mumps-lib="-ldmumps -lzmumps -lsmumps -lcmumps -lmumps_common -lpord" --with-suitesparse=1 --with-suitesparse-include=/usr/include/suitesparse --with-suitesparse-lib="-lumfpack -lamd -lcholmod -lklu" --with-spooles=1 --with-spooles-include=/usr/include/spooles --with-spooles-lib=-lspooles --with-ptscotch=1 --with-ptscotch-include=/usr/include/scotch --with-ptscotch-lib="-lptesmumps -lptscotch -lptscotcherr" --with-fftw=1 --with-fftw-include="[]" --with-fftw-lib="-lfftw3 -lfftw3_mpi" --with-superlu=1 --with-superlu-include=/usr/include/superlu --with-superlu-lib=-lsuperlu --CXX_LINKER_FLAGS=-Wl,--no-as-needed --prefix=/usr/lib/petscdir/3.6.2/x86_64-linux-gnu-real PETSC_DIR=/build/petsc-16ivCo/petsc-3.6.2.dfsg1 --PETSC_ARCH=x86_64-linux-gnu-real CFLAGS="-g -O2 -fstack-protector-strong -Wformat -Werror=format-security" CXXFLAGS="-g -O2 -fstack-protector-strong -Wformat -Werror=format-security" FCFLAGS="-g -O2 -fstack-protector-strong" FFLAGS="-g -O2 -fstack-protector-strong" CPPFLAGS="-Wdate-time -D_FORTIFY_SOURCE=2" LDFLAGS="-Wl,-Bsymbolic-functions -Wl,-z,relro" MAKEFLAGS=w
+[0]PETSC ERROR: #1 User provided function() line 0 in  unknown file
+--------------------------------------------------------------------------
+MPI_ABORT was invoked on rank 0 in communicator MPI_COMM_WORLD 
+with errorcode 59.
 
-Time taken = 6010.97 seconds
-
-Passed
-OK!
-Chaste warning: in file global/src/checkpointing/Identifiable.cpp at line 106: Unable to determine the class type. If you are using C++ serialization may not be set up correctly. 
- If you are using Python this behaviour is expected.
+NOTE: invoking MPI_ABORT causes Open MPI to kill all MPI processes.
+You may or may not see output from other processes, depending on
+exactly when Open MPI kills them.
+--------------------------------------------------------------------------
+number of cells comp = 336
+number of cells all  = 336
+number of ghosts     = 504
