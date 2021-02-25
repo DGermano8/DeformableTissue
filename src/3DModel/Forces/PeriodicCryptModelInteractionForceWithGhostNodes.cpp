@@ -854,22 +854,36 @@ c_vector<double, DIM> PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::Cal
             double time_until_death_a = p_cell_A->GetTimeUntilDeath();
             a_rest_length = a_rest_length * time_until_death_a / p_cell_A->GetApoptosisTime();
         }
-        if(a_apop==false && a_born==true)
-        {
-            a_rest_length = a_rest_length*(p_cell_A->GetAge()/p_model_A->GetMDuration());
-        }
-
+        // if(a_apop==false && a_born==true)
+        // {
+        //     a_rest_length = a_rest_length*(p_cell_A->GetAge()/p_model_A->GetMDuration());
+        // }
 
         if(b_apop==true && (b_born==false || b_born==true) )
         {
             double time_until_death_b = p_cell_B->GetTimeUntilDeath();
             b_rest_length = b_rest_length * time_until_death_b / p_cell_B->GetApoptosisTime();
         }
-        if(b_apop==false && b_born==true)
-        {
-            b_rest_length = b_rest_length*(p_cell_B->GetAge()/p_model_B->GetMDuration());
-        }
+        // if(b_apop==false && b_born==true)
+        // {
+        //     b_rest_length = b_rest_length*(p_cell_B->GetAge()/p_model_B->GetMDuration());
+        // }
 
+        if( (b_apop==false && b_born==true) && (a_apop==false && a_born==true) )
+        {
+            double age_a = p_cell_A->GetAge();
+            double age_b = p_cell_B->GetAge();
+
+            // PRINT_2_VARIABLES(age_a , age_b);
+
+            if (age_a == age_b)
+            {
+                b_rest_length = b_rest_length*(p_cell_B->GetAge()/p_model_B->GetMDuration());
+                a_rest_length = a_rest_length*(p_cell_A->GetAge()/p_model_A->GetMDuration());
+            }
+        }
+        
+        
         rest_length = a_rest_length + b_rest_length;
 
         

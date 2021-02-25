@@ -96,7 +96,7 @@ c_vector<double,3> CryptSimulation3dGhosts::CalculateCellDivisionVector(CellPtr 
     	}
     }
     
-	assert(!isnan(epithelial_neighbour_indices.size()));
+	// assert(!isnan(epithelial_neighbour_indices.size()));
 	assert(epithelial_neighbour_indices.size() != 0);
 	
 	c_vector<double, 3> random_vector;

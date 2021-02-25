@@ -6,13 +6,11 @@
 
 #include "AbstractForce.hpp"
 #include "AbstractOffLatticeCellPopulation.hpp"
-#include "RandomNumberGenerator.hpp"
 
 /**
  * A force class to model random cell movement.
  */
-template<unsigned DIM>
-class DriftPreventForce : public AbstractForce<DIM>
+class DriftPreventForce : public AbstractForce<3>
 {
 private :
 
@@ -37,7 +35,7 @@ private :
     template<class Archive>
     void serialize(Archive & archive, const unsigned int version)
     {
-        archive & boost::serialization::base_object<AbstractForce<DIM> >(*this);
+        archive & boost::serialization::base_object<AbstractForce<3> >(*this);
         archive & mMovementParameter;
         archive & mTissueMiddle;
     }
@@ -80,7 +78,7 @@ public :
      * @param rCellPopulation reference to the tissue
      *
      */
-    void AddForceContribution(AbstractCellPopulation<DIM>& rCellPopulation);
+    void AddForceContribution(AbstractCellPopulation<3>& rCellPopulation);
 
     /**
      * Overridden OutputForceParameters() method.
@@ -91,6 +89,6 @@ public :
 };
 
 #include "SerializationExportWrapper.hpp"
-EXPORT_TEMPLATE_CLASS_SAME_DIMS(DriftPreventForce)
+CHASTE_CLASS_EXPORT(DriftPreventForce)
 
 #endif /*DriftPreventForce_HPP_*/

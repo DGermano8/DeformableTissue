@@ -23,11 +23,11 @@ int main( int argc, char *argv[] ) {
 static Test3dBoxModel suite_Test3dBoxModel;
 
 static CxxTest::List Tests_Test3dBoxModel = { 0, 0 };
-CxxTest::StaticSuiteDescription suiteDescription_Test3dBoxModel( "projects/DeformableTissue/test/PassedTests/TestPeriodicBendingForce_FlatWntRadius.hpp", 57, "Test3dBoxModel", suite_Test3dBoxModel, Tests_Test3dBoxModel );
+CxxTest::StaticSuiteDescription suiteDescription_Test3dBoxModel( "projects/DeformableTissue/test/PassedTests/TestPeriodicBendingForce_FlatWntRadius.hpp", 59, "Test3dBoxModel", suite_Test3dBoxModel, Tests_Test3dBoxModel );
 
 static class TestDescription_Test3dBoxModel_TestPeriodicCubeWithGhosts : public CxxTest::RealTestDescription {
 public:
- TestDescription_Test3dBoxModel_TestPeriodicCubeWithGhosts() : CxxTest::RealTestDescription( Tests_Test3dBoxModel, suiteDescription_Test3dBoxModel, 66, "TestPeriodicCubeWithGhosts" ) {}
+ TestDescription_Test3dBoxModel_TestPeriodicCubeWithGhosts() : CxxTest::RealTestDescription( Tests_Test3dBoxModel, suiteDescription_Test3dBoxModel, 68, "TestPeriodicCubeWithGhosts" ) {}
  void runTest() { suite_Test3dBoxModel.TestPeriodicCubeWithGhosts(); }
 } testDescription_Test3dBoxModel_TestPeriodicCubeWithGhosts;
 

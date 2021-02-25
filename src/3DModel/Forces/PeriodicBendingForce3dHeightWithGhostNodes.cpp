@@ -713,7 +713,7 @@ std::vector<c_vector<double, 3> > PeriodicBendingForce3dHeightWithGhostNodes::Fi
 		c_vector<double, 3> point_on_sphere;
 
 		
-		if (isnan(param_T) || pow(beta,2) - 4*alpha*delta < 0 )
+		if (std::isnan(param_T) || pow(beta,2) - 4*alpha*delta < 0 )
 		{
 			//param_T = 0.0;
 			// i.e. don't move the cell
@@ -876,7 +876,7 @@ c_vector<double, 4> PeriodicBendingForce3dHeightWithGhostNodes::GetForceDueToDis
 				double cos_abc = (abDotac)/(mag_ab*mag_ac);
 
 				// Think these edge cases, they shouldn't be happening, but they do...
-				if (!isnan(ang_sum))
+				if (!std::isnan(ang_sum))
 				{
 					if (cos_abc >= 0.99999999 || cos_abc == 1)
 					{
@@ -895,7 +895,7 @@ c_vector<double, 4> PeriodicBendingForce3dHeightWithGhostNodes::GetForceDueToDis
 						ang_sum += acos(cos_abc);
 					}
 				}
-				else if (isnan(ang_sum))
+				else if (std::isnan(ang_sum))
 				{
 					cos_abc = 0;
 				}
@@ -1732,7 +1732,7 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 				force_due_to_curvature[2] = 0.0;
 			}
 			
-			if (isnan(force_due_to_curvature[0]) || isnan(force_due_to_curvature[1]) || isnan(force_due_to_curvature[2]))
+			if (std::isnan(force_due_to_curvature[0]) || std::isnan(force_due_to_curvature[1]) || std::isnan(force_due_to_curvature[2]))
 			{
 				// PRINT_VECTOR(force_due_to_curvature);
 				force_due_to_curvature[0] = 0.0;
@@ -1746,7 +1746,14 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 			force_curvature[2] = force_due_to_curvature[2];
 
 			// myfile  << std::fixed << std::setprecision(12) << force_due_to_curvature[3] << ", ";
-			
+			if((p_cell_i_ext->GetAge()) < 1)
+			{
+				basement_membrane_parameter = (p_cell_i_ext->GetAge()) *get_basement_membrane_parameter;
+			}
+			else
+			{
+				basement_membrane_parameter = 1.0*get_basement_membrane_parameter;
+			}
 
 			rCellPopulation.GetNode(cell_i_ext)->AddAppliedForceContribution(basement_membrane_parameter*force_curvature);
 			int sim_time = (SimulationTime::Instance()->GetTime())/(SimulationTime::Instance()->GetTimeStep());

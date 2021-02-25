@@ -18,7 +18,6 @@
 #include "RandomMotionForce.hpp"
 #include "PeriodicCryptModelInteractionForceWithGhostNodes.hpp"
 #include "PeriodicBendingForce3dHeightWithGhostNodes.hpp"
-#include "CryptSimulation3dGhosts.hpp"
 #include "SloughingCellKiller3DWithGhostNodes.hpp"
 #include "AnoikisCellKiller3DWithGhostNodes.hpp"
 #include "UniformCellKiller3dWithGhostNodes.hpp"
