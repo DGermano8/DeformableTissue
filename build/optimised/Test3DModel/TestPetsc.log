@@ -1,0 +1,11 @@
+Running 1 test
+
+ ***** Test3dBoxModel.hpp *****
+
+
+Entering TestPeriodicCubeWithGhosts
+Time Ellapsed time: 1805.32s
+Passed
+OK!
+Chaste warning: in file global/src/checkpointing/Identifiable.cpp at line 106: Unable to determine the class type. If you are using C++ serialization may not be set up correctly. 
+ If you are using Python this behaviour is expected.

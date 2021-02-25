@@ -5,7 +5,7 @@ close all;
 addpath /Users/germanod/workspace/ChasteDom/anim/matlab
 
 % addpath /Users/domenicgermano/workspace/ChasteDom/projects/results/WntFlat_maintain
-addpath /Users/germanod/workspace/ChasteDom/results/FlatWntRadius_2202_03/results_from_time_0
+addpath /Users/germanod/workspace/ChasteDom/results/FlatWntRadius_2302_01/results_from_time_0
 
 filename = 'results';
 
@@ -279,7 +279,7 @@ for i = 1:length(timeData)
 end
 %%
 delta_t = 0.01;
-sample_interval = 500;
+sample_interval = 100;
 average_velocity = zeros(CellIdholder(end-4),round(length(timeData)/sample_interval));
 average_position =  zeros(CellIdholder(end-4),round(length(timeData)/sample_interval));
 hold on;
