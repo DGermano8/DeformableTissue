@@ -116,13 +116,7 @@ bool DensityDependantCellKiller3DWithGhostNodes::IsCellTooSmall(MutableMesh<3,3>
 	unsigned num_epithelial_neighbours = 0;
 	double average_cell_distance = 0.0;
 	
-	bool has_neighbour_apop = false;
-
-	CellPtr p_cell = p_tissue->GetCellUsingLocationIndex(nodeIndex);
-	double x_location = this->mpCellPopulation->GetLocationOfCellCentre(p_cell)[0];
-	double y_location = this->mpCellPopulation->GetLocationOfCellCentre(p_cell)[1];
-	double z_location = this->mpCellPopulation->GetLocationOfCellCentre(p_cell)[2];
-
+	bool has_neighbours_begun_apoptosis = false;
 
    	// Iterate over the neighbouring cells to check the number of stromal cell neighbours
    	for(std::set<unsigned>::iterator neighbour_iter=neighbours.begin();
@@ -132,22 +126,29 @@ bool DensityDependantCellKiller3DWithGhostNodes::IsCellTooSmall(MutableMesh<3,3>
 		unsigned global_index = ExtendedMeshNodeIndexMap[*neighbour_iter];
 		CellPtr p_cell_n = p_tissue->GetCellUsingLocationIndex(global_index);
 
+		// We dont want cells to die if its neighbours are dying
+		if(p_cell_n->HasApoptosisBegun())
+		{
+			has_neighbours_begun_apoptosis = true;
+		}
+
 		// Check how many stromal cells its conected to
 		if ( (!p_tissue->IsGhostNode(global_index))
 				&& (p_tissue->GetCellUsingLocationIndex(global_index)->GetMutationState()->IsType<StromalCellMutationState>()==true) )
    		{
 			num_stromal_neighbours += 1;
 		}
-		// else if ( (!p_tissue->IsGhostNode(global_index))
-		// 		&& (p_tissue->GetCellUsingLocationIndex(global_index)->GetMutationState()->IsType<WildTypeCellMutationState>()==true) )
-		// && !(p_cell_n->HasApoptosisBegun()) )
 		else if ( (!p_tissue->IsGhostNode(global_index))
-		&& (p_tissue->GetCellUsingLocationIndex(global_index)->GetMutationState()->IsType<WildTypeCellMutationState>()==true) )
-		{
-			has_neighbour_apop = p_cell_n->HasApoptosisBegun();
-			
+				&& (p_tissue->GetCellUsingLocationIndex(global_index)->GetMutationState()->IsType<WildTypeCellMutationState>()==true)
+				&& !(p_cell_n->HasApoptosisBegun()) )
+   		{
+			CellPtr p_cell = p_tissue->GetCellUsingLocationIndex(nodeIndex);
+			double x_location = this->mpCellPopulation->GetLocationOfCellCentre(p_cell)[0];
+			double y_location = this->mpCellPopulation->GetLocationOfCellCentre(p_cell)[1];
+			double z_location = this->mpCellPopulation->GetLocationOfCellCentre(p_cell)[2];
+
      		c_vector<double, 3> epithelial_location = ExtendedMesh->GetNode(*neighbour_iter)->rGetLocation();
-			
+
 			average_cell_distance = average_cell_distance + sqrt( pow(x_location - epithelial_location[0],2) + pow(y_location - epithelial_location[1],2) + pow(z_location - epithelial_location[2],2));
 			num_epithelial_neighbours += 1;
 		}
@@ -160,14 +161,13 @@ bool DensityDependantCellKiller3DWithGhostNodes::IsCellTooSmall(MutableMesh<3,3>
 
 	average_cell_distance = (average_cell_distance/num_epithelial_neighbours) ;
 
-   	if( (average_cell_distance < mDensityThreshold) && (has_neighbour_apop == false))
+   	if( (average_cell_distance < mDensityThreshold) && (has_neighbours_begun_apoptosis == false))
    	{
    		has_cell_popped_up = true;
-
    	}
 	//PRINT_VARIABLE(num_stromal_neighbours);
    
-    // PRINT_3_VARIABLES(average_cell_distance,has_cell_popped_up,has_neighbour_apop);
+    // PRINT_2_VARIABLES(average_cell_distance,has_cell_popped_up);
 	return has_cell_popped_up;
 }
 
