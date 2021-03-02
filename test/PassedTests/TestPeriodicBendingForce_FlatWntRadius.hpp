@@ -73,10 +73,10 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "FlatWntRadius_2402_T2";
+        std::string output_directory = "FlatWntRadius_0203_03";
 
-        unsigned width = 10;	   // x
-        unsigned height = 12;      // y
+        unsigned width = 8;	   // x
+        unsigned height = 10;      // y
         unsigned ghosts_bottom = 0;       // ghosts > depth
         unsigned ghosts_top = 2;       // ghosts > depth
         unsigned num_tissue_depth = 1;
@@ -113,8 +113,8 @@ public:
         double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 96;
-        double plot_step = 10.0;
+        double end_time = 10;
+        double plot_step = 1.0;
 
         bool include_springs = true;
         bool include_bending = true;
@@ -283,7 +283,7 @@ public:
         DomWntConcentration<3>::Instance()->SetCryptLength(20.0);
         DomWntConcentration<3>::Instance()->SetCryptCentreX(0.5*periodic_width);
         DomWntConcentration<3>::Instance()->SetCryptCentreY(0.5*periodic_height);
-        DomWntConcentration<3>::Instance()->SetCryptRadius(1.0);
+        DomWntConcentration<3>::Instance()->SetCryptRadius(1.5);
         DomWntConcentration<3>::Instance()->SetWntConcentrationParameter(2.0);
 
         // Pass an adaptive numerical method to the simulation
