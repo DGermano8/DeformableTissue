@@ -5,7 +5,7 @@ close all;
 addpath /Users/germanod/workspace/ChasteDom/anim/matlab
 
 % addpath /Users/domenicgermano/workspace/ChasteDom/projects/results/WntFlat_maintain
-addpath /Users/germanod/workspace/ChasteDom/results/FlatWntRadius_2302_01/results_from_time_0
+addpath /Users/germanod/workspace/ChasteDom/results/FlatWntRadius_2502_02/results_from_time_0
 
 filename = 'results';
 
@@ -225,7 +225,7 @@ end
 %   1  |    2   |  3  |  4  |  5  |  6  |  7  |  8  |    9   |  10 |  11 |  12 |  13 |  14 |  15 | ... 
 nodeVelocityRaw = readtable('nodevelocities.dat');
 
-CellIdRaw = readtable('loggedcell.dat');
+CellIdRaw = importdata('loggedcell.dat');
 
 dimensionData = size(nodeVelocityRaw);
 
@@ -233,10 +233,12 @@ timeData = table2array(nodeVelocityRaw(1:dimensionData(1),1));
 
 holder_init = str2double(split(table2array(nodeVelocityRaw(end,2))));
 
-CellIdholder = str2double(split(table2array(CellIdRaw(end,2))));
+CellIdholder = str2double(split(CellIdRaw(end)));
 
-node_i_radial_velocity_with_time = zeros(CellIdholder(end-4),length(timeData));
-node_i_radial_position_with_time = zeros(CellIdholder(end-4),length(timeData));
+number_of_cells_end = CellIdholder(end-4);
+
+node_i_radial_velocity_with_time = zeros(number_of_cells_end,length(timeData));
+node_i_radial_position_with_time = zeros(number_of_cells_end,length(timeData));
 
 for i = 1:length(timeData)
     
@@ -244,10 +246,10 @@ for i = 1:length(timeData)
     
     holder = str2double(split(table2array(nodeVelocityRaw(i,2))));
 %     holder = table2array(nodeVelocityRaw(i,2:end));
-    holder_CellId = str2double(split(table2array(CellIdRaw(i,2))));
+    holder_CellId = str2double(split(CellIdRaw(i)));
 
-    holder_cell_id = holder_CellId(1:5:end);
-    holder_node_id = holder_CellId(2:5:end);
+    holder_cell_id = holder_CellId(2:5:end);
+%     holder_node_id = holder_CellId(2:5:end);
     
     node_ind_i = holder(1:7:end)';
     
@@ -280,10 +282,10 @@ end
 %%
 delta_t = 0.01;
 sample_interval = 100;
-average_velocity = zeros(CellIdholder(end-4),round(length(timeData)/sample_interval));
-average_position =  zeros(CellIdholder(end-4),round(length(timeData)/sample_interval));
+average_velocity = zeros(number_of_cells_end,round(length(timeData)/sample_interval));
+average_position =  zeros(number_of_cells_end,round(length(timeData)/sample_interval));
 hold on;
-for j=120:CellIdholder(end-4)
+for j=120:number_of_cells_end
         
     for i=1:length(timeData)
         if node_i_radial_position_with_time(j,i) == 0
@@ -292,15 +294,22 @@ for j=120:CellIdholder(end-4)
         if mod(i,sample_interval)==0 && i > sample_interval+1
             average_velocity(j,1+(i/sample_interval)) = (1/(delta_t*sample_interval))*(node_i_radial_position_with_time(j,i) - node_i_radial_position_with_time(j,i-sample_interval));
             average_position(j,1+(i/sample_interval)) = node_i_radial_position_with_time(j,i);
-        elseif i ==1
-            average_velocity(j,1) = NaN;
-            average_position(j,1) = NaN;
-        elseif i ==2
-            average_velocity(j,2) = NaN;
-            average_position(j,2) = NaN;
+%         elseif i ==1
+%             average_velocity(j,1) = NaN;
+%             average_position(j,1) = NaN;
+%         elseif i ==2
+%             average_velocity(j,2) = NaN;
+%             average_position(j,2) = NaN;
         end
     end
-    
-%     plot(node_i_radial_position_with_time(j,:))
-    plot(average_position(j,:),average_velocity(j,:),'o-')
+%     subplot(2,1,1)
+    hold on;
+    plot(node_i_radial_position_with_time(j,:))
+    xlabel('time')
+    ylabel('radial distance')
+%     subplot(2,1,2)
+%     hold on;
+%     plot(average_position(j,:),average_velocity(j,:),'o')
+%     xlabel('radial distance')
+%     ylabel('radial velocity')
 end
