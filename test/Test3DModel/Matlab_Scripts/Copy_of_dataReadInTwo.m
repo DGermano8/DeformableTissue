@@ -1,11 +1,11 @@
 clear all;
 close all;
 
-% addpath /Users/domenicgermano/workspace/ChasteDom/anim/matlab
-addpath /Users/germanod/workspace/ChasteDom/anim/matlab
+addpath /Users/domenicgermano/Workspace/ChasteDom/anim/matlab
+% addpath /Users/germanod/workspace/ChasteDom/anim/matlab
 
-% addpath /Users/domenicgermano/workspace/ChasteDom/projects/results/WntFlat_maintain
-addpath /Users/germanod/workspace/ChasteDom/results/FlatWntRadius_2502_02/results_from_time_0
+addpath /Users/domenicgermano/Workspace/results/FlatWntRadius_0303_06/results_from_time_0
+% addpath /Users/germanod/workspace/ChasteDom/results/FlatWntRadius_2502_02/results_from_time_0
 
 filename = 'results';
 
@@ -19,8 +19,8 @@ celltypesdata = LoadNonConstantLengthData(celltypesfile);
 % input these manually...
 
 % tissue size
-width = 10;
-hight = 12;
+width = 8;
+hight = 10;
 
 ghost = 1 + 1;
 stromal = 1;
@@ -231,7 +231,8 @@ dimensionData = size(nodeVelocityRaw);
 
 timeData = table2array(nodeVelocityRaw(1:dimensionData(1),1));
 
-holder_init = str2double(split(table2array(nodeVelocityRaw(end,2))));
+% holder_init = str2double(split(table2array(nodeVelocityRaw(end,2))));
+% holder_init = str2double(split(table2array(nodeVelocityRaw(end,2:end))));
 
 CellIdholder = str2double(split(CellIdRaw(end)));
 
@@ -244,7 +245,17 @@ for i = 1:length(timeData)
     
     time = timeData(i);
     
-    holder = str2double(split(table2array(nodeVelocityRaw(i,2))));
+%     size_12 = size(nodeVelocityRaw(i,2:end));
+%     holder = zeros(1,size_12(2));
+%     for ii = 1:size_12(2)
+%         hold_val = table2array(nodeVelocityRaw(i,ii));
+%         if iscell(hold_val)
+%             holder(ii) = NaN;
+%         else
+%             holder(ii) = hold_val;
+%         end
+%     end
+    holder = str2double(split(table2array(nodeVelocityRaw(i,2:end))));
 %     holder = table2array(nodeVelocityRaw(i,2:end));
     holder_CellId = str2double(split(CellIdRaw(i)));
 
@@ -285,7 +296,7 @@ sample_interval = 100;
 average_velocity = zeros(number_of_cells_end,round(length(timeData)/sample_interval));
 average_position =  zeros(number_of_cells_end,round(length(timeData)/sample_interval));
 hold on;
-for j=120:number_of_cells_end
+for j=(8*10):number_of_cells_end
         
     for i=1:length(timeData)
         if node_i_radial_position_with_time(j,i) == 0
@@ -302,14 +313,14 @@ for j=120:number_of_cells_end
 %             average_position(j,2) = NaN;
         end
     end
-%     subplot(2,1,1)
+    subplot(2,1,1)
     hold on;
     plot(node_i_radial_position_with_time(j,:))
     xlabel('time')
     ylabel('radial distance')
-%     subplot(2,1,2)
-%     hold on;
-%     plot(average_position(j,:),average_velocity(j,:),'o')
-%     xlabel('radial distance')
-%     ylabel('radial velocity')
+    subplot(2,1,2)
+    hold on;
+    plot(average_position(j,:),average_velocity(j,:),'o')
+    xlabel('radial distance')
+    ylabel('radial velocity')
 end

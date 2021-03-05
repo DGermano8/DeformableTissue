@@ -138,9 +138,11 @@ bool DensityDependantCellKiller3DWithGhostNodes::IsCellTooSmall(MutableMesh<3,3>
    		{
 			num_stromal_neighbours += 1;
 		}
+		// else if ( (!p_tissue->IsGhostNode(global_index))
+		// 		&& (p_tissue->GetCellUsingLocationIndex(global_index)->GetMutationState()->IsType<WildTypeCellMutationState>()==true)
+		// 		&& !(p_cell_n->HasApoptosisBegun()) )
 		else if ( (!p_tissue->IsGhostNode(global_index))
-				&& (p_tissue->GetCellUsingLocationIndex(global_index)->GetMutationState()->IsType<WildTypeCellMutationState>()==true)
-				&& !(p_cell_n->HasApoptosisBegun()) )
+				&& (p_tissue->GetCellUsingLocationIndex(global_index)->GetMutationState()->IsType<WildTypeCellMutationState>()==true))
    		{
 			CellPtr p_cell = p_tissue->GetCellUsingLocationIndex(nodeIndex);
 			double x_location = this->mpCellPopulation->GetLocationOfCellCentre(p_cell)[0];

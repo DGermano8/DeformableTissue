@@ -78,7 +78,7 @@ public:
         RandomNumberGenerator::Instance()->Reseed(1);
     	
 
-        for (unsigned rep=0; rep<=1; rep++)
+        for (unsigned rep=0; rep<10; rep++)
         {
             // int rep = 0;
             // RandomNumberGenerator::Instance()->Reseed(1);
@@ -87,10 +87,10 @@ public:
 
             std::vector<Node<3>*> nodes;
 
-            std::string output_directory = "RepSweep_RandomToFlat_Rep2_" + std::to_string(rep);
+            std::string output_directory = "RepSweep_RandomToFlat_Rep4_" + std::to_string(rep);
 
-            unsigned width = 10;	   // x
-            unsigned height = 12;      // y
+            unsigned width = 8;	   // x
+            unsigned height = 10;      // y
             unsigned ghosts_bottom = 0;       // ghosts > depth
             unsigned ghosts_top = 2;       // ghosts > depth
             unsigned num_tissue_depth = 1;
@@ -127,7 +127,7 @@ public:
             double alpha_parameter = 1.2;
 
             double time_step = 0.001;
-            double end_time = 0.1;
+            double end_time = 2;
             double plot_step = 10.0;
 
             bool include_springs = true;
@@ -393,12 +393,12 @@ public:
             // p_random_force->SetMovementParameter(0.001); //0.1 causes dissasociation, 0.001 is not enough
             // simulator.AddForce(p_random_force);
             
-            double cut_off = 1.5;
-            double density_threshold = 0.99;
-            double domain_tol = 1.0;
-            // Add anoikis cell killer
-            MAKE_PTR_ARGS(AnoikisCellKiller3DWithGhostNodes, anoikis, (&cell_population, cut_off, periodic_width, periodic_height));
-            simulator.AddCellKiller(anoikis);
+            // double cut_off = 1.5;
+            // double density_threshold = 0.99;
+            // double domain_tol = 1.0;
+            // // Add anoikis cell killer
+            // MAKE_PTR_ARGS(AnoikisCellKiller3DWithGhostNodes, anoikis, (&cell_population, cut_off, periodic_width, periodic_height));
+            // simulator.AddCellKiller(anoikis);
 
             // MAKE_PTR_ARGS(DensityDependantCellKiller3DWithGhostNodes, density, (&cell_population, domain_tol, density_threshold, periodic_width, periodic_height));
             // simulator.AddCellKiller(density);
@@ -419,9 +419,9 @@ public:
 
             // Add random cell killer for death at the edges
             //                                                              ProbabilityOfDeathInAnHour,    MinXBoundary,                MaxXBoundary,     MinYBoundary,                    MaxYBoundary
-            MAKE_PTR_ARGS(UniformCellKiller3dWithGhostNodes, random_cell_death, (&cell_population, 1.0, 1.5*width_space,  periodic_width-1.5*width_space, 1.5*height_space,  periodic_height-1.5*height_space, num_epithelial_cells+num_tissue_cells));
-            // MAKE_PTR_ARGS(UniformCellKiller3dWithGhostNodes, random_cell_death, (&cell_population, 1.0, periodic_width + 1,  0 - 1, periodic_height + 1,  0 - 1 , num_epithelial_cells+num_tissue_cells ));
-            simulator.AddCellKiller(random_cell_death);              
+            // MAKE_PTR_ARGS(UniformCellKiller3dWithGhostNodes, random_cell_death, (&cell_population, 1.0, 1.5*width_space,  periodic_width-1.5*width_space, 1.5*height_space,  periodic_height-1.5*height_space, num_epithelial_cells+num_tissue_cells));
+            // // MAKE_PTR_ARGS(UniformCellKiller3dWithGhostNodes, random_cell_death, (&cell_population, 1.0, periodic_width + 1,  0 - 1, periodic_height + 1,  0 - 1 , num_epithelial_cells+num_tissue_cells ));
+            // simulator.AddCellKiller(random_cell_death);              
 
             simulator.SetSamplingTimestepMultiple(plot_step);			// Every hour
             simulator.SetEndTime(end_time);
