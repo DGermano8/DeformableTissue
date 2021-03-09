@@ -106,7 +106,7 @@ double DomWntConcentration<DIM>::GetWntLevel(CellPtr pCell)
         double b = GetCryptProjectionParameterB();
         // height = a*pow(norm_2(mpCellPopulation->GetLocationOfCellCentre(pCell)), b);
 
-        height = rLocation[2];
+        height = rLocation[DIM-1];
 
         double x0 = GetCryptCentreX();
         double y0 = GetCryptCentreY();

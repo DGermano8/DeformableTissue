@@ -44,6 +44,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ApcTwoHitCellMutationState.hpp"
 #include "BetaCateninOneHitCellMutationState.hpp"
 
+#include "Debug.hpp"
+
 DomSimpleWntCellCycleModel::DomSimpleWntCellCycleModel()
     : mUseCellProliferativeTypeDependentG1Duration(false),
       mWntStemThreshold(0.8),
@@ -196,6 +198,7 @@ DomWntConcentrationType DomSimpleWntCellCycleModel::GetWntType()
 
 void DomSimpleWntCellCycleModel::UpdateCellCyclePhase()
 {
+    // TRACE("WNT IN");
     // The cell can divide if the Wnt concentration >= wnt_division_threshold
     double wnt_division_threshold = DBL_MAX;
 
@@ -267,6 +270,8 @@ void DomSimpleWntCellCycleModel::UpdateCellCyclePhase()
         mpCell->SetCellProliferativeType(p_diff_type);
     }
     AbstractSimplePhaseBasedCellCycleModel::UpdateCellCyclePhase();
+
+    // TRACE("WNT OUT");
 }
 
 void DomSimpleWntCellCycleModel::InitialiseDaughterCell()
