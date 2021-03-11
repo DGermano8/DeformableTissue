@@ -68,7 +68,9 @@ private:
      * Probability that in an hour's worth of trying, the cell killer
      * will have successfully killed a given cell.
       */
-     double mProbabilityOfDeathInAnHour;
+     double mVolumeThreshold;
+     double mDomainWidth;
+     double mDomainDepth;
 
     /** Needed for serialization. */
     friend class boost::serialization::access;
@@ -94,15 +96,24 @@ public:
      * Default constructor.
      *
      * @param pCellPopulation pointer to the cell population
-     * @param probabilityOfDeathInAnHour probability that a cell is labelled for apoptosis in one hour's worth of trying
+     * @param volumeThreshold probability that a cell is labelled for apoptosis in one hour's worth of trying
+     * @param domainWidth
+     * @param domainDepth
      */
-    AreaVertexCellKiller(AbstractCellPopulation<DIM>* pCellPopulation, double probabilityOfDeathInAnHour);
+    AreaVertexCellKiller(AbstractCellPopulation<DIM>* pCellPopulation, double volumeThreshold, double domainWidth, double domainDepth);
 
     /**
-     * @return mProbabilityOfDeathInAnHour.
+     * @return mVolumeThreshold.
      */
-    double GetDeathProbabilityInAnHour() const;
-
+    double GetVolumeThreshold() const;
+    /**
+     * @return mVolumeThreshold.
+     */
+    double GetDomainWidth() const;
+    /**
+     * @return mVolumeThreshold.
+     */
+    double GetDomainDepth() const;
     /**
      * Overridden method to test a given cell for apoptosis.
      *
@@ -141,8 +152,13 @@ inline void save_construct_data(
     // Save data required to construct instance
     const AbstractCellPopulation<DIM>* const p_cell_population = t->GetCellPopulation();
     ar << p_cell_population;
-    double prob = t->GetDeathProbabilityInAnHour();
+    double prob = t->GetVolumeThreshold();
     ar << prob;
+
+    double width = t->GetDomainWidth();
+    ar << width;
+    double depth = t->GetDomainDepth();
+    ar << depth;
 }
 
 /**
@@ -158,8 +174,14 @@ inline void load_construct_data(
     double prob;
     ar >> prob;
 
+    double width;
+    ar >> width;
+    double depth;
+    ar >> depth;
+
+
     // Invoke inplace constructor to initialise instance
-    ::new(t)AreaVertexCellKiller<DIM>(p_cell_population, prob);
+    ::new(t)AreaVertexCellKiller<DIM>(p_cell_population, prob, width, depth);
 }
 }
 } // namespace ...

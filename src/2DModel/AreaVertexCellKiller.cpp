@@ -36,21 +36,37 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AreaVertexCellKiller.hpp"
 #include "Debug.hpp"
 template<unsigned DIM>
-AreaVertexCellKiller<DIM>::AreaVertexCellKiller(AbstractCellPopulation<DIM>* pCellPopulation, double probabilityOfDeathInAnHour)
+AreaVertexCellKiller<DIM>::AreaVertexCellKiller(AbstractCellPopulation<DIM>* pCellPopulation, double volumeThreshold, double domainWidth, double domainDepth)
         : AbstractCellKiller<DIM>(pCellPopulation),
-          mProbabilityOfDeathInAnHour(probabilityOfDeathInAnHour)
+          mVolumeThreshold(volumeThreshold),
+          mDomainWidth(domainWidth),
+          mDomainDepth(domainDepth)
 {
-    if ((mProbabilityOfDeathInAnHour<0) || (mProbabilityOfDeathInAnHour>1))
+    if ((mVolumeThreshold<0) || (mVolumeThreshold>1))
     {
-        EXCEPTION("Probability of death must be between zero and one");
+        EXCEPTION("Volume Threshold must be between zero and one");
     }
 }
 
 template<unsigned DIM>
-double AreaVertexCellKiller<DIM>::GetDeathProbabilityInAnHour() const
+double AreaVertexCellKiller<DIM>::GetVolumeThreshold() const
 {
-    return mProbabilityOfDeathInAnHour;
+    return mVolumeThreshold;
 }
+
+template<unsigned DIM>
+double AreaVertexCellKiller<DIM>::GetDomainWidth() const
+{
+    return mDomainWidth;
+}
+
+template<unsigned DIM>
+double AreaVertexCellKiller<DIM>::GetDomainDepth() const
+{
+    return mDomainDepth;
+}
+
+
 
 template<unsigned DIM>
 void AreaVertexCellKiller<DIM>::CheckAndLabelSingleCellForApoptosis(CellPtr pCell)
@@ -59,7 +75,7 @@ void AreaVertexCellKiller<DIM>::CheckAndLabelSingleCellForApoptosis(CellPtr pCel
     double cell_volume = this->mpCellPopulation->GetVolumeOfCell(pCell);
     
     // std::cout<< cell_volume << "\n";
-    double volume_threshold = mProbabilityOfDeathInAnHour;
+    double volume_threshold = mVolumeThreshold;
 
     if ( cell_volume < volume_threshold)
     {
@@ -71,62 +87,62 @@ void AreaVertexCellKiller<DIM>::CheckAndLabelSingleCellForApoptosis(CellPtr pCel
 template<unsigned DIM>
 void AreaVertexCellKiller<DIM>::CheckAndLabelCellsForApoptosisOrDeath()
 {
-
     double domain_tollerance = 1.5;
 
-    double mCellPopulationWidth = 20.0;
-	double mCellPopulationDepth = 24.0*sqrt(0.75);
-    // TRACE("IN");
-    // double cell_volume_tot = 0.0;
-    // double counter = 0.0;
+    double mCellPopulationWidth = mDomainWidth;
+	double mCellPopulationDepth = mDomainDepth;
+
     for (typename AbstractCellPopulation<DIM>::Iterator cell_iter = this->mpCellPopulation->Begin();
          cell_iter != this->mpCellPopulation->End();
          ++cell_iter)
     {
-        // double cell_volume = this->mpCellPopulation->GetVolumeOfCell(*cell_iter);
-        // cell_volume_tot = cell_volume_tot + cell_volume;
-        // counter = counter + 1;
+        
+
         if( !((*cell_iter)->IsDead()) &&  !((*cell_iter)->HasApoptosisBegun()) )
         {
-            c_vector<double, DIM> rLocation = this->mpCellPopulation->GetLocationOfCellCentre(*cell_iter);
-            double x_location = rLocation[0];
-            double y_location = rLocation[1];
-            
-            // Make sure cell is well inside tissue and not just an edge
-            if ( x_location <= domain_tollerance || x_location >= mCellPopulationWidth - domain_tollerance ||
-            y_location <= domain_tollerance || y_location >= mCellPopulationDepth - domain_tollerance   )
-            {			
-                CheckAndLabelSingleCellForApoptosis(*cell_iter);
+
+            std::set<unsigned> neighbour_indices = this->mpCellPopulation->GetNeighbouringLocationIndices(*cell_iter);
+
+            bool neigh_apop = false;
+
+            if (!neighbour_indices.empty())
+            {
+                for (std::set<unsigned>::iterator iter = neighbour_indices.begin();
+                    iter != neighbour_indices.end();
+                    ++iter)
+                {
+                    CellPtr p_cell = this->mpCellPopulation->GetCellUsingLocationIndex(*iter);
+                    neigh_apop = ((p_cell)->HasApoptosisBegun());
+                }
             }
+
+            if(neigh_apop == false)
+            {
+                c_vector<double, DIM> rLocation = this->mpCellPopulation->GetLocationOfCellCentre(*cell_iter);
+                double x_location = rLocation[0];
+                double y_location = rLocation[1];
+                
+                // Make sure cell is well inside tissue and not just an edge
+                if ( x_location <= domain_tollerance || x_location >= mCellPopulationWidth - domain_tollerance ||
+                y_location <= domain_tollerance*sqrt(0.75) || y_location >= mCellPopulationDepth - domain_tollerance*sqrt(0.75)  )
+                {			
+                    CheckAndLabelSingleCellForApoptosis(*cell_iter);
+                }
+            }
+            
         }
+
     }
 
-    // cell_volume_tot = cell_volume_tot/counter;
-    // std::cout<< " Average Cell Volume = " << cell_volume_tot << "\n";
-	// for (typename AbstractCellPopulation<DIM>::Iterator cell_iter = this->mpCellPopulation->Begin();
-    //      cell_iter != this->mpCellPopulation->End();
-    //      ++cell_iter)
-    // {
-
-    //     CellPtr p_cell = this->mpCellPopulation->GetCellUsingLocationIndex(cell_iter);
-    //     if(!(p_cell->IsDead()))
-    //     {
-    //         if(p_cell->HasApoptosisBegun())
-    //         {
-    //             if (p_cell->GetTimeUntilDeath() <= 2*SimulationTime::Instance()->GetTimeStep())
-    //             {
-    //                 p_cell->Kill();
-    //             }
-    //         }
-    //     }
-    // }
-    // TRACE("Out");
 }
 
 template<unsigned DIM>
 void AreaVertexCellKiller<DIM>::OutputCellKillerParameters(out_stream& rParamsFile)
 {
-    *rParamsFile << "\t\t\t<ProbabilityOfDeathInAnHour>" << mProbabilityOfDeathInAnHour << "</ProbabilityOfDeathInAnHour>\n";
+    *rParamsFile << "\t\t\t<VolumeThreshold>" << mVolumeThreshold << "</VolumeThreshold>\n";
+    *rParamsFile << "\t\t\t<DomainWidth>" << mDomainWidth << "</DomainWidth>\n";
+    *rParamsFile << "\t\t\t<DomainDepth>" << mDomainDepth << "</DomainDepth>\n";
+
 
     // Call method on direct parent class
     AbstractCellKiller<DIM>::OutputCellKillerParameters(rParamsFile);

@@ -1,26 +1,26 @@
 clear all;
 close all;
 
-% addpath /Users/domenicgermano/Workspace/ChasteDom/anim/matlab
-addpath /Users/germanod/workspace/ChasteDom/anim/matlab
+addpath /Users/domenicgermano/workspace/ChasteDom/anim/matlab
+% addpath /Users/germanod/workspace/ChasteDom/anim/matlab
 
-% addpath /Users/domenicgermano/Workspace/results/FlatWntRadius_0303_06/results_from_time_0
-addpath /Users/germanod/Workspace/results/TestVertexBasedMonolayer/results_from_time_0
+addpath /Users/domenicgermano/Workspace/results/TestVertexBasedMonolayer/results_from_time_0
+% addpath /Users/germanod/Workspace/results/TestVertexBasedMonolayer/results_from_time_0
 
 filename = 'results';
 
-nodesfile = [filename, '.viznodes'];
+% nodesfile = [filename, '.viznodes'];
 celltypesfile = [filename, '.vizcelltypes'];
 
-nodedata = LoadNonConstantLengthData(nodesfile);
+% nodedata = LoadNonConstantLengthData(nodesfile);
 celltypesdata = LoadNonConstantLengthData(celltypesfile);
 
 %%
 % input these manually...
 
 % tissue size
-width = 8;
-hight = 10;
+width = 14;
+hight = 18;
 
 ghost = 1 + 1;
 stromal = 1;
@@ -41,13 +41,13 @@ max_radius = sqrt((x_centre)^2 + (y_centre)^2);
 % data structure is:
 % time | node_0 | x_0 | y_0 | u_0 | v_0 | node_1 | x_1 | y_1 | u_1 | v_1 | ...
 %   1  |    2   |  3  |  4  |  6  |  7  |    9   |  10 |  11 |  13 |  14 | ... 
-nodeVelocityRaw = readtable('nodevelocities.dat');
+% nodeVelocityRaw = readtable('nodevelocities.dat');
 
 CellIdRaw = importdata('loggedcell.dat');
 
-dimensionData = size(nodeVelocityRaw);
+dimensionData = size(CellIdRaw);
 
-timeData = table2array(nodeVelocityRaw(1:dimensionData(1),1));
+% timeData = table2array(split(CellIdRaw(1:dimensionData(1),1)));
 
 % holder_init = str2double(split(table2array(nodeVelocityRaw(end,2))));
 % holder_init = str2double(split(table2array(nodeVelocityRaw(end,2:end))));
@@ -57,11 +57,11 @@ CellIdholder = str2double(split(CellIdRaw(end)));
 number_of_cells_end = CellIdholder(end-3);
 
 % node_i_radial_velocity_with_time = zeros(number_of_cells_end,length(timeData));
-node_i_radial_position_with_time = zeros(number_of_cells_end,length(timeData));
+node_i_radial_position_with_time = zeros(number_of_cells_end,dimensionData(1));
 
-for i = 1:length(timeData)
+for i = 1:dimensionData(1)
     
-    time = timeData(i);
+%     time = timeData(i);
     
 %     size_12 = size(nodeVelocityRaw(i,2:end));
 %     holder = zeros(1,size_12(2));
@@ -108,15 +108,15 @@ for i = 1:length(timeData)
 end
 %%
 delta_t = 0.01;
-sample_interval = 5;
-when_to_sample = 100;
-when_to_stop = 480;
+sample_interval = 1200;
+when_to_sample = 2400;
+when_to_stop = 14401;
 average_velocity = zeros(number_of_cells_end,length(when_to_sample:sample_interval:when_to_stop));
 average_position =  zeros(number_of_cells_end,length(when_to_sample:sample_interval:when_to_stop));
 figure;
 for j=(hight*width):number_of_cells_end
     count = 0;
-    for i=1:length(timeData)
+    for i=1:dimensionData(1)
         if node_i_radial_position_with_time(j,i) == 0
             node_i_radial_position_with_time(j,i) = NaN;
         end
@@ -166,7 +166,7 @@ end
 
 
 %%
-
+time = (14400-when_to_sample)/sample_interval;
 region_count = zeros(1,2*ceil(max_radius));
 region_velocity =  zeros(1,2*ceil(max_radius));
 region_mean = zeros(1,2*ceil(max_radius));
@@ -177,9 +177,12 @@ for j=(hight*width):number_of_cells_end
         low_bound = (i-1)/2;
         upp_bound = (i-1)/2+1;
         
-        if( (average_position(j,end) > low_bound) && (average_position(j,end) <= upp_bound))
-            region_count(i) = region_count(i) + 1;
-            region_velocity(i) = region_velocity(i) + (average_velocity(j,end));
+        if( (average_position(j,time) > low_bound) && (average_position(j,time) <= upp_bound))
+            
+            if ~isnan(average_velocity(j,time))
+                region_count(i) = region_count(i) + 1;
+                region_velocity(i) = region_velocity(i) + (average_velocity(j,time));
+            end
         end
     end
     
@@ -218,8 +221,10 @@ for j=(hight*width):number_of_cells_end
             upp_bound = (i-1)/2+1;
 
             if( (average_position(j,count) > low_bound) && (average_position(j,count) <= upp_bound))
-                region_count(count,i) = region_count(count,i) + 1;
-                region_velocity(count,i) = region_velocity(count,i) + (average_velocity(j,count));
+                if ~isnan(average_velocity(j,count))
+                    region_count(count,i) = region_count(count,i) + 1;
+                    region_velocity(count,i) = region_velocity(count,i) + (average_velocity(j,count));
+                end
             end
         end
     end
@@ -243,7 +248,7 @@ end
 [X,Y] = meshgrid(1:2*ceil(max_radius),when_to_sample:sample_interval:when_to_stop);
 hold on
 s=surf(X,Y,region_velocity);
-% s.EdgeColor = 'none';
+s.EdgeColor = 'none';
 % plot([0 upp_bound], [0 0] ,'k-')
 xlabel('radial distance')
 ylabel('time')
