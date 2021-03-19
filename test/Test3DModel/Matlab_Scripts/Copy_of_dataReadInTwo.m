@@ -19,8 +19,8 @@ celltypesdata = LoadNonConstantLengthData(celltypesfile);
 % input these manually...
 
 % tissue size
-width = 10;
-hight = 12;
+width = 14;
+hight = 18;
 
 ghost = 1 + 1;
 stromal = 1;

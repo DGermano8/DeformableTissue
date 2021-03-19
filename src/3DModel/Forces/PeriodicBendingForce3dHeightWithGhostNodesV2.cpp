@@ -1,14 +1,14 @@
-#include "PeriodicBendingForce3dHeightWithGhostNodes.hpp"
+#include "PeriodicBendingForce3dHeightWithGhostNodesV2.hpp"
 #include "SimulationTime.hpp"
 #include <cmath>
-#include "DomMeshBasedCellPopulationWithGhostNodes.hpp"
+#include "DomPeriodicMeshBasedCellPopulationWithGhostNodes.hpp"
 
 
 #include <iostream>
 #include <fstream>
 
 
-PeriodicBendingForce3dHeightWithGhostNodes::PeriodicBendingForce3dHeightWithGhostNodes()
+PeriodicBendingForce3dHeightWithGhostNodesV2::PeriodicBendingForce3dHeightWithGhostNodesV2()
     : AbstractForce<3>(),
       mBasementMembraneParameter(DOUBLE_UNSET),
 	  mExponentParameter(DOUBLE_UNSET),
@@ -25,7 +25,7 @@ PeriodicBendingForce3dHeightWithGhostNodes::PeriodicBendingForce3dHeightWithGhos
 {
 }
 
-PeriodicBendingForce3dHeightWithGhostNodes::~PeriodicBendingForce3dHeightWithGhostNodes()
+PeriodicBendingForce3dHeightWithGhostNodesV2::~PeriodicBendingForce3dHeightWithGhostNodesV2()
 {
     // Avoid memory leaks
     if (mpExtendedMesh != NULL)
@@ -35,42 +35,42 @@ PeriodicBendingForce3dHeightWithGhostNodes::~PeriodicBendingForce3dHeightWithGho
     
 }
 
-void PeriodicBendingForce3dHeightWithGhostNodes::SetOutputDirectory(std::string outputDirectory)
+void PeriodicBendingForce3dHeightWithGhostNodesV2::SetOutputDirectory(std::string outputDirectory)
 {
 	mOutputDirectory = outputDirectory;
 }
 
-void PeriodicBendingForce3dHeightWithGhostNodes::SetBasementMembraneParameter(double basementMembraneParameter)
+void PeriodicBendingForce3dHeightWithGhostNodesV2::SetBasementMembraneParameter(double basementMembraneParameter)
 {
 	mBasementMembraneParameter = basementMembraneParameter;
 }
 
-double PeriodicBendingForce3dHeightWithGhostNodes::GetBasementMembraneParameter()
+double PeriodicBendingForce3dHeightWithGhostNodesV2::GetBasementMembraneParameter()
 {
 	return mBasementMembraneParameter;
 }
 
-void PeriodicBendingForce3dHeightWithGhostNodes::SetExponentParameter(double exponentParameter)
+void PeriodicBendingForce3dHeightWithGhostNodesV2::SetExponentParameter(double exponentParameter)
 {
 	mExponentParameter = exponentParameter;
 }
 
-double PeriodicBendingForce3dHeightWithGhostNodes::GetExponentParameter()
+double PeriodicBendingForce3dHeightWithGhostNodesV2::GetExponentParameter()
 {
 	return mExponentParameter;
 }
 
-void PeriodicBendingForce3dHeightWithGhostNodes::SetHeightDependantCurvatureParameter(double heightparameter)
+void PeriodicBendingForce3dHeightWithGhostNodesV2::SetHeightDependantCurvatureParameter(double heightparameter)
 {
 	mHeightDependantCurvatureParameter = heightparameter;
 }
 
-double PeriodicBendingForce3dHeightWithGhostNodes::GetHeightDependantCurvatureParameter()
+double PeriodicBendingForce3dHeightWithGhostNodesV2::GetHeightDependantCurvatureParameter()
 {
 	return mHeightDependantCurvatureParameter;
 }
 
-void PeriodicBendingForce3dHeightWithGhostNodes::SetCircularNonZeroTargetCurvatureRegion(bool setNonZeroTargetCurvatureRegion, double nonZeroTargetCurvature,
+void PeriodicBendingForce3dHeightWithGhostNodesV2::SetCircularNonZeroTargetCurvatureRegion(bool setNonZeroTargetCurvatureRegion, double nonZeroTargetCurvature,
 		double radiusOfNonZeroTargetCurvatureRegion, double xCoordinateOfCentreOfNonZeroTargetCurvatureRegion,
 		double yCoordinateOfCentreOfNonZeroTargetCurvatureRegion)
 {
@@ -81,27 +81,27 @@ void PeriodicBendingForce3dHeightWithGhostNodes::SetCircularNonZeroTargetCurvatu
 	mYCoordinateOfCentreOfNonZeroTargetCurvatureRegion = yCoordinateOfCentreOfNonZeroTargetCurvatureRegion;
 }
 
-bool PeriodicBendingForce3dHeightWithGhostNodes::GetWhetherToSetNonZeroTargetCurvatureRegion()
+bool PeriodicBendingForce3dHeightWithGhostNodesV2::GetWhetherToSetNonZeroTargetCurvatureRegion()
 {
 	return mSetNonZeroTargetCurvatureRegion;
 }
 
-double PeriodicBendingForce3dHeightWithGhostNodes::GetNonZeroTargetCurvature()
+double PeriodicBendingForce3dHeightWithGhostNodesV2::GetNonZeroTargetCurvature()
 {
 	return mNonZeroTargetCurvature;
 }
 
-double PeriodicBendingForce3dHeightWithGhostNodes::GetRadiusOfNonZeroTargetCurvatureRegion()
+double PeriodicBendingForce3dHeightWithGhostNodesV2::GetRadiusOfNonZeroTargetCurvatureRegion()
 {
 	return mRadiusOfNonZeroTargetCurvatureRegion;
 }
 
-double PeriodicBendingForce3dHeightWithGhostNodes::GetXCoordinateOfCentreOfNonZeroTargetCurvatureRegion()
+double PeriodicBendingForce3dHeightWithGhostNodesV2::GetXCoordinateOfCentreOfNonZeroTargetCurvatureRegion()
 {
 	return mXCoordinateOfCentreOfNonZeroTargetCurvatureRegion;
 }
 
-double PeriodicBendingForce3dHeightWithGhostNodes::GetYCoordinateOfCentreOfNonZeroTargetCurvatureRegion()
+double PeriodicBendingForce3dHeightWithGhostNodesV2::GetYCoordinateOfCentreOfNonZeroTargetCurvatureRegion()
 {
 	return mYCoordinateOfCentreOfNonZeroTargetCurvatureRegion;
 }
@@ -109,7 +109,7 @@ double PeriodicBendingForce3dHeightWithGhostNodes::GetYCoordinateOfCentreOfNonZe
 /*
  * Remove repeated entries in a 1D vector
  */
-void PeriodicBendingForce3dHeightWithGhostNodes::RemoveDuplicates1D(std::vector<unsigned>& rVectorWithDuplicates)
+void PeriodicBendingForce3dHeightWithGhostNodesV2::RemoveDuplicates1D(std::vector<unsigned>& rVectorWithDuplicates)
 {
     std::sort(rVectorWithDuplicates.begin(), rVectorWithDuplicates.end());
     rVectorWithDuplicates.erase(std::unique(rVectorWithDuplicates.begin(), rVectorWithDuplicates.end()), rVectorWithDuplicates.end());
@@ -121,8 +121,11 @@ void PeriodicBendingForce3dHeightWithGhostNodes::RemoveDuplicates1D(std::vector<
  * Returns a vector of node pairings, without repeats. The first of each pair is the epithelial node index,
  * and the second is the tissue/stromal node index.
  */
-std::vector<c_vector<unsigned, 2> > PeriodicBendingForce3dHeightWithGhostNodes::GetEpithelialTissuePairs(AbstractCellPopulation<3>& rCellPopulation)
+std::vector<c_vector<unsigned, 2> > PeriodicBendingForce3dHeightWithGhostNodesV2::GetEpithelialTissuePairs(AbstractCellPopulation<3>& rCellPopulation)
 {
+
+	DomPeriodicMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomPeriodicMeshBasedCellPopulationWithGhostNodes<3>*>(&rCellPopulation);
+
     // Create a vector to record the pairs of nodes corresponding to *joined* epithelial and tissue nodes
     std::vector<c_vector<unsigned, 2> > node_pairs;
     c_vector<double, 2> pair;
@@ -134,7 +137,7 @@ std::vector<c_vector<unsigned, 2> > PeriodicBendingForce3dHeightWithGhostNodes::
         Node<3>* p_node = mpExtendedMesh->GetNode(extended_node_index);
 
         // Get the corresponding node index in rCellPopulation
-        unsigned node_index = mExtendedMeshNodeIndexMap[extended_node_index];
+        unsigned node_index = p_tissue->ExtendedMeshNodeIndexMap(extended_node_index);
 
         // Get the cell corresponding to this node
         CellPtr p_cell = rCellPopulation.GetCellUsingLocationIndex(node_index);
@@ -167,7 +170,7 @@ std::vector<c_vector<unsigned, 2> > PeriodicBendingForce3dHeightWithGhostNodes::
 					unsigned nodeBGlobalIndex = p_element->GetNodeGlobalIndex(local_index);
 
 					// Get the corresponding node index in rCellPopulation
-					unsigned neighbour_index = mExtendedMeshNodeIndexMap[nodeBGlobalIndex];
+					unsigned neighbour_index = p_tissue->ExtendedMeshNodeIndexMap(nodeBGlobalIndex);
 					CellPtr p_cell = rCellPopulation.GetCellUsingLocationIndex(neighbour_index);
 
 					if (p_cell->GetMutationState()->IsType<StromalCellMutationState>())
@@ -234,7 +237,7 @@ std::vector<c_vector<unsigned, 2> > PeriodicBendingForce3dHeightWithGhostNodes::
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::vector<c_vector<unsigned, 10> > PeriodicBendingForce3dHeightWithGhostNodes::GetEpithelialNeighbours(std::vector<c_vector<unsigned, 3> > rEpithelialMeshVector, int number_of_cells)
+std::vector<c_vector<unsigned, 10> > PeriodicBendingForce3dHeightWithGhostNodesV2::GetEpithelialNeighbours(std::vector<c_vector<unsigned, 3> > rEpithelialMeshVector, int number_of_cells)
 {
 	std::vector<c_vector<unsigned, 10> > node_neighbours;
 
@@ -399,13 +402,14 @@ std::vector<c_vector<unsigned, 10> > PeriodicBendingForce3dHeightWithGhostNodes:
 
 
 
-std::vector<c_vector<unsigned, 3> > PeriodicBendingForce3dHeightWithGhostNodes::GetEpithelialMesh(AbstractCellPopulation<3>& rCellPopulation)
+std::vector<c_vector<unsigned, 3> > PeriodicBendingForce3dHeightWithGhostNodesV2::GetEpithelialMesh(AbstractCellPopulation<3>& rCellPopulation)
 {
 // Get a pointer to this node in mpExtendedMesh
 std::vector<c_vector<unsigned, 3> > epithelial_triangulation;
 
+DomPeriodicMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomPeriodicMeshBasedCellPopulationWithGhostNodes<3>*>(&rCellPopulation);
 
-DomMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<3>*>(&rCellPopulation);
+
 for (unsigned elem_index=0; elem_index<mpExtendedMesh->GetNumElements(); elem_index++) 
 { 
 
@@ -418,10 +422,10 @@ for (unsigned elem_index=0; elem_index<mpExtendedMesh->GetNumElements(); elem_in
     int Node3Index = p_element->GetNodeGlobalIndex(3);
     int node_index[4] = {Node0Index, Node1Index, Node2Index, Node3Index};
 
-	int node0GlobalIndex = mExtendedMeshNodeIndexMap[Node0Index];
-	int node1GlobalIndex = mExtendedMeshNodeIndexMap[Node1Index];
-	int node2GlobalIndex = mExtendedMeshNodeIndexMap[Node2Index];
-	int node3GlobalIndex = mExtendedMeshNodeIndexMap[Node3Index];
+	int node0GlobalIndex = p_tissue->ExtendedMeshNodeIndexMap(Node0Index);
+	int node1GlobalIndex = p_tissue->ExtendedMeshNodeIndexMap(Node1Index);
+	int node2GlobalIndex = p_tissue->ExtendedMeshNodeIndexMap(Node2Index);
+	int node3GlobalIndex = p_tissue->ExtendedMeshNodeIndexMap(Node3Index);
 	int node_global_intex[4] = {node0GlobalIndex, node1GlobalIndex, node2GlobalIndex, node3GlobalIndex};
 
 	for(int j=0; j<4; j++)
@@ -466,8 +470,10 @@ for (unsigned elem_index=0; elem_index<mpExtendedMesh->GetNumElements(); elem_in
 	return epithelial_triangulation;
 }
 
-std::vector<c_vector<double, 3> > PeriodicBendingForce3dHeightWithGhostNodes::FitPlaneAndFindImage(AbstractCellPopulation<3>& rCellPopulation, std::vector<unsigned> second_order_neighs,  unsigned cell_i)
+std::vector<c_vector<double, 3> > PeriodicBendingForce3dHeightWithGhostNodesV2::FitPlaneAndFindImage(AbstractCellPopulation<3>& rCellPopulation, std::vector<unsigned> second_order_neighs,  unsigned cell_i)
 {
+	DomPeriodicMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomPeriodicMeshBasedCellPopulationWithGhostNodes<3>*>(&rCellPopulation);
+
 	c_vector<double, 3> normal_vector;
 	
 	std::vector<c_vector<double, 3> > image_location_per_second_order_neighbours;
@@ -675,7 +681,7 @@ std::vector<c_vector<double, 3> > PeriodicBendingForce3dHeightWithGhostNodes::Fi
 	double radius_from_curvature = 1/sqrt(mNonZeroTargetCurvature*sign_of_curvature);
 
 	c_vector<double, 3> circle_centre = zero_vector<double>(3);
-	unsigned cell_ii_ext = mExtendedMeshNodeIndexMap[cell_i];
+	unsigned cell_ii_ext = p_tissue->ExtendedMeshNodeIndexMap(cell_i);
 	
 	// c_vector<double, 3> epithelial_cell_i = mpExtendedMesh->GetNode(cell_ii_ext)->rGetLocation();
 	c_vector<double, 3> epithelial_cell_i = this->mpExtendedMesh->GetNode(cell_ii_ext)->rGetLocation();
@@ -770,9 +776,10 @@ std::vector<c_vector<double, 3> > PeriodicBendingForce3dHeightWithGhostNodes::Fi
 }
 
 
-c_vector<double, 4> PeriodicBendingForce3dHeightWithGhostNodes::GetForceDueToDiscreteCurvature(AbstractCellPopulation<3>& rCellPopulation, std::vector<c_vector<unsigned, 3> > rEpithelialMeshVector, std::vector<unsigned> first_order_neighs,  std::vector<unsigned> second_order_neighs, std::vector<c_vector<double, 3> > image_location, unsigned cell_i, unsigned num_cells)
+c_vector<double, 4> PeriodicBendingForce3dHeightWithGhostNodesV2::GetForceDueToDiscreteCurvature(AbstractCellPopulation<3>& rCellPopulation, std::vector<c_vector<unsigned, 3> > rEpithelialMeshVector, std::vector<unsigned> first_order_neighs,  std::vector<unsigned> second_order_neighs, std::vector<c_vector<double, 3> > image_location, unsigned cell_i, unsigned num_cells)
 {
-	
+	DomPeriodicMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomPeriodicMeshBasedCellPopulationWithGhostNodes<3>*>(&rCellPopulation);
+
 	/* 
 	Need:
 	Traingulation		    ->  rEpithelialMeshVector
@@ -903,7 +910,7 @@ c_vector<double, 4> PeriodicBendingForce3dHeightWithGhostNodes::GetForceDueToDis
 				c_vector<double, 3> grad_hold = zero_vector<double>(3);;
 
 				// Calculate grad_i phi_i
-				if(cell_a == mCellPopulationNodeIndexMap[cell_i])
+				if(cell_a == p_tissue->CellPopulationNodeIndexMap(cell_i))
 				{
 					// grad_hold = ( -1.0/sqrt(1.0 - cos_abc*cos_abc) )*(1.0/(mag_ab*mag_ac))*(2.0*a_loc - b_loc - c_loc + (vect_ab[0]*vect_ac[0] + vect_ab[1]*vect_ac[1] + vect_ab[2]*vect_ac[2])*( (b_loc-a_loc)/pow(mag_ab,2) +(c_loc-a_loc)/pow(mag_ac,2) ) );
 					grad_hold = ( -1.0/sqrt(1.0 - pow(cos_abc,2)) )*(1.0/(mag_ab*mag_ac))*(2.0*a_loc - b_loc - c_loc + (abDotac)*( (b_loc-a_loc)/pow(mag_ab,2) +(c_loc-a_loc)/pow(mag_ac,2) ) );
@@ -919,7 +926,7 @@ c_vector<double, 4> PeriodicBendingForce3dHeightWithGhostNodes::GetForceDueToDis
 
 				}
 				
-				else if(cell_b == mCellPopulationNodeIndexMap[cell_i])
+				else if(cell_b == p_tissue->CellPopulationNodeIndexMap(cell_i))
 				{
 
 					// grad_hold = (-1.0/(sqrt(1.0 - cos_abc*cos_abc)))*(1.0/(mag_ab*mag_ac))*( c_loc-a_loc + (b_loc-a_loc)*((vect_ab[0]*vect_ac[0] + vect_ab[1]*vect_ac[1] + vect_ab[2]*vect_ac[2]))/pow(mag_ab,2) ) ;
@@ -934,7 +941,7 @@ c_vector<double, 4> PeriodicBendingForce3dHeightWithGhostNodes::GetForceDueToDis
 					// }
 
 				}
-				else if(cell_c == mCellPopulationNodeIndexMap[cell_i])
+				else if(cell_c == p_tissue->CellPopulationNodeIndexMap(cell_i))
 				{
 					
 					// grad_hold = (-1.0/(sqrt(1.0 - cos_abc*cos_abc)))*(1.0/(mag_ab*mag_ac))*( b_loc-a_loc + (c_loc-a_loc)*((vect_ab[0]*vect_ac[0] + vect_ab[1]*vect_ac[1] + vect_ab[2]*vect_ac[2]))/pow(mag_ac,2) ) ;
@@ -982,7 +989,7 @@ c_vector<double, 4> PeriodicBendingForce3dHeightWithGhostNodes::GetForceDueToDis
 		force_due_to_curvature(1) +=  force_due_to_curvature_i(1);
 		force_due_to_curvature(2) +=  force_due_to_curvature_i(2);
 		
-		if(cell_a == mCellPopulationNodeIndexMap[cell_i])
+		if(cell_a == p_tissue->CellPopulationNodeIndexMap(cell_i))
 		{
 			force_due_to_curvature(3) = ang_sum;
 		}
@@ -1008,7 +1015,7 @@ c_vector<double, 4> PeriodicBendingForce3dHeightWithGhostNodes::GetForceDueToDis
 }
 
 // ORIGINAL
-// c_vector<double, 3> PeriodicBendingForce3dHeightWithGhostNodes::GetForceDueToDiscreteCurvature(AbstractCellPopulation<3>& rCellPopulation, std::vector<c_vector<unsigned, 3> > rEpithelialMeshVector, std::vector<unsigned> first_order_neighs,  std::vector<unsigned> second_order_neighs, std::vector<c_vector<double, 3> > image_location, unsigned cell_i, unsigned num_cells)
+// c_vector<double, 3> PeriodicBendingForce3dHeightWithGhostNodesV2::GetForceDueToDiscreteCurvature(AbstractCellPopulation<3>& rCellPopulation, std::vector<c_vector<unsigned, 3> > rEpithelialMeshVector, std::vector<unsigned> first_order_neighs,  std::vector<unsigned> second_order_neighs, std::vector<c_vector<double, 3> > image_location, unsigned cell_i, unsigned num_cells)
 // {
 	
 // 	/* 
@@ -1258,10 +1265,10 @@ c_vector<double, 4> PeriodicBendingForce3dHeightWithGhostNodes::GetForceDueToDis
 // 	return force_due_to_curvature;
 // }
 
-// c_vector<unsigned, 2> PeriodicBendingForce3dHeightWithGhostNodes::GetMaxMinEpithelialCells(AbstractCellPopulation<3>& rCellPopulation)
+// c_vector<unsigned, 2> PeriodicBendingForce3dHeightWithGhostNodesV2::GetMaxMinEpithelialCells(AbstractCellPopulation<3>& rCellPopulation)
 // {
 // 	unsigned num_cells = rCellPopulation.GetNumRealCells();
-// 	DomMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<3>*>(&rCellPopulation);
+// 	DomPeriodicMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomPeriodicMeshBasedCellPopulationWithGhostNodes<3>*>(&rCellPopulation);
 
 // 	c_vector<double, 2> max_min_ep_cells;
 
@@ -1314,9 +1321,9 @@ c_vector<double, 4> PeriodicBendingForce3dHeightWithGhostNodes::GetForceDueToDis
 /*
  * Method to determine whether an element contains ghost nodes
  */
-bool PeriodicBendingForce3dHeightWithGhostNodes::DoesElementContainGhostNodes(AbstractCellPopulation<3>& rCellPopulation, unsigned elementIndex)
+bool PeriodicBendingForce3dHeightWithGhostNodesV2::DoesElementContainGhostNodes(AbstractCellPopulation<3>& rCellPopulation, unsigned elementIndex)
 {
-	DomMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<3>*>(&rCellPopulation);
+	DomPeriodicMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomPeriodicMeshBasedCellPopulationWithGhostNodes<3>*>(&rCellPopulation);
 
 	bool element_contains_ghost_nodes = false;
 
@@ -1339,7 +1346,7 @@ bool PeriodicBendingForce3dHeightWithGhostNodes::DoesElementContainGhostNodes(Ab
 /*
  * Method to determine whether an element contains a long edge
  */
-bool PeriodicBendingForce3dHeightWithGhostNodes::DoesElementContainLongEdge(AbstractCellPopulation<3>& rCellPopulation, unsigned elementIndex, double maxEdgeLength)
+bool PeriodicBendingForce3dHeightWithGhostNodesV2::DoesElementContainLongEdge(AbstractCellPopulation<3>& rCellPopulation, unsigned elementIndex, double maxEdgeLength)
 {
 	bool element_contains_long_edge = false;
 
@@ -1368,185 +1375,14 @@ bool PeriodicBendingForce3dHeightWithGhostNodes::DoesElementContainLongEdge(Abst
 }
 
 // Dom - adds the force to the cell - will use this
-void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCellPopulation<3>& rCellPopulation)
+void PeriodicBendingForce3dHeightWithGhostNodesV2::AddForceContribution(AbstractCellPopulation<3>& rCellPopulation)
 {
-	DomMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<3>*>(&rCellPopulation);
+	DomPeriodicMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomPeriodicMeshBasedCellPopulationWithGhostNodes<3>*>(&rCellPopulation);
+
+	// Creat a new mesh
+    MutableMesh<3,3>* mpExtendedMesh = p_tissue->rGetPeriodicMesh();
 
 	unsigned num_cells = rCellPopulation.GetNumRealCells();
-	unsigned num_nodes = rCellPopulation.GetNumNodes();
-	
-
-	// If the width of the periodic domain has not been specified, use the initial width of the cell population
-    if (mPeriodicDomainWidth == DOUBLE_UNSET)
-    {
-        mPeriodicDomainWidth = rCellPopulation.GetWidth(0);
-    }
-
-	// If the width of the periodic domain has not been specified, use the initial width of the cell population
-    if (mPeriodicDomainDepth == DOUBLE_UNSET)
-    {
-    	mPeriodicDomainDepth = rCellPopulation.GetWidth(1);
-    }
-
-    mExtendedMeshNodeIndexMap.clear();
-
-	mCellPopulationNodeIndexMap.clear();
-
-	for(int iter; iter<num_nodes; iter++)
-	{
-		mCellPopulationNodeIndexMap[iter] = -1;
-	}
-
-    // Create a vector of nodes for use in constructing mpExtendedMesh
-    std::vector<Node<3>*> extended_nodes(4*num_cells);
-
-    // We iterate over all cells in the population
-    unsigned count = 0;
-
-	// Dom - Create a copy of original mesh
-	for (AbstractCellPopulation<3>::Iterator cell_iter = rCellPopulation.Begin();
-         cell_iter != rCellPopulation.End();
-         ++cell_iter)
-    {
-        // First, create and store a copy of this real node and cell
-
-        unsigned real_node_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
-        c_vector<double, 3> real_node_location = rCellPopulation.GetLocationOfCellCentre(*cell_iter);
-
-        // Create a copy of the node corresponding to this cell and store it
-        Node<3>* p_real_node = new Node<3>(real_node_index, real_node_location);
-        extended_nodes[count] = p_real_node;
-
-        // Populate mExtendedMeshNodeIndexMap
-        mExtendedMeshNodeIndexMap[count] = real_node_index;
-		mCellPopulationNodeIndexMap[real_node_index] = count;
-		
-
-        count++;
-    }
-
-
-    // First, extend the mesh in the x-direction
-    for (AbstractCellPopulation<3>::Iterator cell_iter = rCellPopulation.Begin();
-         cell_iter != rCellPopulation.End();
-         ++cell_iter)
-    {
-        // First, create and store a copy of this real node and cell
-        unsigned real_node_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
-        c_vector<double, 3> real_node_location = rCellPopulation.GetLocationOfCellCentre(*cell_iter);
-
-        // Create a copy of the node corresponding to this cell and store it
-        Node<3>* p_real_node = new Node<3>(real_node_index, real_node_location);
-
-        // Compute the location of the image node corresponding to this node
-        c_vector<double,3> image_node_location = real_node_location;
-        if (real_node_location[0] >= mPeriodicDomainWidth*0.5)
-        {
-            image_node_location[0] -= mPeriodicDomainWidth;
-        }
-        else if (real_node_location[0] <  mPeriodicDomainWidth*0.5)
-        {
-            image_node_location[0] += mPeriodicDomainWidth;
-        }
-
-        // Create a copy of the node corresponding to this cell, suitable translated, and store it
-        Node<3>* p_image_node = new Node<3>(count, image_node_location);
-
-        extended_nodes[count] = p_image_node;
-
-        // Populate mExtendedMeshNodeIndexMap
-        mExtendedMeshNodeIndexMap[count] = real_node_index;
-
-        count++;
-    }
-
-    // Second, extend this extended mesh in the y-direction
-    // (We don't need to store the real nodes anymore)
-    for (AbstractCellPopulation<3>::Iterator cell_iter = rCellPopulation.Begin();
-         cell_iter != rCellPopulation.End();
-         ++cell_iter)
-    {
-        // First, create and store a copy of this real node and cell
-        unsigned real_node_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
-        c_vector<double, 3> real_node_location = rCellPopulation.GetLocationOfCellCentre(*cell_iter);
-
-        // Compute the location of the image node corresponding to this node
-        c_vector<double,3> image_node_location = real_node_location;
-
-        if (real_node_location[1] >= mPeriodicDomainDepth*0.5)
-        {
-            image_node_location[1] -= mPeriodicDomainDepth;
-        }
-        else if (real_node_location[1] <  mPeriodicDomainDepth*0.5)
-        {
-            image_node_location[1] += mPeriodicDomainDepth;
-        }
-
-        // Create a copy of the node corresponding to this cell, suitable translated, and store it
-        Node<3>* p_image_node = new Node<3>(count, image_node_location);
-        extended_nodes[count] = p_image_node;
-
-        // Populate mExtendedMeshNodeIndexMap
-        mExtendedMeshNodeIndexMap[count] = real_node_index;
-
-        count++;
-    }
-
-	// Thirdly, extend this extended mesh so that we cover the corners too
-    // (We don't need to store the real nodes anymore)
-    for (AbstractCellPopulation<3>::Iterator cell_iter = rCellPopulation.Begin();
-         cell_iter != rCellPopulation.End();
-         ++cell_iter)
-    {
-        // First, create and store a copy of this real node and cell
-        unsigned real_node_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
-        c_vector<double, 3> real_node_location = rCellPopulation.GetLocationOfCellCentre(*cell_iter);
-
-        // Compute the location of the image node corresponding to this node
-        c_vector<double,3> image_node_location = real_node_location;
-
-        if (real_node_location[1] >= mPeriodicDomainDepth*0.5)
-        {
-			if (real_node_location[0] >= mPeriodicDomainWidth*0.5)
-			{
-				image_node_location[0] -= mPeriodicDomainWidth;
-			}
-			else if (real_node_location[0] <  mPeriodicDomainWidth*0.5)
-			{
-				image_node_location[0] += mPeriodicDomainWidth;
-			}
-            image_node_location[1] -= mPeriodicDomainDepth;
-        }
-        else if (real_node_location[1] <  mPeriodicDomainDepth*0.5)
-        {
-			if (real_node_location[0] >= mPeriodicDomainWidth*0.5)
-			{
-				image_node_location[0] -= mPeriodicDomainWidth;
-			}
-			else if (real_node_location[0] <  mPeriodicDomainWidth*0.5)
-			{
-				image_node_location[0] += mPeriodicDomainWidth;
-			}
-            image_node_location[1] += mPeriodicDomainDepth;
-        }
-
-        // Create a copy of the node corresponding to this cell, suitable translated, and store it
-        Node<3>* p_image_node = new Node<3>(count, image_node_location);
-        extended_nodes[count] = p_image_node;
-
-        mExtendedMeshNodeIndexMap[count] = real_node_index;
-
-        count++;
-    }
-
-	
-
-    // We now construct mpExtendedMesh using extended_nodes
-    if (mpExtendedMesh != NULL)
-    {
-    	delete mpExtendedMesh;
-    }
-    mpExtendedMesh = new MutableMesh<3,3>(extended_nodes);
     
 	///////////////////////////////////////////////////////////////////////////////////////
 	// Dom - everything above this is just creating the extended mesh - leave it as it is
@@ -1557,7 +1393,6 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 	std::vector<c_vector<unsigned, 3> > epithelial_triangulation = GetEpithelialMesh(rCellPopulation);
 
 	std::vector<c_vector<unsigned, 10> > epithelial_neighbours = GetEpithelialNeighbours(epithelial_triangulation, num_cells);
-
 
 	double get_basement_membrane_parameter = GetBasementMembraneParameter();
 
@@ -1641,7 +1476,7 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 			
 			for(unsigned j=0; j<10; j++)
 			{
-				unsigned extended_node_index = mCellPopulationNodeIndexMap[real_node_index];
+				unsigned extended_node_index = p_tissue->CellPopulationNodeIndexMap(real_node_index);
 				first_order_neighs[j] = epithelial_neighbours[extended_node_index][j];
 						
 				for(unsigned k=0; k<10; k++)
@@ -1698,10 +1533,10 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 			std::vector<unsigned> first_order_neighs_vect;
 			for(unsigned j=0; j<10; j++)
 			{
-				first_order_neighs_vect.push_back(epithelial_neighbours[mCellPopulationNodeIndexMap[cell_i_ext]][j]);
+				first_order_neighs_vect.push_back(epithelial_neighbours[p_tissue->CellPopulationNodeIndexMap(cell_i_ext)][j]);
 				// first_order_neighs_vect.push_back(epithelial_neighbours[cell_i_ext][j]);
 			}
-			first_order_neighs_vect.push_back(mCellPopulationNodeIndexMap[cell_i_ext]);
+			first_order_neighs_vect.push_back(p_tissue->CellPopulationNodeIndexMap(cell_i_ext));
 			// order and remove doubles
 			std::sort(first_order_neighs_vect.begin(), first_order_neighs_vect.end());
 			first_order_neighs_vect.erase(std::unique(first_order_neighs_vect.begin(), first_order_neighs_vect.end()), first_order_neighs_vect.end());
@@ -1777,28 +1612,28 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 }
 
 
-double PeriodicBendingForce3dHeightWithGhostNodes::GetPeriodicDomainWidth()
+double PeriodicBendingForce3dHeightWithGhostNodesV2::GetPeriodicDomainWidth()
 {
 	return mPeriodicDomainWidth;
 }
 
-void PeriodicBendingForce3dHeightWithGhostNodes::SetPeriodicDomainWidth(double periodicDomainWidth)
+void PeriodicBendingForce3dHeightWithGhostNodesV2::SetPeriodicDomainWidth(double periodicDomainWidth)
 {
 	mPeriodicDomainWidth = periodicDomainWidth;
 }
 
-double PeriodicBendingForce3dHeightWithGhostNodes::GetPeriodicDomainDepth()
+double PeriodicBendingForce3dHeightWithGhostNodesV2::GetPeriodicDomainDepth()
 {
 	return mPeriodicDomainDepth;
 }
 
-void PeriodicBendingForce3dHeightWithGhostNodes::SetPeriodicDomainDepth(double periodicDomainDepth)
+void PeriodicBendingForce3dHeightWithGhostNodesV2::SetPeriodicDomainDepth(double periodicDomainDepth)
 {
 	mPeriodicDomainDepth = periodicDomainDepth;
 }
 
 
-void PeriodicBendingForce3dHeightWithGhostNodes::OutputForceParameters(out_stream& rParamsFile)
+void PeriodicBendingForce3dHeightWithGhostNodesV2::OutputForceParameters(out_stream& rParamsFile)
 {
 	*rParamsFile <<  "\t\t\t<BasementMembraneParameter>"<<  mBasementMembraneParameter << "</BasementMembraneParameter> \n" ;
 	*rParamsFile <<  "\t\t\t<ExponentParameter>"<<  mExponentParameter << "</ExponentParameter> \n" ;
@@ -1816,6 +1651,6 @@ void PeriodicBendingForce3dHeightWithGhostNodes::OutputForceParameters(out_strea
 
 // Serialization for Boost >= 1.36
 #include "SerializationExportWrapperForCpp.hpp"
-CHASTE_CLASS_EXPORT(PeriodicBendingForce3dHeightWithGhostNodes)
+CHASTE_CLASS_EXPORT(PeriodicBendingForce3dHeightWithGhostNodesV2)
 
 

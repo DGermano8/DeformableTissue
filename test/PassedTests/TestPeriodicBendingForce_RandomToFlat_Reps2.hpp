@@ -78,16 +78,15 @@ public:
         RandomNumberGenerator::Instance()->Reseed(1);
     	
 
-        for (unsigned rep=0; rep<10; rep++)
+        for (unsigned rep=0; rep<20; rep++)
         {
             // int rep = 0;
-            // RandomNumberGenerator::Instance()->Reseed(1);
             
-            PRINT_VARIABLE(rep);
+            // PRINT_VARIABLE(rep);
 
             std::vector<Node<3>*> nodes;
 
-            std::string output_directory = "RepSweep_RandomToFlat_Rep4_" + std::to_string(rep);
+            std::string output_directory = "RepSweep_RandomToFlat_Rep5_" + std::to_string(rep);
 
             unsigned width = 8;	   // x
             unsigned height = 10;      // y
@@ -124,10 +123,10 @@ public:
             double radius =  2.0;//periodic_width+1.0;
             double target_curvature = -0.2; //maximum curvature is 0.2066 -> higher curvature means smaller sphere
             double beta_parameter = 1.0*spring_strength;
-            double alpha_parameter = 1.2;
+            double alpha_parameter = 1.5;
 
             double time_step = 0.001;
-            double end_time = 2;
+            double end_time = 5;
             double plot_step = 10.0;
 
             bool include_springs = true;
@@ -157,18 +156,18 @@ public:
                             
                         c_vector<double, 3> node_i_new_location;
 
-                        x_coordinate = (double) (i + 0.5*(j%2 + k%2))*width_space      + 0.15*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
-                        y_coordinate = (double) j*height_space                         + 0.15*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                        x_coordinate = (double) (i + 0.5*(j%2 + k%2))*width_space      + 0.25*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                        y_coordinate = (double) j*height_space                         + 0.25*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
 
                         // z_coordinate = (double) tissue_base + k*depth_space;
                         
                         if( k == depth)
                         {
-                            z_coordinate = (double) tissue_base + (-1.0)*depth_space   + 0.15*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                            z_coordinate = (double) tissue_base + (-1.0)*depth_space   + 0.25*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
                         }
                         else
                         {
-                            z_coordinate = (double) tissue_base + k*depth_space        + 0.15*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                            z_coordinate = (double) tissue_base + k*depth_space        + 0.25*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
                         }
 
                         if( pow(x_coordinate - 0.5*periodic_width,2)+ pow(y_coordinate - 0.5*periodic_height ,2) <= pow(1.0,2) )
@@ -433,7 +432,7 @@ public:
 		    SimulationTime::Instance()->SetStartTime(0.0);
             // SimulationTime::Destroy();
 
-            // PRINT_VARIABLE(rep);
+            PRINT_VARIABLE(rep);
 
         }
 

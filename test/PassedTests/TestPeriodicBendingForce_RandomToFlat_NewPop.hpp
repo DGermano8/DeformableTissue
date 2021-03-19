@@ -1,6 +1,6 @@
 #ifndef TEST3DBOXMODEL_HPP_
 #define TEST3DBOXMODEL_HPP_
-
+ 
 #include <cxxtest/TestSuite.h>
 
 // Must be included before other cell_based headers
@@ -10,14 +10,14 @@
 #include "OffLatticeSimulation.hpp"
 #include "GeneralisedLinearSpringForce.hpp"
 #include "SimpleWntCellCycleModel.hpp"
-#include "DomMeshBasedCellPopulationWithGhostNodes.hpp"
+#include "DomPeriodicMeshBasedCellPopulationWithGhostNodes.hpp"
 #include "AbstractCellBasedTestSuite.hpp"
 #include "WildTypeCellMutationState.hpp"
 #include "StromalCellMutationState.hpp"
 #include "CellsGenerator.hpp"
 #include "RandomMotionForce.hpp"
 #include "PeriodicCryptModelInteractionForceWithGhostNodes.hpp"
-#include "PeriodicBendingForce3dHeightWithGhostNodes.hpp"
+// #include "PeriodicBendingForce3dHeightWithGhostNodesV2.hpp"
 #include "SloughingCellKiller3DWithGhostNodes.hpp"
 #include "AnoikisCellKiller3DWithGhostNodes.hpp"
 #include "UniformCellKiller3dWithGhostNodes.hpp"
@@ -40,7 +40,7 @@
 #include "PetscSetupAndFinalize.hpp"
 #include "ForwardEulerNumericalMethod.hpp"
 #include "PlanarDivisionRule.hpp"
-#include "DriftPreventForce.hpp"
+// #include "DriftPreventForce.hpp"
 
 
 #include "MeshModifier.hpp"
@@ -105,8 +105,8 @@ public:
         double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 1;
-        double plot_step = 10.0;
+        double end_time = 0.01;
+        double plot_step = 1.0;
 
         bool include_springs = true;
         bool include_bending = true;
@@ -253,7 +253,7 @@ public:
         std::cout<< "number of cells all  = " << num_epithelial_cells+num_tissue_cells << "\n";
         std::cout<< "number of ghosts     = " << ghost_node_indices.size() << "\n";
 
-        DomMeshBasedCellPopulationWithGhostNodes<3> cell_population(mesh, cells, real_node_indices); //ghost_sep
+        DomPeriodicMeshBasedCellPopulationWithGhostNodes<3> cell_population(mesh, cells, real_node_indices, false, 15, 1, periodic_width, periodic_height); //ghost_sep
         assert(cell_population.GetNumRealCells() != 0);
 
 
@@ -285,7 +285,7 @@ public:
         
         //cell_population.AddPopulationWriter<VoronoiDataWriter>(); // paraview is pretty pointless at viewing this, worth looking into
         
-        //cell_population.WriteVtkResultsToFile(output_directory);
+        // cell_population.WriteVtkResultsToFile(output_directory);
         //To fix paraview
         cell_population.SetWriteVtkAsPointsDom(true);
         //std::cout<<cell_population.GetWriteVtkAsPoints() << "\n";
@@ -305,49 +305,49 @@ public:
         }
 
         // MAKE_PTR_ARGS(PeriodicBoxBoundaryCondition3d, boundary_condition, (&cell_population));
-        MAKE_PTR_ARGS(PeriodicBoxBoundaryCondition3dGhosts, boundary_condition, (&cell_population));
-        boundary_condition->SetCellPopulationWidth(periodic_width);
-        boundary_condition->SetCellPopulationDepth(periodic_height);
-        boundary_condition->SetMaxHeightForPinnedCells(0.0);       			      
-        boundary_condition->ImposeBoundaryCondition(node_locations_before);
-        simulator.AddCellPopulationBoundaryCondition(boundary_condition);
+        // MAKE_PTR_ARGS(PeriodicBoxBoundaryCondition3dGhosts, boundary_condition, (&cell_population));
+        // boundary_condition->SetCellPopulationWidth(periodic_width);
+        // boundary_condition->SetCellPopulationDepth(periodic_height);
+        // boundary_condition->SetMaxHeightForPinnedCells(0.0);       			      
+        // boundary_condition->ImposeBoundaryCondition(node_locations_before);
+        // simulator.AddCellPopulationBoundaryCondition(boundary_condition);
 
-        MAKE_PTR_ARGS(PeriodicStromalBoxBoundaryCondition3d, stromal_boundary_condition, (&cell_population));
-        stromal_boundary_condition->SetCellPopulationWidth(periodic_width);
-        stromal_boundary_condition->SetCellPopulationDepth(periodic_height);
-        stromal_boundary_condition->SetMaxHeightForPinnedCells(0.0);
-        stromal_boundary_condition->ImposeBoundaryCondition(node_locations_before);
-        simulator.AddCellPopulationBoundaryCondition(stromal_boundary_condition);
+        // MAKE_PTR_ARGS(PeriodicStromalBoxBoundaryCondition3d, stromal_boundary_condition, (&cell_population));
+        // stromal_boundary_condition->SetCellPopulationWidth(periodic_width);
+        // stromal_boundary_condition->SetCellPopulationDepth(periodic_height);
+        // stromal_boundary_condition->SetMaxHeightForPinnedCells(0.0);
+        // stromal_boundary_condition->ImposeBoundaryCondition(node_locations_before);
+        // simulator.AddCellPopulationBoundaryCondition(stromal_boundary_condition);
 
 
 		// Create periodic spring force law
-        MAKE_PTR(PeriodicCryptModelInteractionForceWithGhostNodes<3>, periodic_spring_force);
-        periodic_spring_force->SetUseOneWaySprings(false); //turning this on makes the stromal cells act as ghosts..
-        periodic_spring_force->SetCutOffLength(1.25);
-        //                     SetEpithelialStromalCellDependentSprings(ind , Ep-Ep, Str-Str, Ep-Str, apcTwoHitStromalMultiplier);
-        periodic_spring_force->SetEpithelialStromalCellDependentSprings(true, 1.0,     0.5,     0.5,    1.0);
-        periodic_spring_force->SetPeriodicDomainWidth(periodic_width);
-        periodic_spring_force->SetPeriodicDomainDepth(periodic_height);
-        periodic_spring_force->SetMeinekeSpringStiffness(spring_strength);
-        if(include_springs)
-        {
-            simulator.AddForce(periodic_spring_force);
-        }
+        // MAKE_PTR(PeriodicCryptModelInteractionForceWithGhostNodes<3>, periodic_spring_force);
+        // periodic_spring_force->SetUseOneWaySprings(false); //turning this on makes the stromal cells act as ghosts..
+        // periodic_spring_force->SetCutOffLength(1.25);
+        // //                     SetEpithelialStromalCellDependentSprings(ind , Ep-Ep, Str-Str, Ep-Str, apcTwoHitStromalMultiplier);
+        // periodic_spring_force->SetEpithelialStromalCellDependentSprings(true, 1.0,     0.5,     0.5,    1.0);
+        // periodic_spring_force->SetPeriodicDomainWidth(periodic_width);
+        // periodic_spring_force->SetPeriodicDomainDepth(periodic_height);
+        // periodic_spring_force->SetMeinekeSpringStiffness(spring_strength);
+        // if(include_springs)
+        // {
+        //     simulator.AddForce(periodic_spring_force);
+        // }
 
 		// Create periodic basement membrane force law
-        MAKE_PTR(PeriodicBendingForce3dHeightWithGhostNodes, periodic_bending_force);
-        periodic_bending_force->SetOutputDirectory(output_directory);
-        periodic_bending_force->SetHeightDependantCurvatureParameter(1.2);
-        periodic_bending_force->SetBasementMembraneParameter(beta_parameter);
-        periodic_bending_force->SetExponentParameter(alpha_parameter);
-        // periodic_bending_force->SetCircularNonZeroTargetCurvatureRegion(true, target_curvature, radius, 20, 20);
-        periodic_bending_force->SetCircularNonZeroTargetCurvatureRegion(true, target_curvature, radius, centre_x, centre_y);
-        periodic_bending_force->SetPeriodicDomainWidth(periodic_width);
-        periodic_bending_force->SetPeriodicDomainDepth(periodic_height);
-        if(include_bending)
-        {
-            simulator.AddForce(periodic_bending_force);
-        }
+        // MAKE_PTR(PeriodicBendingForce3dHeightWithGhostNodesV2, periodic_bending_force);
+        // periodic_bending_force->SetOutputDirectory(output_directory);
+        // periodic_bending_force->SetHeightDependantCurvatureParameter(1.2);
+        // periodic_bending_force->SetBasementMembraneParameter(beta_parameter);
+        // periodic_bending_force->SetExponentParameter(alpha_parameter);
+        // // periodic_bending_force->SetCircularNonZeroTargetCurvatureRegion(true, target_curvature, radius, 20, 20);
+        // periodic_bending_force->SetCircularNonZeroTargetCurvatureRegion(true, target_curvature, radius, centre_x, centre_y);
+        // periodic_bending_force->SetPeriodicDomainWidth(periodic_width);
+        // periodic_bending_force->SetPeriodicDomainDepth(periodic_height);
+        // if(include_bending)
+        // {
+        //     simulator.AddForce(periodic_bending_force);
+        // }
 
 
         // MAKE_PTR(DriftPreventForce<3>, p_drift_force);
@@ -361,32 +361,32 @@ public:
 
         double cut_off = 2.0;
         // Add anoikis cell killer
-        MAKE_PTR_ARGS(AnoikisCellKiller3DWithGhostNodes, anoikis, (&cell_population, cut_off, periodic_width, periodic_height));
-        simulator.AddCellKiller(anoikis);
+        // MAKE_PTR_ARGS(AnoikisCellKiller3DWithGhostNodes, anoikis, (&cell_population, cut_off, periodic_width, periodic_height));
+        // simulator.AddCellKiller(anoikis);
 
         simulator.SetOutputDirectory(output_directory);	 
 
-        MAKE_PTR(MeshRemeshModifier<3>, p_modifier);
-        p_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
-        p_modifier->SetWidth(periodic_width);
-        p_modifier->SetDepth(periodic_height);
+        // MAKE_PTR(MeshRemeshModifier<3>, p_modifier);
+        // p_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
+        // p_modifier->SetWidth(periodic_width);
+        // p_modifier->SetDepth(periodic_height);
 
-        simulator.AddSimulationModifier(p_modifier);
+        // simulator.AddSimulationModifier(p_modifier);
 
-        MAKE_PTR(PeriodicRemeshCellsModifier<3>, p_per_modifier);
-        p_per_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
-        p_per_modifier->SetWidth(periodic_width);
-        p_per_modifier->SetDepth(periodic_height);
+        // MAKE_PTR(PeriodicRemeshCellsModifier<3>, p_per_modifier);
+        // p_per_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
+        // p_per_modifier->SetWidth(periodic_width);
+        // p_per_modifier->SetDepth(periodic_height);
 
-        simulator.AddSimulationModifier(p_per_modifier);
+        // simulator.AddSimulationModifier(p_per_modifier);
 
 
 
         // Add random cell killer for death at the edges
         //                                                              ProbabilityOfDeathInAnHour,    MinXBoundary,                MaxXBoundary,     MinYBoundary,                    MaxYBoundary
         // MAKE_PTR_ARGS(UniformCellKiller3dWithGhostNodes, random_cell_death, (&cell_population, 1.0, 1.5*width_space,  periodic_width-1.5*width_space, 1.5*height_space,  periodic_height-1.5*height_space, num_epithelial_cells+num_tissue_cells));
-        MAKE_PTR_ARGS(UniformCellKiller3dWithGhostNodes, random_cell_death, (&cell_population, 1.0, periodic_width + 1,  0 - 1, periodic_height + 1,  0 - 1 , num_epithelial_cells+num_tissue_cells));
-		simulator.AddCellKiller(random_cell_death);
+        // MAKE_PTR_ARGS(UniformCellKiller3dWithGhostNodes, random_cell_death, (&cell_population, 1.0, periodic_width + 1,  0 - 1, periodic_height + 1,  0 - 1 , num_epithelial_cells+num_tissue_cells));
+		// simulator.AddCellKiller(random_cell_death);
 
         simulator.SetSamplingTimestepMultiple(plot_step);			// Every hour
 		simulator.SetEndTime(end_time);

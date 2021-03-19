@@ -56,51 +56,18 @@ class SimulationVT_1 : public AbstractCellBasedTestSuite
 {
 public:
 
-    /* We next show how to modify the previous test to include 'ghost nodes', which do not
-     * correspond to cells but are sometimes needed when using a Voronoi tessellation. We
-     * will discuss ghost nodes in more detail in subsequent cell-based tutorials.
-     */
-    // void TestMeshBasedMonolayerWithGhostNodes()
-    // {
-    //     EXIT_IF_PARALLEL;
-
-    //     // CylindricalHoneycombMeshGenerator generator(6, 8, 2);
-    //     // Cylindrical2dMesh* p_mesh = generator.GetCylindricalMesh();
-
-    //     ToroidalHoneycombVertexMeshGenerator generator(4, 4);
-    //     Toroidal2dVertexMesh* p_mesh = generator.GetToroidalMesh();
-
-    //     std::vector<CellPtr> cells;
-    //     MAKE_PTR(TransitCellProliferativeType, p_transit_type);
-    //     CellsGenerator<UniformG1GenerationalCellCycleModel, 2> cells_generator;
-    //     cells_generator.GenerateBasicRandom(cells, p_mesh->GetNumElements(), p_transit_type);
-
-    //     VertexBasedCellPopulation<2> cell_population(*p_mesh, cells);
-    //     OffLatticeSimulation<2> simulator(cell_population);
-        
-    //     MAKE_PTR(NagaiHondaForce<2>, p_force);
-    //     simulator.AddForce(p_force);
-
-    //     simulator.SetOutputDirectory("CellBased_VT"); //**Changed**//
-    //     simulator.SetSamplingTimestepMultiple(1);
-    //     simulator.SetEndTime(1.0); //**Changed**//
-
-    //     simulator.Solve();
-
-    // }
-
     void TestVertexBasedMonolayer()
     {
         /* We include the next line because Vertex simulations cannot be run in parallel */
         EXIT_IF_PARALLEL;
 
-        RandomNumberGenerator::Instance()->Reseed(2);
+        RandomNumberGenerator::Instance()->Reseed(3);
 
         Timer::Reset();
 
         /* First we create a regular vertex mesh. */
         unsigned width = 14;	   // x
-        unsigned height = 18;      // y
+        unsigned height = 16;      // y
         double width_space = 1.0;
         double height_space = 1.0*sqrt(0.75);
         double periodic_width = (double) (width+0.0)*width_space;
@@ -138,7 +105,7 @@ public:
             CellPtr p_cell(new Cell(p_state, p_cc_model));
             p_cell->SetCellProliferativeType(p_transit_type);
             
-            double birth_time = -8-RandomNumberGenerator::Instance()->ranf()*(p_cc_model->GetTransitCellG1Duration() + p_cc_model->GetSG2MDuration());
+            double birth_time = -2-RandomNumberGenerator::Instance()->ranf()*(p_cc_model->GetTransitCellG1Duration() + p_cc_model->GetSG2MDuration());
             
             p_cell->SetApoptosisTime(1.5);
 
@@ -156,7 +123,6 @@ public:
         DomWntConcentration<2>::Instance()->SetCryptRadius(2);
         DomWntConcentration<2>::Instance()->SetWntConcentrationParameter(2.0);
 
-
         /* Using the vertex mesh and cells, we create a cell-based population object, and specify which results to
          * output to file. */
         // cell_population.AddCellPopulationCountWriter<CellMutationStatesCountWriter>();
@@ -168,14 +134,11 @@ public:
         // cell_population.AddPopulationWriter<NodeVelocityWriter>();
         cell_population.AddCellWriter<CellIdWriter>();
 
-
-        /* We are now in a position to create and configure the cell-based simulation object, pass a force law to it,
-         * and run the simulation. We can make the simulation run for longer to see more patterning by increasing the end time. */
         OffLatticeSimulation<2> simulator(cell_population);
-        simulator.SetOutputDirectory("TestVertexBasedMonolayer");
+        simulator.SetOutputDirectory("TestVertexBasedMonolayer_1203_02");
         simulator.SetSamplingTimestepMultiple(1);
         simulator.SetDt(0.01);
-        simulator.SetEndTime(144.0);
+        simulator.SetEndTime(240.0);
 
         
         MAKE_PTR_ARGS(AreaVertexCellKiller<2>, p_killer, (&cell_population, 0.825, periodic_width, periodic_height));
@@ -201,11 +164,5 @@ public:
 
         Timer::Print("Time Ellapsed");
     }
-
-    /* To visualize the results, open a new terminal, {{{cd}}} to the Chaste directory,
-     * then {{{cd}}} to {{{anim}}}. Then do: {{{java Visualize2dCentreCells /tmp/$USER/testoutput/CellBased_VT/results_from_time_0}}}.
-     * We may have to do: {{{javac Visualize2dCentreCells.java}}} beforehand to create the
-     * java executable.
-     */
 
 };

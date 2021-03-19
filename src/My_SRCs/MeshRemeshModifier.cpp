@@ -170,7 +170,7 @@ void MeshRemeshModifier<DIM>::UpdateAtEndOfOutputTimeStep(AbstractCellPopulation
     mpMeshNoGhosts = new MutableMesh<DIM,DIM>(extended_nodes_no_ghosts);
 
     // PRINT_2_VARIABLES(rCellPopulation.GetNumRealCells() , mpMeshNoGhosts->GetNumNodes());
-    
+
     MutableMesh<2,3>* pMutableMesh = new MutableMesh<2,3>();
 
     std::vector<Node<3>*> nodes;
@@ -592,6 +592,8 @@ void MeshRemeshModifier<DIM>::UpdateAtEndOfOutputTimeStep(AbstractCellPopulation
     std::string results_file = "mono_mesh_results_" + time_string.str();
     VtkMeshWriter<2,3>* p_vtk_mesh_writer = new VtkMeshWriter<2,3>(mOutputDirectory, results_file, false);
     p_vtk_mesh_writer->WriteFilesUsingMesh(*pMutableMesh);
+
+    delete pMutableMesh;
 
     // delete pOriginalMesh;
 }
