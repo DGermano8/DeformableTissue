@@ -15,7 +15,7 @@ PeriodicBendingForce3dHeightWithGhostNodesV2::PeriodicBendingForce3dHeightWithGh
 	  mHeightDependantCurvatureParameter(1.0),
       mPeriodicDomainWidth(DOUBLE_UNSET),
       mPeriodicDomainDepth(DOUBLE_UNSET),
-      mpExtendedMesh(NULL),
+    //   mpExtendedMesh(NULL),
       mSetNonZeroTargetCurvatureRegion(false),
       mNonZeroTargetCurvature(DOUBLE_UNSET),
       mRadiusOfNonZeroTargetCurvatureRegion(DOUBLE_UNSET),
@@ -28,10 +28,10 @@ PeriodicBendingForce3dHeightWithGhostNodesV2::PeriodicBendingForce3dHeightWithGh
 PeriodicBendingForce3dHeightWithGhostNodesV2::~PeriodicBendingForce3dHeightWithGhostNodesV2()
 {
     // Avoid memory leaks
-    if (mpExtendedMesh != NULL)
-    {
-        delete mpExtendedMesh;
-    }
+    // if (mpExtendedMesh != NULL)
+    // {
+    //     delete mpExtendedMesh;
+    // }
     
 }
 
@@ -121,124 +121,127 @@ void PeriodicBendingForce3dHeightWithGhostNodesV2::RemoveDuplicates1D(std::vecto
  * Returns a vector of node pairings, without repeats. The first of each pair is the epithelial node index,
  * and the second is the tissue/stromal node index.
  */
-std::vector<c_vector<unsigned, 2> > PeriodicBendingForce3dHeightWithGhostNodesV2::GetEpithelialTissuePairs(AbstractCellPopulation<3>& rCellPopulation)
-{
+// std::vector<c_vector<unsigned, 2> > PeriodicBendingForce3dHeightWithGhostNodesV2::GetEpithelialTissuePairs(AbstractCellPopulation<3>& rCellPopulation)
+// {
 
-	DomPeriodicMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomPeriodicMeshBasedCellPopulationWithGhostNodes<3>*>(&rCellPopulation);
+// 	DomPeriodicMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomPeriodicMeshBasedCellPopulationWithGhostNodes<3>*>(&rCellPopulation);
 
-    // Create a vector to record the pairs of nodes corresponding to *joined* epithelial and tissue nodes
-    std::vector<c_vector<unsigned, 2> > node_pairs;
-    c_vector<double, 2> pair;
+//     // Create a vector to record the pairs of nodes corresponding to *joined* epithelial and tissue nodes
+//     std::vector<c_vector<unsigned, 2> > node_pairs;
+//     c_vector<double, 2> pair;
 
-    // Loop over nodes of mpExtendedMesh
-    for (unsigned extended_node_index=0; extended_node_index<mpExtendedMesh->GetNumNodes(); extended_node_index++)
-    {
-        // Get a pointer to this node in mpExtendedMesh
-        Node<3>* p_node = mpExtendedMesh->GetNode(extended_node_index);
+//     // Loop over nodes of mpExtendedMesh
+//     for (unsigned extended_node_index=0; extended_node_index<mpExtendedMesh->GetNumNodes(); extended_node_index++)
+//     {
+//         // Get a pointer to this node in mpExtendedMesh
+//         Node<3>* p_node = mpExtendedMesh->GetNode(extended_node_index);
 
-        // Get the corresponding node index in rCellPopulation
-        unsigned node_index = p_tissue->ExtendedMeshNodeIndexMap(extended_node_index);
+//         // Get the corresponding node index in rCellPopulation
+//         unsigned node_index = p_tissue->ExtendedMeshNodeIndexMap(extended_node_index);
 
-        // Get the cell corresponding to this node
-        CellPtr p_cell = rCellPopulation.GetCellUsingLocationIndex(node_index);
+//         // Get the cell corresponding to this node
+//         CellPtr p_cell = rCellPopulation.GetCellUsingLocationIndex(node_index);
 
-        // Get mutation state of cell
-    	boost::shared_ptr<AbstractCellMutationState> p_state = p_cell->GetMutationState();
+//         // Get mutation state of cell
+//     	boost::shared_ptr<AbstractCellMutationState> p_state = p_cell->GetMutationState();
 
-    	// Get whether cell is dead
-    	bool cell_is_dead = p_cell->IsDead();
+//     	// Get whether cell is dead
+//     	bool cell_is_dead = p_cell->IsDead();
 
-    	// Get whether this cell is a live epithelial cell
-//    	bool is_live_epithelial_cell = (p_state->IsType<StromalCellMutationState>()==false) && !cell_is_dead;
-    	bool is_live_epithelial_cell = (p_state->IsType<WildTypeCellMutationState>()==true) && !cell_is_dead;
+//     	// Get whether this cell is a live epithelial cell
+// //    	bool is_live_epithelial_cell = (p_state->IsType<StromalCellMutationState>()==false) && !cell_is_dead;
+//     	bool is_live_epithelial_cell = (p_state->IsType<WildTypeCellMutationState>()==true) && !cell_is_dead;
 
-    	if (is_live_epithelial_cell)
-    	{
-    	    // Iterate over elements of mpExtendedMesh containing this node and no ghost nodes
-    		std::vector<unsigned> tissue_nodes;
+//     	if (is_live_epithelial_cell)
+//     	{
+//     	    // Iterate over elements of mpExtendedMesh containing this node and no ghost nodes
+//     		std::vector<unsigned> tissue_nodes;
 
-    		for (Node<3>::ContainingElementIterator elem_iter = p_node->ContainingElementsBegin();
-		         elem_iter != p_node->ContainingElementsEnd();
-		         ++elem_iter)
-    		{
-				// Get a pointer to the element
-				Element<3,3>* p_element = mpExtendedMesh->GetElement(*elem_iter);
+//     		for (Node<3>::ContainingElementIterator elem_iter = p_node->ContainingElementsBegin();
+// 		         elem_iter != p_node->ContainingElementsEnd();
+// 		         ++elem_iter)
+//     		{
+// 				// Get a pointer to the element
+// 				Element<3,3>* p_element = mpExtendedMesh->GetElement(*elem_iter);
 
-				// ITERATE OVER NODES owned by this element
-				for (unsigned local_index=0; local_index<4; local_index++)
-				{
-					unsigned nodeBGlobalIndex = p_element->GetNodeGlobalIndex(local_index);
+// 				// ITERATE OVER NODES owned by this element
+// 				for (unsigned local_index=0; local_index<4; local_index++)
+// 				{
+// 					unsigned nodeBGlobalIndex = p_element->GetNodeGlobalIndex(local_index);
 
-					// Get the corresponding node index in rCellPopulation
-					unsigned neighbour_index = p_tissue->ExtendedMeshNodeIndexMap(nodeBGlobalIndex);
-					CellPtr p_cell = rCellPopulation.GetCellUsingLocationIndex(neighbour_index);
+// 					// Get the corresponding node index in rCellPopulation
+// 					unsigned neighbour_index = p_tissue->ExtendedMeshNodeIndexMap(nodeBGlobalIndex);
+// 					CellPtr p_cell = rCellPopulation.GetCellUsingLocationIndex(neighbour_index);
 
-					if (p_cell->GetMutationState()->IsType<StromalCellMutationState>())
-					{
-						// Store the index of each tissue node that is attached to the epithelial
-						// node. There will be repetitions due to iterating over neighbouring elements
-						tissue_nodes.push_back(nodeBGlobalIndex);
-					}
-				}
-			}
+// 					if (p_cell->GetMutationState()->IsType<StromalCellMutationState>())
+// 					{
+// 						// Store the index of each tissue node that is attached to the epithelial
+// 						// node. There will be repetitions due to iterating over neighbouring elements
+// 						tissue_nodes.push_back(nodeBGlobalIndex);
+// 					}
+// 				}
+// 			}
 
-			// Remove any nodes that have been found twice
-			RemoveDuplicates1D(tissue_nodes);
+// 			// Remove any nodes that have been found twice
+// 			RemoveDuplicates1D(tissue_nodes);
 
-			// Now construct the vector of node pairs
-			for (unsigned i=0; i<tissue_nodes.size(); i++)
-			{
-				pair[0] = extended_node_index;
-				pair[1] = tissue_nodes[i];
-				node_pairs.push_back(pair);
+// 			// Now construct the vector of node pairs
+// 			for (unsigned i=0; i<tissue_nodes.size(); i++)
+// 			{
+// 				pair[0] = extended_node_index;
+// 				pair[1] = tissue_nodes[i];
+// 				node_pairs.push_back(pair);
 
-				///\todo Consider reimplementing this check
-//				// Check that these node share a common element
-//				bool has_common_element = false;
-//
-//				// The elements that contain this epithelial node:
-//				std::set<unsigned> epithelial_elements = rCellPopulation.GetNode(node_index)->rGetContainingElementIndices();
-//				assert(epithelial_elements.size() != 0);
-//
-//				// The elements that contain the tissue node:
-//				std::set<unsigned> tissue_elements = rCellPopulation.GetNode(tissue_nodes[i])->rGetContainingElementIndices();
-//				assert(tissue_elements.size() != 0);
-//
-//				// Loop over all elements that contain the tissue node
-//				for (Node<3>::ContainingElementIterator elt_it = rCellPopulation.GetNode(tissue_nodes[i])->ContainingElementsBegin();
-//					 elt_it != rCellPopulation.GetNode(tissue_nodes[i])->ContainingElementsEnd();
-//					 ++elt_it)
-//				{
-//					unsigned elt_index = *elt_it;
-//
-//					bool elt_contains_ghost_nodes = DoesElementContainGhostNodes(rCellPopulation, elt_index);
-//
-//					// Keep only those elements that also contain the epithelial node, but do not have ghost nodes
-//					if ( (elt_contains_ghost_nodes == false) && (epithelial_elements.find(elt_index) != epithelial_elements.end()) )
-//					{
-//						// Common element
-//						has_common_element = true;
-//						break;
-//					}
-//				}
-//
-//				if (!has_common_element)
-//				{
-//					PRINT_2_VARIABLES(node_index,tissue_nodes[i]);
-//				}
-//				assert(has_common_element);
-			}
-		}
-    }
+// 				///\todo Consider reimplementing this check
+// //				// Check that these node share a common element
+// //				bool has_common_element = false;
+// //
+// //				// The elements that contain this epithelial node:
+// //				std::set<unsigned> epithelial_elements = rCellPopulation.GetNode(node_index)->rGetContainingElementIndices();
+// //				assert(epithelial_elements.size() != 0);
+// //
+// //				// The elements that contain the tissue node:
+// //				std::set<unsigned> tissue_elements = rCellPopulation.GetNode(tissue_nodes[i])->rGetContainingElementIndices();
+// //				assert(tissue_elements.size() != 0);
+// //
+// //				// Loop over all elements that contain the tissue node
+// //				for (Node<3>::ContainingElementIterator elt_it = rCellPopulation.GetNode(tissue_nodes[i])->ContainingElementsBegin();
+// //					 elt_it != rCellPopulation.GetNode(tissue_nodes[i])->ContainingElementsEnd();
+// //					 ++elt_it)
+// //				{
+// //					unsigned elt_index = *elt_it;
+// //
+// //					bool elt_contains_ghost_nodes = DoesElementContainGhostNodes(rCellPopulation, elt_index);
+// //
+// //					// Keep only those elements that also contain the epithelial node, but do not have ghost nodes
+// //					if ( (elt_contains_ghost_nodes == false) && (epithelial_elements.find(elt_index) != epithelial_elements.end()) )
+// //					{
+// //						// Common element
+// //						has_common_element = true;
+// //						break;
+// //					}
+// //				}
+// //
+// //				if (!has_common_element)
+// //				{
+// //					PRINT_2_VARIABLES(node_index,tissue_nodes[i]);
+// //				}
+// //				assert(has_common_element);
+// 			}
+// 		}
+//     }
 
-    return node_pairs;
+//     return node_pairs;
 	
-}
+// }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 std::vector<c_vector<unsigned, 10> > PeriodicBendingForce3dHeightWithGhostNodesV2::GetEpithelialNeighbours(std::vector<c_vector<unsigned, 3> > rEpithelialMeshVector, int number_of_cells)
 {
+	// TRACE("In the neighbours");
+	// PRINT_VARIABLE(rEpithelialMeshVector.size());
+
 	std::vector<c_vector<unsigned, 10> > node_neighbours;
 
 	int temp_neighbours[4*number_of_cells][10];
@@ -249,7 +252,7 @@ std::vector<c_vector<unsigned, 10> > PeriodicBendingForce3dHeightWithGhostNodesV
 			temp_neighbours[i][j] = 0;
 		}
 	}
-
+	// PRINT_VARIABLE(4*number_of_cells);
 	for(unsigned i=0; i<rEpithelialMeshVector.size(); i++)
 	{
 		unsigned node_A = rEpithelialMeshVector[i][0];
@@ -396,6 +399,7 @@ std::vector<c_vector<unsigned, 10> > PeriodicBendingForce3dHeightWithGhostNodesV
 		node_neighbours.push_back(another_holder_neighbour);
 
 	}
+	// TRACE("End of neighbours");
 	return node_neighbours;
 
 }
@@ -409,13 +413,16 @@ std::vector<c_vector<unsigned, 3> > epithelial_triangulation;
 
 DomPeriodicMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomPeriodicMeshBasedCellPopulationWithGhostNodes<3>*>(&rCellPopulation);
 
+MutableMesh<3,3>& mpExtendedMesh = p_tissue->rGetPeriodicMesh();
 
-for (unsigned elem_index=0; elem_index<mpExtendedMesh->GetNumElements(); elem_index++) 
-{ 
+// TRACE("Inside GetEpithelialMesh");
 
+// PRINT_VARIABLE(mpExtendedMesh.GetNumElements());
+for (unsigned elem_index=0; elem_index<mpExtendedMesh.GetNumElements(); elem_index++) 
+{
     // Get a pointer to the element
-    Element<3,3>* p_element = mpExtendedMesh->GetElement(elem_index);
-        
+    Element<3,3>* p_element = mpExtendedMesh.GetElement(elem_index);
+    
     int Node0Index = p_element->GetNodeGlobalIndex(0);
     int Node1Index = p_element->GetNodeGlobalIndex(1);
     int Node2Index = p_element->GetNodeGlobalIndex(2);
@@ -428,41 +435,52 @@ for (unsigned elem_index=0; elem_index<mpExtendedMesh->GetNumElements(); elem_in
 	int node3GlobalIndex = p_tissue->ExtendedMeshNodeIndexMap(Node3Index);
 	int node_global_intex[4] = {node0GlobalIndex, node1GlobalIndex, node2GlobalIndex, node3GlobalIndex};
 
-	for(int j=0; j<4; j++)
-    {
-		c_vector<unsigned, 3> tri_el = zero_vector<double>(3);
+	// PRINT_4_VARIABLES(Node0Index,Node1Index,Node2Index,Node3Index);
 
-        CellPtr p_cell = rCellPopulation.GetCellUsingLocationIndex(node_global_intex[(0+j)%4]);
-        boost::shared_ptr<AbstractCellMutationState> p_state = p_cell->GetMutationState();
+	// PRINT_4_VARIABLES(node0GlobalIndex,node1GlobalIndex,node2GlobalIndex,node3GlobalIndex);
 
-        bool is_0_stromal_cell = (p_state->IsType<StromalCellMutationState>()==true);
+	if(p_tissue->IsGhostNode(node0GlobalIndex)==false && p_tissue->IsGhostNode(node1GlobalIndex)==false &&
+	   p_tissue->IsGhostNode(node2GlobalIndex)==false && p_tissue->IsGhostNode(node3GlobalIndex)==false )
+	{
+		for(int j=0; j<4; j++)
+		{
+			// PRINT_VARIABLE(j);
+			c_vector<unsigned, 3> tri_el = zero_vector<double>(3);
 
-        if(is_0_stromal_cell) 
-        {
-            CellPtr p_cell_1 = rCellPopulation.GetCellUsingLocationIndex(node_global_intex[(1+j)%4]);
-            boost::shared_ptr<AbstractCellMutationState> p_state_1 = p_cell_1->GetMutationState();
+			CellPtr p_cell = rCellPopulation.GetCellUsingLocationIndex(node_global_intex[(0+j)%4]);
+			boost::shared_ptr<AbstractCellMutationState> p_state = p_cell->GetMutationState();
 
-            CellPtr p_cell_2 = rCellPopulation.GetCellUsingLocationIndex(node_global_intex[(2+j)%4]);
-            boost::shared_ptr<AbstractCellMutationState> p_state_2 = p_cell_2->GetMutationState();
-                    
-            CellPtr p_cell_3 = rCellPopulation.GetCellUsingLocationIndex(node_global_intex[(3+j)%4]);
-            boost::shared_ptr<AbstractCellMutationState> p_state_3 = p_cell_3->GetMutationState();
-                    
-            int number_of_epithelial_cell = (p_state_1->IsType<WildTypeCellMutationState>()==true) + (p_state_2->IsType<WildTypeCellMutationState>()==true) + (p_state_3->IsType<WildTypeCellMutationState>()==true);
+			bool is_0_stromal_cell = (p_state->IsType<StromalCellMutationState>()==true);
 
-            if (number_of_epithelial_cell == 3)
-            {
-				tri_el[0] = node_index[(1+j)%4];
-				tri_el[1] = node_index[(2+j)%4];
-				tri_el[2] = node_index[(3+j)%4];
+			if(is_0_stromal_cell) 
+			{
+				CellPtr p_cell_1 = rCellPopulation.GetCellUsingLocationIndex(node_global_intex[(1+j)%4]);
+				boost::shared_ptr<AbstractCellMutationState> p_state_1 = p_cell_1->GetMutationState();
 
-				epithelial_triangulation.push_back(tri_el);
-            }
-                    
-        }
-                
-                
-    }
+				CellPtr p_cell_2 = rCellPopulation.GetCellUsingLocationIndex(node_global_intex[(2+j)%4]);
+				boost::shared_ptr<AbstractCellMutationState> p_state_2 = p_cell_2->GetMutationState();
+						
+				CellPtr p_cell_3 = rCellPopulation.GetCellUsingLocationIndex(node_global_intex[(3+j)%4]);
+				boost::shared_ptr<AbstractCellMutationState> p_state_3 = p_cell_3->GetMutationState();
+						
+				int number_of_epithelial_cell = (p_state_1->IsType<WildTypeCellMutationState>()==true) + (p_state_2->IsType<WildTypeCellMutationState>()==true) + (p_state_3->IsType<WildTypeCellMutationState>()==true);
+
+				if (number_of_epithelial_cell == 3)
+				{
+					tri_el[0] = node_index[(1+j)%4];
+					tri_el[1] = node_index[(2+j)%4];
+					tri_el[2] = node_index[(3+j)%4];
+
+					epithelial_triangulation.push_back(tri_el);
+
+					// TRACE("Got an element");
+				}
+						
+			}
+					
+					
+		}
+	}
 
 
 }
@@ -473,6 +491,8 @@ for (unsigned elem_index=0; elem_index<mpExtendedMesh->GetNumElements(); elem_in
 std::vector<c_vector<double, 3> > PeriodicBendingForce3dHeightWithGhostNodesV2::FitPlaneAndFindImage(AbstractCellPopulation<3>& rCellPopulation, std::vector<unsigned> second_order_neighs,  unsigned cell_i)
 {
 	DomPeriodicMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomPeriodicMeshBasedCellPopulationWithGhostNodes<3>*>(&rCellPopulation);
+
+	MutableMesh<3,3>& mpExtendedMesh = p_tissue->rGetPeriodicMesh();
 
 	c_vector<double, 3> normal_vector;
 	
@@ -485,7 +505,7 @@ std::vector<c_vector<double, 3> > PeriodicBendingForce3dHeightWithGhostNodesV2::
 	for (unsigned i=0; i<second_order_neighs.size(); i++)
 	{
 		unsigned cell_i_ext =second_order_neighs[i];
-		c_vector<double, 3> epithelial_location = this->mpExtendedMesh->GetNode(cell_i_ext)->rGetLocation();
+		c_vector<double, 3> epithelial_location = mpExtendedMesh.GetNode(cell_i_ext)->rGetLocation();
 
 
 		// Find Transpose(A)*A
@@ -684,7 +704,7 @@ std::vector<c_vector<double, 3> > PeriodicBendingForce3dHeightWithGhostNodesV2::
 	unsigned cell_ii_ext = p_tissue->ExtendedMeshNodeIndexMap(cell_i);
 	
 	// c_vector<double, 3> epithelial_cell_i = mpExtendedMesh->GetNode(cell_ii_ext)->rGetLocation();
-	c_vector<double, 3> epithelial_cell_i = this->mpExtendedMesh->GetNode(cell_ii_ext)->rGetLocation();
+	c_vector<double, 3> epithelial_cell_i = mpExtendedMesh.GetNode(cell_ii_ext)->rGetLocation();
 
 
 	circle_centre[0]  = radius_from_curvature*unit_normal[0] + epithelial_cell_i[0];
@@ -702,7 +722,7 @@ std::vector<c_vector<double, 3> > PeriodicBendingForce3dHeightWithGhostNodesV2::
 		unsigned cell_i_ext = second_order_neighs[i];
 		//int epithelialNodeIndex = second_order_neighs[i];
 		// c_vector<double, 3> epithelial_location = mpExtendedMesh->GetNode(cell_i_ext)->rGetLocation();
-		c_vector<double, 3> epithelial_location = this->mpExtendedMesh->GetNode(cell_i_ext)->rGetLocation();
+		c_vector<double, 3> epithelial_location = mpExtendedMesh.GetNode(cell_i_ext)->rGetLocation();
 
 		
 		//PRINT_VECTOR(unit_normal);
@@ -1349,14 +1369,17 @@ bool PeriodicBendingForce3dHeightWithGhostNodesV2::DoesElementContainGhostNodes(
 bool PeriodicBendingForce3dHeightWithGhostNodesV2::DoesElementContainLongEdge(AbstractCellPopulation<3>& rCellPopulation, unsigned elementIndex, double maxEdgeLength)
 {
 	bool element_contains_long_edge = false;
+	DomPeriodicMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomPeriodicMeshBasedCellPopulationWithGhostNodes<3>*>(&rCellPopulation);
+    MutableMesh<3,3>& mpExtendedMesh = p_tissue->rGetPeriodicMesh();
+
 
 	// Get a pointer to the element
-	Element<3,3>* p_element = mpExtendedMesh->GetElement(elementIndex);
+	Element<3,3>* p_element = mpExtendedMesh.GetElement(elementIndex);
 
-	c_vector<double, 3> location0 = mpExtendedMesh->GetNode(p_element->GetNodeGlobalIndex(0))->rGetLocation();
-	c_vector<double, 3> location1 = mpExtendedMesh->GetNode(p_element->GetNodeGlobalIndex(1))->rGetLocation();
-	c_vector<double, 3> location2 = mpExtendedMesh->GetNode(p_element->GetNodeGlobalIndex(2))->rGetLocation();
-	c_vector<double, 3> location3 = mpExtendedMesh->GetNode(p_element->GetNodeGlobalIndex(3))->rGetLocation();
+	c_vector<double, 3> location0 = mpExtendedMesh.GetNode(p_element->GetNodeGlobalIndex(0))->rGetLocation();
+	c_vector<double, 3> location1 = mpExtendedMesh.GetNode(p_element->GetNodeGlobalIndex(1))->rGetLocation();
+	c_vector<double, 3> location2 = mpExtendedMesh.GetNode(p_element->GetNodeGlobalIndex(2))->rGetLocation();
+	c_vector<double, 3> location3 = mpExtendedMesh.GetNode(p_element->GetNodeGlobalIndex(3))->rGetLocation();
 
     double edge_length_01 = norm_2(location0-location1);
     double edge_length_02 = norm_2(location0-location2);
@@ -1377,13 +1400,14 @@ bool PeriodicBendingForce3dHeightWithGhostNodesV2::DoesElementContainLongEdge(Ab
 // Dom - adds the force to the cell - will use this
 void PeriodicBendingForce3dHeightWithGhostNodesV2::AddForceContribution(AbstractCellPopulation<3>& rCellPopulation)
 {
+	TRACE("Inside force contribution");
 	DomPeriodicMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomPeriodicMeshBasedCellPopulationWithGhostNodes<3>*>(&rCellPopulation);
 
 	// Creat a new mesh
-    MutableMesh<3,3>* mpExtendedMesh = p_tissue->rGetPeriodicMesh();
+    MutableMesh<3,3>& mpExtendedMesh = p_tissue->rGetPeriodicMesh();
 
-	unsigned num_cells = rCellPopulation.GetNumRealCells();
-    
+	unsigned num_cells = p_tissue->GetNumNodes();
+    PRINT_VARIABLE(num_cells);
 	///////////////////////////////////////////////////////////////////////////////////////
 	// Dom - everything above this is just creating the extended mesh - leave it as it is
 	///////////////////////////////////////////////////////////////////////////////////////
@@ -1391,20 +1415,23 @@ void PeriodicBendingForce3dHeightWithGhostNodesV2::AddForceContribution(Abstract
 	///\todo We may need to modify rCellPopulation to ensure thatmMarkedSprings is correct at this point
 
 	std::vector<c_vector<unsigned, 3> > epithelial_triangulation = GetEpithelialMesh(rCellPopulation);
-
-	std::vector<c_vector<unsigned, 10> > epithelial_neighbours = GetEpithelialNeighbours(epithelial_triangulation, num_cells);
-
+	// TRACE("Got epithelial mesh");
+	std::vector<c_vector<unsigned, 10> > epithelial_neighbours = GetEpithelialNeighbours(epithelial_triangulation, mpExtendedMesh.GetNumNodes());
+	// TRACE("Got epithelial neighbours");
 	double get_basement_membrane_parameter = GetBasementMembraneParameter();
 
 	// c_vector<unsigned, 2> CryptMaxMin = GetMaxMinEpithelialCells(rCellPopulation);
 
 	////
+
+	
 	double max_height = -10.0;
 	double min_height = 10.0;
 
 	double tissue_max_height = -10.0;
 	double tissue_min_height = 10.0;
 
+	
 	for (AbstractCellPopulation<3>::Iterator cell_iter = rCellPopulation.Begin();
          cell_iter != rCellPopulation.End();
          ++cell_iter)
@@ -1450,167 +1477,176 @@ void PeriodicBendingForce3dHeightWithGhostNodesV2::AddForceContribution(Abstract
 	myfile.open (angle_string);
 	myfile << SimulationTime::Instance()->GetTime() << ", ";
 
-	for (AbstractCellPopulation<3>::Iterator cell_iter = rCellPopulation.Begin();
-         cell_iter != rCellPopulation.End();
-         ++cell_iter)
+	// for (AbstractCellPopulation<3>::Iterator cell_iter = rCellPopulation.Begin();
+    //      cell_iter != rCellPopulation.End();
+    //      ++cell_iter)
+    // {
+		for (unsigned i=0; i<p_tissue->GetNumNodes(); i++)
     {
-        // First, create and store a copy of this real node and cell
-        unsigned real_node_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
-        c_vector<double, 3> real_node_location = rCellPopulation.GetLocationOfCellCentre(*cell_iter);
+        int real_node_index = p_tissue->GetNode(i)->GetIndex();
 
-		CellPtr p_cell_i_ext = rCellPopulation.GetCellUsingLocationIndex(real_node_index);
-
-
-        unsigned cell_i_ext = real_node_index;
-
-    	bool cell_is_dead = p_cell_i_ext->IsDead();
-		bool is_ghost = p_tissue->IsGhostNode(cell_i_ext);
+        // unsigned real_node_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
+        // c_vector<double, 3> real_node_location = p_tissue->GetLocationOfCellCentre(node_iter);
 		
-				
-        if(p_cell_i_ext->GetMutationState()->IsType<WildTypeCellMutationState>() == true && cell_is_dead == false && is_ghost == false)
+		if( p_tissue->IsGhostNode(real_node_index)==false )
 		{
+			const c_vector<double, 3>& epithelial_location = p_tissue->GetNode(real_node_index)->rGetLocation();
 
-			std::vector<unsigned> second_order_neighs;
+			// PRINT_VARIABLE(real_node_index);
+			CellPtr p_cell_i_ext = rCellPopulation.GetCellUsingLocationIndex(real_node_index);
 
-			int first_order_neighs[10];
+
+			// unsigned cell_i_ext = real_node_index;
+
+			bool cell_is_dead = p_cell_i_ext->IsDead();
 			
-			for(unsigned j=0; j<10; j++)
+
+					
+			if(p_cell_i_ext->GetMutationState()->IsType<WildTypeCellMutationState>() == true && cell_is_dead == false)
 			{
-				unsigned extended_node_index = p_tissue->CellPopulationNodeIndexMap(real_node_index);
-				first_order_neighs[j] = epithelial_neighbours[extended_node_index][j];
-						
-				for(unsigned k=0; k<10; k++)
+				std::vector<unsigned> second_order_neighs;
+
+				int first_order_neighs[10];
+				
+				for(unsigned j=0; j<10; j++)
 				{
-					unsigned extended_node_index_j = first_order_neighs[j];
-					second_order_neighs.push_back(epithelial_neighbours[extended_node_index_j][k]);
+					unsigned extended_node_index = p_tissue->CellPopulationNodeIndexMap(real_node_index);
+					first_order_neighs[j] = epithelial_neighbours[extended_node_index][j];
+							
+					for(unsigned k=0; k<10; k++)
+					{
+						unsigned extended_node_index_j = first_order_neighs[j];
+						second_order_neighs.push_back(epithelial_neighbours[extended_node_index_j][k]);
+
+					}
+					
+				}
+
+				std::sort(second_order_neighs.begin(), second_order_neighs.end());
+				second_order_neighs.erase(std::unique(second_order_neighs.begin(), second_order_neighs.end()), second_order_neighs.end());
+
+				// Remove the value zero
+				second_order_neighs.erase(std::remove(second_order_neighs.begin(), second_order_neighs.end(), 0), second_order_neighs.end());
+				// Remove the value i
+				//second_order_neighs.erase(std::remove(second_order_neighs.begin(), second_order_neighs.end(), i), second_order_neighs.end());
+				// May aswell include i since we need it for the linear regression part.
+
+				//std::cout<< second_order_neighs.size() << " ";
+				
+				std::vector<c_vector<double, 3> > image_location_per_second_order_neighbours;
+
+				bool epithelial_cell_in_disk_target_curvature_region = (pow((epithelial_location[0] - mXCoordinateOfCentreOfNonZeroTargetCurvatureRegion),2)
+																	+ pow((epithelial_location[1] - mYCoordinateOfCentreOfNonZeroTargetCurvatureRegion),2) 
+																	<= pow(mRadiusOfNonZeroTargetCurvatureRegion,2) );
+
+				bool epithelial_cell_in_height_target_curvature_region = (epithelial_location[2] < max_height_for_curvature);
+
+				// here we will find
+				double basement_membrane_parameter = 0.0;
+				if(epithelial_cell_in_height_target_curvature_region == true && epithelial_cell_in_disk_target_curvature_region == true)
+				{
+					image_location_per_second_order_neighbours = FitPlaneAndFindImage(rCellPopulation, second_order_neighs, real_node_index);
+					
+					basement_membrane_parameter = 1.0*get_basement_membrane_parameter;
 
 				}
-				
-			}
-
-			std::sort(second_order_neighs.begin(), second_order_neighs.end());
-			second_order_neighs.erase(std::unique(second_order_neighs.begin(), second_order_neighs.end()), second_order_neighs.end());
-
-			// Remove the value zero
-			second_order_neighs.erase(std::remove(second_order_neighs.begin(), second_order_neighs.end(), 0), second_order_neighs.end());
-			// Remove the value i
-			//second_order_neighs.erase(std::remove(second_order_neighs.begin(), second_order_neighs.end(), i), second_order_neighs.end());
-			// May aswell include i since we need it for the linear regression part.
-
-			//std::cout<< second_order_neighs.size() << " ";
-
-			c_vector<double, 3> epithelial_location = real_node_location;
-			
-			std::vector<c_vector<double, 3> > image_location_per_second_order_neighbours;
-
-			bool epithelial_cell_in_disk_target_curvature_region = (pow((epithelial_location[0] - mXCoordinateOfCentreOfNonZeroTargetCurvatureRegion),2)
-																  + pow((epithelial_location[1] - mYCoordinateOfCentreOfNonZeroTargetCurvatureRegion),2) 
-																 <= pow(mRadiusOfNonZeroTargetCurvatureRegion,2) );
-
-			bool epithelial_cell_in_height_target_curvature_region = (epithelial_location[2] < max_height_for_curvature);
-
-			// here we will find
-			double basement_membrane_parameter = 0.0;
-			if(epithelial_cell_in_height_target_curvature_region == true && epithelial_cell_in_disk_target_curvature_region == true)
-			{
-				image_location_per_second_order_neighbours = FitPlaneAndFindImage(rCellPopulation, second_order_neighs, cell_i_ext);
-				
-				basement_membrane_parameter = 1.0*get_basement_membrane_parameter;
-
-			}
-			else 
-			{
-				// TRACE("no bending cell");
-				basement_membrane_parameter = +1.0*get_basement_membrane_parameter;
-
-				for (unsigned j=0; j<second_order_neighs.size(); j++)
+				else 
 				{
-					c_vector<double, 3> location_of_neighbour_j = mpExtendedMesh->GetNode(second_order_neighs[j])->rGetLocation();
-					image_location_per_second_order_neighbours.push_back(location_of_neighbour_j);
+					
+					basement_membrane_parameter = +1.0*get_basement_membrane_parameter;
+
+					for (unsigned j=0; j<second_order_neighs.size(); j++)
+					{
+						c_vector<double, 3> location_of_neighbour_j = mpExtendedMesh.GetNode(second_order_neighs[j])->rGetLocation();
+						image_location_per_second_order_neighbours.push_back(location_of_neighbour_j);
+					}
 				}
-			}
 
-			std::vector<unsigned> first_order_neighs_vect;
-			for(unsigned j=0; j<10; j++)
-			{
-				first_order_neighs_vect.push_back(epithelial_neighbours[p_tissue->CellPopulationNodeIndexMap(cell_i_ext)][j]);
-				// first_order_neighs_vect.push_back(epithelial_neighbours[cell_i_ext][j]);
-			}
-			first_order_neighs_vect.push_back(p_tissue->CellPopulationNodeIndexMap(cell_i_ext));
-			// order and remove doubles
-			std::sort(first_order_neighs_vect.begin(), first_order_neighs_vect.end());
-			first_order_neighs_vect.erase(std::unique(first_order_neighs_vect.begin(), first_order_neighs_vect.end()), first_order_neighs_vect.end());
-			// Remove zero from vector
-			first_order_neighs_vect.erase(std::remove(first_order_neighs_vect.begin(), first_order_neighs_vect.end(), 0), first_order_neighs_vect.end());
-			// PRINT_VECTOR(first_order_neighs_vect);
-			/* 
-			* Need:
-			* First order neighbours  ->  first_order_neighs_vect
-			* Traingulation		    ->  epithelial_triangulation
-			* image node positions    ->  image_location_per_second_order_neighbours 
-			*   needs (for node IDs)  ->  second_order_neighs 
-			* Cell_i					->  cell_i_ext
-			*/
+				std::vector<unsigned> first_order_neighs_vect;
+				for(unsigned j=0; j<10; j++)
+				{
+					first_order_neighs_vect.push_back(epithelial_neighbours[p_tissue->CellPopulationNodeIndexMap(real_node_index)][j]);
+					// first_order_neighs_vect.push_back(epithelial_neighbours[cell_i_ext][j]);
+				}
+				first_order_neighs_vect.push_back(p_tissue->CellPopulationNodeIndexMap(real_node_index));
+				// order and remove doubles
+				std::sort(first_order_neighs_vect.begin(), first_order_neighs_vect.end());
+				first_order_neighs_vect.erase(std::unique(first_order_neighs_vect.begin(), first_order_neighs_vect.end()), first_order_neighs_vect.end());
+				// Remove zero from vector
+				first_order_neighs_vect.erase(std::remove(first_order_neighs_vect.begin(), first_order_neighs_vect.end(), 0), first_order_neighs_vect.end());
+				// PRINT_VECTOR(first_order_neighs_vect);
+				/* 
+				* Need:
+				* First order neighbours  ->  first_order_neighs_vect
+				* Traingulation		    ->  epithelial_triangulation
+				* image node positions    ->  image_location_per_second_order_neighbours 
+				*   needs (for node IDs)  ->  second_order_neighs 
+				* Cell_i					->  real_node_index
+				*/
 
+				c_vector<double, 4> force_due_to_curvature = zero_vector<double>(4);
 
-			c_vector<double, 4> force_due_to_curvature = zero_vector<double>(4);
+				if(first_order_neighs_vect.size() >= 3)
+				{
+					force_due_to_curvature = GetForceDueToDiscreteCurvature(rCellPopulation, epithelial_triangulation, first_order_neighs_vect, second_order_neighs, image_location_per_second_order_neighbours, real_node_index, mpExtendedMesh.GetNumNodes());
 
-			if(first_order_neighs_vect.size() >= 3)
-			{
-				force_due_to_curvature = GetForceDueToDiscreteCurvature(rCellPopulation, epithelial_triangulation, first_order_neighs_vect, second_order_neighs, image_location_per_second_order_neighbours, cell_i_ext, num_cells);
+				}
+				else if(first_order_neighs_vect.size() < 3)
+				{
+					// if(cell_i_ext > 199)
+					// {
+					// 	PRINT_VARIABLE(cell_i_ext);
+						// TRACE("Has no neighbours")
+					// }
+					force_due_to_curvature[0] = 0.0;
+					force_due_to_curvature[1] = 0.0;
+					force_due_to_curvature[2] = 0.0;
+				}
 
-			}
-			else if(first_order_neighs_vect.size() < 3)
-			{
-				// if(cell_i_ext > 199)
+				if (std::isnan(force_due_to_curvature[0]) || std::isnan(force_due_to_curvature[1]) || std::isnan(force_due_to_curvature[2]))
+				{
+					// PRINT_VECTOR(force_due_to_curvature);
+					force_due_to_curvature[0] = 0.0;
+					force_due_to_curvature[1] = 0.0;
+					force_due_to_curvature[2] = 0.0;
+				}
+
+				c_vector<double, 3> force_curvature = zero_vector<double>(3);
+				force_curvature[0] = force_due_to_curvature[0];
+				force_curvature[1] = force_due_to_curvature[1];
+				force_curvature[2] = force_due_to_curvature[2];
+
+				myfile  << std::fixed << std::setprecision(12) << force_due_to_curvature[3] << ", ";
+				if((p_cell_i_ext->GetAge()) < 1)
+				{
+					basement_membrane_parameter = (p_cell_i_ext->GetAge()) *get_basement_membrane_parameter;
+				}
+				else
+				{
+					basement_membrane_parameter = 1.0*get_basement_membrane_parameter;
+				}
+
+				rCellPopulation.GetNode(real_node_index)->AddAppliedForceContribution(basement_membrane_parameter*force_curvature);
+				int sim_time = (SimulationTime::Instance()->GetTime())/(SimulationTime::Instance()->GetTimeStep());
+				// if(cell_i_ext == 154 && (sim_time%10 == 0) )
 				// {
-				// 	PRINT_VARIABLE(cell_i_ext);
-					// TRACE("Has no neighbours")
+				// PRINT_VARIABLE(SimulationTime::Instance()->GetTime());
+				// 	PRINT_VECTOR(force_due_to_curvature);
 				// }
-				force_due_to_curvature[0] = 0.0;
-				force_due_to_curvature[1] = 0.0;
-				force_due_to_curvature[2] = 0.0;
-			}
-			
-			if (std::isnan(force_due_to_curvature[0]) || std::isnan(force_due_to_curvature[1]) || std::isnan(force_due_to_curvature[2]))
-			{
-				// PRINT_VECTOR(force_due_to_curvature);
-				force_due_to_curvature[0] = 0.0;
-				force_due_to_curvature[1] = 0.0;
-				force_due_to_curvature[2] = 0.0;
-			}
+				if(real_node_index == 250 )
+				{
+					PRINT_VECTOR(force_due_to_curvature);
+					PRINT_VECTOR(first_order_neighs_vect);
 
-			c_vector<double, 3> force_curvature = zero_vector<double>(3);
-			force_curvature[0] = force_due_to_curvature[0];
-			force_curvature[1] = force_due_to_curvature[1];
-			force_curvature[2] = force_due_to_curvature[2];
-
-			myfile  << std::fixed << std::setprecision(12) << force_due_to_curvature[3] << ", ";
-			if((p_cell_i_ext->GetAge()) < 1)
-			{
-				basement_membrane_parameter = (p_cell_i_ext->GetAge()) *get_basement_membrane_parameter;
-			}
-			else
-			{
-				basement_membrane_parameter = 1.0*get_basement_membrane_parameter;
-			}
-
-			rCellPopulation.GetNode(cell_i_ext)->AddAppliedForceContribution(basement_membrane_parameter*force_curvature);
-			int sim_time = (SimulationTime::Instance()->GetTime())/(SimulationTime::Instance()->GetTimeStep());
-			// if(cell_i_ext == 154 && (sim_time%10 == 0) )
-			// {
-			// 	PRINT_VARIABLE(SimulationTime::Instance()->GetTime());
-			// 	PRINT_VECTOR(force_due_to_curvature);
-			// }
-		}		
-		
+				}
+			}		
+		}	
 	}
 
 	myfile.close();
 	// delete mpExtendedMesh;
-	
+	TRACE("Left Force contribution");
 }
-
 
 double PeriodicBendingForce3dHeightWithGhostNodesV2::GetPeriodicDomainWidth()
 {

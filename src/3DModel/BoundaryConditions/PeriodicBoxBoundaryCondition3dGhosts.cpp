@@ -76,6 +76,7 @@ void PeriodicBoxBoundaryCondition3dGhosts::ImposeBoundaryCondition(const std::ma
 
 bool PeriodicBoxBoundaryCondition3dGhosts::VerifyBoundaryCondition()
 {
+	TRACE("Checking boundaries");
 	bool boundary_condition_satisfied = true;
 
 	/*

@@ -74,7 +74,7 @@ protected :
     double mPeriodicDomainDepth;
 
     /** An extended mesh, used to implement periodicity. */
-    MutableMesh<3,3>* mpExtendedMesh;
+    // MutableMesh<3,3> mpExtendedMesh;
 
     /** A map from node indices in mpExtendedMesh to node indices in the cell population. */
     std::map<unsigned, unsigned> mExtendedMeshNodeIndexMap;
@@ -168,7 +168,7 @@ public :
 
     /* Returns a vector of all epithelial-tissue node pairings
      */
-    std::vector<c_vector<unsigned, 2> > GetEpithelialTissuePairs(AbstractCellPopulation<3>& rCellPopulation);
+    // std::vector<c_vector<unsigned, 2> > GetEpithelialTissuePairs(AbstractCellPopulation<3>& rCellPopulation);
     
     ////
     std::vector<c_vector<unsigned, 10> > GetEpithelialNeighbours(std::vector<c_vector<unsigned, 3> > rEpithelialMeshVector, int number_of_cells);

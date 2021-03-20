@@ -1767,6 +1767,12 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 			// 	PRINT_VARIABLE(SimulationTime::Instance()->GetTime());
 			// 	PRINT_VECTOR(force_due_to_curvature);
 			// }
+			if(cell_i_ext == 250 )
+				{
+					PRINT_VECTOR(force_due_to_curvature);
+					PRINT_VECTOR(first_order_neighs_vect);
+
+				}
 		}		
 		
 	}

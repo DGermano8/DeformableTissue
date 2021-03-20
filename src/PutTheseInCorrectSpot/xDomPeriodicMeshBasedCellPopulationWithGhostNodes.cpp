@@ -68,7 +68,7 @@ DomPeriodicMeshBasedCellPopulationWithGhostNodes<DIM>::DomPeriodicMeshBasedCellP
                
 
 {
-    PRINT_2_VARIABLES(mPeriodicDomainWidth,mPeriodicDomainDepth);
+    // PRINT_2_VARIABLES(mPeriodicDomainWidth,mPeriodicDomainDepth);
     //
     mpMutableMesh = static_cast<MutableMesh<DIM,DIM>* >(&(this->mrMesh));
     //
@@ -105,9 +105,14 @@ DomPeriodicMeshBasedCellPopulationWithGhostNodes<DIM>::DomPeriodicMeshBasedCellP
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
-    
-    std::vector<int>  mExtendedMeshNodeIndexMap;
-    std::vector<int> mCellPopulationNodeIndexMap;
+    TRACE("Yo V1");
+    // std::vector<unsigned>  mExtendedMeshNodeIndexMap;
+    // std::vector<unsigned> mCellPopulationNodeIndexMap;
+    this->mExtendedMeshNodeIndexMap = std::vector<int>(4*this->GetNumNodes(), 0);
+    this->mCellPopulationNodeIndexMap = std::vector<int>(this->GetNumNodes(), 0);
+
+    // mExtendedMeshNodeIndexMap.clear();
+    // mCellPopulationNodeIndexMap.clear();
 
     std::vector<Node<DIM>*> extended_nodes(4*this->GetNumNodes());
 
@@ -125,8 +130,12 @@ DomPeriodicMeshBasedCellPopulationWithGhostNodes<DIM>::DomPeriodicMeshBasedCellP
         extended_nodes[count] = p_real_node;
 
         // Populate mExtendedMeshNodeIndexMap
-        mExtendedMeshNodeIndexMap[count] = node_iter;
-		mCellPopulationNodeIndexMap[node_iter] = count;
+        // PRINT_VARIABLE(node_iter);
+        this->mExtendedMeshNodeIndexMap[count] = node_iter;
+        // PRINT_VARIABLE(node_iter);
+		this->mCellPopulationNodeIndexMap[node_iter] = count;
+        
+        // PRINT_VARIABLE(this->mExtendedMeshNodeIndexMap[count]);
 
         count++;
     }
@@ -153,7 +162,7 @@ DomPeriodicMeshBasedCellPopulationWithGhostNodes<DIM>::DomPeriodicMeshBasedCellP
         extended_nodes[count] = p_image_node;
 
         // Populate mExtendedMeshNodeIndexMap
-        mExtendedMeshNodeIndexMap[count] = node_iter;
+        this->mExtendedMeshNodeIndexMap[count] = node_iter;
         
         count++;
     }
@@ -180,7 +189,7 @@ DomPeriodicMeshBasedCellPopulationWithGhostNodes<DIM>::DomPeriodicMeshBasedCellP
         extended_nodes[count] = p_image_node;
 
         // Populate mExtendedMeshNodeIndexMap
-        mExtendedMeshNodeIndexMap[count] = node_iter;
+        this->mExtendedMeshNodeIndexMap[count] = node_iter;
         
         count++;
     }
@@ -225,7 +234,7 @@ DomPeriodicMeshBasedCellPopulationWithGhostNodes<DIM>::DomPeriodicMeshBasedCellP
         Node<DIM>* p_image_node = new Node<DIM>(count, image_node_location);
         extended_nodes[count] = p_image_node;
 
-        mExtendedMeshNodeIndexMap[count] = node_iter;
+        this->mExtendedMeshNodeIndexMap[count] = node_iter;
 
         count++;
     }
@@ -238,10 +247,19 @@ DomPeriodicMeshBasedCellPopulationWithGhostNodes<DIM>::DomPeriodicMeshBasedCellP
 
     // MutableMesh<DIM,DIM> mpExtendedMesh = static_cast<MutableMesh<DIM,DIM>* >(extended_nodes);
 
-    MutableMesh<DIM,DIM>* mpExtendedMesh = new MutableMesh<DIM,DIM>(extended_nodes);
+    MutableMesh<DIM,DIM>* ExtendedMesh = new MutableMesh<DIM,DIM>(extended_nodes);
+
+    mpExtendedMesh = static_cast<MutableMesh<DIM,DIM>* >(ExtendedMesh);
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    TRACE("section 2");
+    // TRACE("section 2");
+
+    PRINT_VARIABLE(this->mExtendedMeshNodeIndexMap.size());
+     
+    
+    // PRINT_4_VARIABLES(this->mExtendedMeshNodeIndexMap[1694],this->mExtendedMeshNodeIndexMap[1674],this->mExtendedMeshNodeIndexMap[1874],this->mExtendedMeshNodeIndexMap[1985] );
+
+
 }
 
 template<unsigned DIM>
@@ -403,7 +421,6 @@ void DomPeriodicMeshBasedCellPopulationWithGhostNodes<DIM>::Validate()
 template<unsigned DIM>
 MutableMesh<DIM,DIM>& DomPeriodicMeshBasedCellPopulationWithGhostNodes<DIM>::rGetMesh()
 {
-
     return *mpMutableMesh;
 }
 
@@ -416,6 +433,12 @@ const MutableMesh<DIM,DIM>& DomPeriodicMeshBasedCellPopulationWithGhostNodes<DIM
 
 template<unsigned DIM>
 MutableMesh<DIM,DIM>& DomPeriodicMeshBasedCellPopulationWithGhostNodes<DIM>::rGetPeriodicMesh()
+{
+    return *mpExtendedMesh;
+}
+
+template<unsigned DIM>
+const MutableMesh<DIM,DIM>& DomPeriodicMeshBasedCellPopulationWithGhostNodes<DIM>::rGetPeriodicMesh() const
 {
     return *mpExtendedMesh;
 }
@@ -433,7 +456,6 @@ int DomPeriodicMeshBasedCellPopulationWithGhostNodes<DIM>::CellPopulationNodeInd
 template<unsigned DIM>
 void DomPeriodicMeshBasedCellPopulationWithGhostNodes<DIM>::UpdateGhostNodesAfterReMesh(NodeMap& rMap)
 {
-    TRACE("Some trace");
     // Copy mIsGhostNode to a temporary vector
     std::vector<bool> ghost_nodes_before_remesh = mIsGhostNode;
 
@@ -499,6 +521,7 @@ void DomPeriodicMeshBasedCellPopulationWithGhostNodes<DIM>::AcceptCellWritersAcr
 template<unsigned DIM>
 void DomPeriodicMeshBasedCellPopulationWithGhostNodes<DIM>::ApplyGhostForces()
 {
+    TRACE("Applying ghost forces");
     // Initialise vector of forces on ghost nodes
     std::vector<c_vector<double, DIM> > drdt(this->GetNumNodes());
     for (unsigned i=0; i<drdt.size(); i++)
@@ -564,6 +587,159 @@ void DomPeriodicMeshBasedCellPopulationWithGhostNodes<DIM>::OpenWritersFiles(Out
 template<unsigned DIM>
 void DomPeriodicMeshBasedCellPopulationWithGhostNodes<DIM>::WriteVtkResultsToFile(const std::string& rDirectory)
 {
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    TRACE("Yo V2");
+    // std::vector<unsigned>  mExtendedMeshNodeIndexMap;
+    // std::vector<unsigned> mCellPopulationNodeIndexMap;
+    this->mExtendedMeshNodeIndexMap = std::vector<int>(4*this->GetNumNodes(), 0);
+    this->mCellPopulationNodeIndexMap = std::vector<int>(this->GetNumNodes(), 0);
+
+    // mExtendedMeshNodeIndexMap.clear();
+    // mCellPopulationNodeIndexMap.clear();
+
+    std::vector<Node<DIM>*> extended_nodes(4*this->GetNumNodes());
+
+    // We iterate over all cells in the population
+    unsigned count = 0;
+
+	// Dom - Create a copy of original mesh
+    for (unsigned i=0; i<this->GetNumNodes(); i++)
+    {
+        int node_iter = this->GetNode(i)->GetIndex();
+        const c_vector<double, DIM>& r_node_location = this->GetNode(node_iter)->rGetLocation();
+        
+        // Create a copy of the node corresponding to this cell and store it
+        Node<DIM>* p_real_node = new Node<DIM>(node_iter, r_node_location);
+        extended_nodes[count] = p_real_node;
+
+        // Populate mExtendedMeshNodeIndexMap
+        // PRINT_VARIABLE(node_iter);
+        this->mExtendedMeshNodeIndexMap[count] = node_iter;
+        // PRINT_VARIABLE(node_iter);
+		this->mCellPopulationNodeIndexMap[node_iter] = count;
+        
+        // PRINT_VARIABLE(this->mExtendedMeshNodeIndexMap[count]);
+
+        count++;
+    }
+
+    // First, extend the mesh in the x-direction
+    for (unsigned i=0; i<this->GetNumNodes(); i++)
+    {
+        int node_iter = this->GetNode(i)->GetIndex();
+        const c_vector<double, DIM>& r_node_location = this->GetNode(node_iter)->rGetLocation();
+        
+        // Compute the location of the image node corresponding to this node
+        c_vector<double,DIM> image_node_location = r_node_location;
+        if (r_node_location[0] >= mPeriodicDomainWidth*0.5)
+        {
+            image_node_location[0] -= mPeriodicDomainWidth;
+        }
+        else if (r_node_location[0] <  mPeriodicDomainWidth*0.5)
+        {
+            image_node_location[0] += mPeriodicDomainWidth;
+        }
+
+        // Create a copy of the node corresponding to this cell, suitable translated, and store it
+        Node<DIM>* p_image_node = new Node<DIM>(count, image_node_location);
+        extended_nodes[count] = p_image_node;
+
+        // Populate mExtendedMeshNodeIndexMap
+        this->mExtendedMeshNodeIndexMap[count] = node_iter;
+        
+        count++;
+    }
+
+    // Secondly, extend the mesh in the y-direction
+    for (unsigned i=0; i<this->GetNumNodes(); i++)
+    {
+        int node_iter = this->GetNode(i)->GetIndex();
+        const c_vector<double, DIM>& r_node_location = this->GetNode(node_iter)->rGetLocation();
+        
+        // Compute the location of the image node corresponding to this node
+        c_vector<double,DIM> image_node_location = r_node_location;
+        if (r_node_location[0] >= mPeriodicDomainDepth*0.5)
+        {
+            image_node_location[0] -= mPeriodicDomainDepth;
+        }
+        else if (r_node_location[0] <  mPeriodicDomainDepth*0.5)
+        {
+            image_node_location[0] += mPeriodicDomainDepth;
+        }
+
+        // Create a copy of the node corresponding to this cell, suitable translated, and store it
+        Node<DIM>* p_image_node = new Node<DIM>(count, image_node_location);
+        extended_nodes[count] = p_image_node;
+
+        // Populate mExtendedMeshNodeIndexMap
+        this->mExtendedMeshNodeIndexMap[count] = node_iter;
+        
+        count++;
+    }
+
+    // Thirdly, extend this extended mesh so that we cover the corners too
+    // (We don't need to store the real nodes anymore)
+    for (unsigned i=0; i<this->GetNumNodes(); i++)
+    {
+        int node_iter = this->GetNode(i)->GetIndex();
+        // First, create and store a copy of this real node and cell
+        const c_vector<double, DIM>& r_node_location = this->GetNode(node_iter)->rGetLocation();
+
+        // Compute the location of the image node corresponding to this node
+        c_vector<double,DIM> image_node_location = r_node_location;
+
+        if (r_node_location[1] >= mPeriodicDomainDepth*0.5)
+        {
+			if (r_node_location[0] >= mPeriodicDomainWidth*0.5)
+			{
+				image_node_location[0] -= mPeriodicDomainWidth;
+			}
+			else if (r_node_location[0] <  mPeriodicDomainWidth*0.5)
+			{
+				image_node_location[0] += mPeriodicDomainWidth;
+			}
+            image_node_location[1] -= mPeriodicDomainDepth;
+        }
+        else if (r_node_location[1] <  mPeriodicDomainDepth*0.5)
+        {
+			if (r_node_location[0] >= mPeriodicDomainWidth*0.5)
+			{
+				image_node_location[0] -= mPeriodicDomainWidth;
+			}
+			else if (r_node_location[0] <  mPeriodicDomainWidth*0.5)
+			{
+				image_node_location[0] += mPeriodicDomainWidth;
+			}
+            image_node_location[1] += mPeriodicDomainDepth;
+        }
+
+        // Create a copy of the node corresponding to this cell, suitable translated, and store it
+        Node<DIM>* p_image_node = new Node<DIM>(count, image_node_location);
+        extended_nodes[count] = p_image_node;
+
+        this->mExtendedMeshNodeIndexMap[count] = node_iter;
+
+        count++;
+    }
+
+    // We now construct mpExtendedMesh using extended_nodes
+    // if (mpExtendedMesh != NULL)
+    // {
+    // 	delete mpExtendedMesh;
+    // }
+
+    // MutableMesh<DIM,DIM> mpExtendedMesh = static_cast<MutableMesh<DIM,DIM>* >(extended_nodes);
+
+    MutableMesh<DIM,DIM>* ExtendedMesh = new MutableMesh<DIM,DIM>(extended_nodes);
+
+    mpExtendedMesh = static_cast<MutableMesh<DIM,DIM>* >(ExtendedMesh);
+
+ //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
 #ifdef CHASTE_VTK
 // PRINT_VARIABLE((this->mpVoronoiTessellation != nullptr));
     if (this->mpVoronoiTessellation != nullptr)
@@ -755,7 +931,7 @@ void DomPeriodicMeshBasedCellPopulationWithGhostNodes<DIM>::WriteVtkResultsToFil
     if (mWriteVtkAsPointsDom)
     {
         //std::cout<< "\n";
-        //PRINT_VARIABLE("Start ");
+        // TRACE("Start ");
         
         // Create mesh writer for VTK output
         VtkMeshWriter<DIM, DIM> cells_writer(rDirectory, "results_"+time.str(), false);
@@ -868,7 +1044,7 @@ void DomPeriodicMeshBasedCellPopulationWithGhostNodes<DIM>::WriteVtkResultsToFil
         *(this->mpVtkMetaFile) << num_timesteps;
         *(this->mpVtkMetaFile) << ".vtu\"/>\n";
         
-        //PRINT_VARIABLE("Finish");
+        // TRACE("Finish");
     }
 
     if (false)//Change this to true to display nodes without ghosts, but it needs fixing....

@@ -225,6 +225,8 @@ public:
 
 
     MutableMesh<DIM, DIM>& rGetPeriodicMesh();
+    
+    const MutableMesh<DIM, DIM>& rGetPeriodicMesh() const;
 
     int ExtendedMeshNodeIndexMap(unsigned index);
 
