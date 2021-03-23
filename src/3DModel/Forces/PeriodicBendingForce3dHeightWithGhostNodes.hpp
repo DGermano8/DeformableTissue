@@ -171,7 +171,7 @@ public :
     std::vector<c_vector<unsigned, 2> > GetEpithelialTissuePairs(AbstractCellPopulation<3>& rCellPopulation);
     
     ////
-    std::vector<c_vector<unsigned, 10> > GetEpithelialNeighbours(std::vector<c_vector<unsigned, 3> > rEpithelialMeshVector, int number_of_cells);
+    std::vector<c_vector<unsigned, 10> > GetEpithelialNeighbours(std::vector<c_vector<unsigned, 3> > rEpithelialMeshVector, unsigned number_of_cells);
 
     std::vector<c_vector<unsigned, 3> > GetEpithelialMesh(AbstractCellPopulation<3>& rCellPopulation);
 

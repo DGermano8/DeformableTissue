@@ -22,7 +22,7 @@ void PeriodicBoxBoundaryCondition3dGhosts::ImposeBoundaryCondition(const std::ma
 	// for (AbstractCellPopulation<3>::Iterator cell_iter = this->mpCellPopulation->Begin();
 	// 	 cell_iter != this->mpCellPopulation->End();
 	// 	 ++cell_iter)
-	for(int node_index=0; node_index<this->mpCellPopulation->GetNumNodes(); node_index++)
+	for(unsigned node_index=0; node_index<this->mpCellPopulation->GetNumNodes(); node_index++)
 	{
 		
 		// assert(this->mpCellPopulation->IsCellAssociatedWithADeletedLocation(*cell_iter) == false);
@@ -76,7 +76,6 @@ void PeriodicBoxBoundaryCondition3dGhosts::ImposeBoundaryCondition(const std::ma
 
 bool PeriodicBoxBoundaryCondition3dGhosts::VerifyBoundaryCondition()
 {
-	TRACE("Checking boundaries");
 	bool boundary_condition_satisfied = true;
 
 	/*
@@ -86,7 +85,7 @@ bool PeriodicBoxBoundaryCondition3dGhosts::VerifyBoundaryCondition()
     // for (AbstractCellPopulation<3>::Iterator cell_iter = this->mpCellPopulation->Begin();
     //      cell_iter != this->mpCellPopulation->End();
     //      ++cell_iter)
-	for(int node_index=0; node_index<this->mpCellPopulation->GetNumNodes(); node_index++)
+	for(unsigned node_index=0; node_index<this->mpCellPopulation->GetNumNodes(); node_index++)
     {
         // Get index of node associated with cell
         // unsigned node_index = this->mpCellPopulation->GetLocationIndexUsingCell(*cell_iter);

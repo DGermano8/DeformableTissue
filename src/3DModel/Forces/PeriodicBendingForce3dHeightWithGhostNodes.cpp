@@ -234,11 +234,11 @@ std::vector<c_vector<unsigned, 2> > PeriodicBendingForce3dHeightWithGhostNodes::
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::vector<c_vector<unsigned, 10> > PeriodicBendingForce3dHeightWithGhostNodes::GetEpithelialNeighbours(std::vector<c_vector<unsigned, 3> > rEpithelialMeshVector, int number_of_cells)
+std::vector<c_vector<unsigned, 10> > PeriodicBendingForce3dHeightWithGhostNodes::GetEpithelialNeighbours(std::vector<c_vector<unsigned, 3> > rEpithelialMeshVector, unsigned number_of_cells)
 {
 	std::vector<c_vector<unsigned, 10> > node_neighbours;
 
-	int temp_neighbours[4*number_of_cells][10];
+	unsigned temp_neighbours[4*number_of_cells][10];
 	for(unsigned i=0; i<4*number_of_cells; i++)
 	{
 		for(unsigned j=0; j<10; j++)
@@ -254,14 +254,14 @@ std::vector<c_vector<unsigned, 10> > PeriodicBendingForce3dHeightWithGhostNodes:
 		unsigned node_C = rEpithelialMeshVector[i][2];
 
 		// Do node_A first
-		int row_neighs_A[10];
+		unsigned row_neighs_A[10];
 		for(unsigned j=0; j<10; j++)
 		{
 			row_neighs_A[j] = temp_neighbours[node_A][j];
 		}
 		if(std::find(std::begin(row_neighs_A), std::end(row_neighs_A), node_B) == std::end(row_neighs_A))
 		{
-			int iter_A = 0;
+			unsigned iter_A = 0;
 			while(iter_A < 10)
 			{
 				if(temp_neighbours[node_A][iter_A] == 0)
@@ -278,7 +278,7 @@ std::vector<c_vector<unsigned, 10> > PeriodicBendingForce3dHeightWithGhostNodes:
 		}
 		if(std::find(std::begin(row_neighs_A), std::end(row_neighs_A), node_C) == std::end(row_neighs_A))
 		{
-			int iter_A = 0;
+			unsigned iter_A = 0;
 			while(iter_A < 10)
 			{
 				if(temp_neighbours[node_A][iter_A] == 0)
@@ -293,14 +293,14 @@ std::vector<c_vector<unsigned, 10> > PeriodicBendingForce3dHeightWithGhostNodes:
 
 
 		// Then do node_B
-		int row_neighs_B[10];
+		unsigned row_neighs_B[10];
 		for(unsigned j=0; j<10; j++)
 		{
 			row_neighs_B[j] = temp_neighbours[node_B][j];
 		}
 		if(std::find(std::begin(row_neighs_B), std::end(row_neighs_B), node_A) == std::end(row_neighs_B))
 		{
-			int iter_B = 0;
+			unsigned iter_B = 0;
 			while(iter_B < 10)
 			{
 				if(temp_neighbours[node_B][iter_B] == 0)
@@ -317,7 +317,7 @@ std::vector<c_vector<unsigned, 10> > PeriodicBendingForce3dHeightWithGhostNodes:
 		}
 		if(std::find(std::begin(row_neighs_B), std::end(row_neighs_B), node_C) == std::end(row_neighs_B))
 		{
-			int iter_B = 0;
+			unsigned iter_B = 0;
 			while(iter_B < 10)
 			{
 				if(temp_neighbours[node_B][iter_B] == 0)
@@ -330,14 +330,14 @@ std::vector<c_vector<unsigned, 10> > PeriodicBendingForce3dHeightWithGhostNodes:
 		}
 
 		// Then do node_C
-		int row_neighs_C[10];
+		unsigned row_neighs_C[10];
 		for(unsigned j=0; j<10; j++)
 		{
 			row_neighs_C[j] = temp_neighbours[node_C][j];
 		}
 		if(std::find(std::begin(row_neighs_C), std::end(row_neighs_C), node_A) == std::end(row_neighs_C))
 		{
-			int iter_B = 0;
+			unsigned iter_B = 0;
 			while(iter_B < 10)
 			{
 				if(temp_neighbours[node_C][iter_B] == 0)
@@ -354,7 +354,7 @@ std::vector<c_vector<unsigned, 10> > PeriodicBendingForce3dHeightWithGhostNodes:
 		}
 		if(std::find(std::begin(row_neighs_C), std::end(row_neighs_C), node_B) == std::end(row_neighs_C))
 		{
-			int iter_B = 0;
+			unsigned iter_B = 0;
 			while(iter_B < 10)
 			{
 				if(temp_neighbours[node_C][iter_B] == 0)
@@ -412,19 +412,19 @@ for (unsigned elem_index=0; elem_index<mpExtendedMesh->GetNumElements(); elem_in
     // Get a pointer to the element
     Element<3,3>* p_element = mpExtendedMesh->GetElement(elem_index);
         
-    int Node0Index = p_element->GetNodeGlobalIndex(0);
-    int Node1Index = p_element->GetNodeGlobalIndex(1);
-    int Node2Index = p_element->GetNodeGlobalIndex(2);
-    int Node3Index = p_element->GetNodeGlobalIndex(3);
-    int node_index[4] = {Node0Index, Node1Index, Node2Index, Node3Index};
+    unsigned Node0Index = p_element->GetNodeGlobalIndex(0);
+    unsigned Node1Index = p_element->GetNodeGlobalIndex(1);
+    unsigned Node2Index = p_element->GetNodeGlobalIndex(2);
+    unsigned Node3Index = p_element->GetNodeGlobalIndex(3);
+    unsigned node_index[4] = {Node0Index, Node1Index, Node2Index, Node3Index};
 
-	int node0GlobalIndex = mExtendedMeshNodeIndexMap[Node0Index];
-	int node1GlobalIndex = mExtendedMeshNodeIndexMap[Node1Index];
-	int node2GlobalIndex = mExtendedMeshNodeIndexMap[Node2Index];
-	int node3GlobalIndex = mExtendedMeshNodeIndexMap[Node3Index];
-	int node_global_intex[4] = {node0GlobalIndex, node1GlobalIndex, node2GlobalIndex, node3GlobalIndex};
+	unsigned node0GlobalIndex = mExtendedMeshNodeIndexMap[Node0Index];
+	unsigned node1GlobalIndex = mExtendedMeshNodeIndexMap[Node1Index];
+	unsigned node2GlobalIndex = mExtendedMeshNodeIndexMap[Node2Index];
+	unsigned node3GlobalIndex = mExtendedMeshNodeIndexMap[Node3Index];
+	unsigned node_global_intex[4] = {node0GlobalIndex, node1GlobalIndex, node2GlobalIndex, node3GlobalIndex};
 
-	for(int j=0; j<4; j++)
+	for(unsigned j=0; j<4; j++)
     {
 		c_vector<unsigned, 3> tri_el = zero_vector<double>(3);
 
@@ -444,7 +444,7 @@ for (unsigned elem_index=0; elem_index<mpExtendedMesh->GetNumElements(); elem_in
             CellPtr p_cell_3 = rCellPopulation.GetCellUsingLocationIndex(node_global_intex[(3+j)%4]);
             boost::shared_ptr<AbstractCellMutationState> p_state_3 = p_cell_3->GetMutationState();
                     
-            int number_of_epithelial_cell = (p_state_1->IsType<WildTypeCellMutationState>()==true) + (p_state_2->IsType<WildTypeCellMutationState>()==true) + (p_state_3->IsType<WildTypeCellMutationState>()==true);
+            unsigned number_of_epithelial_cell = (p_state_1->IsType<WildTypeCellMutationState>()==true) + (p_state_2->IsType<WildTypeCellMutationState>()==true) + (p_state_3->IsType<WildTypeCellMutationState>()==true);
 
             if (number_of_epithelial_cell == 3)
             {
@@ -787,7 +787,7 @@ c_vector<double, 4> PeriodicBendingForce3dHeightWithGhostNodes::GetForceDueToDis
 	// force_due_to_curvature[1] = 0.0;
 	// force_due_to_curvature[2] = 0.0;
 
-	int inverse_sec_neighs[4*num_cells];
+	unsigned inverse_sec_neighs[4*num_cells];
 	for(unsigned i=0; i<4*num_cells; i++)
 	{
 		inverse_sec_neighs[i] = 0;
@@ -813,8 +813,8 @@ c_vector<double, 4> PeriodicBendingForce3dHeightWithGhostNodes::GetForceDueToDis
 		// grad_i_phi_j_el[1] = 0.0;
 		// grad_i_phi_j_el[2] = 0.0;
 
-		int cell_a = first_order_neighs[j];
-		int inv_cell_a = inverse_sec_neighs[cell_a];
+		unsigned cell_a = first_order_neighs[j];
+		unsigned inv_cell_a = inverse_sec_neighs[cell_a];
 		c_vector<double, 3> a_loc, b_loc, c_loc;
 		a_loc[0] = image_location[inv_cell_a][0];
 		a_loc[1] = image_location[inv_cell_a][1];
@@ -827,7 +827,7 @@ c_vector<double, 4> PeriodicBendingForce3dHeightWithGhostNodes::GetForceDueToDis
 
 		for(unsigned i=0; i<rEpithelialMeshVector.size(); i++)
 		{
-			int cell_b, cell_c, inv_cell_b, inv_cell_c;
+			unsigned cell_b, cell_c, inv_cell_b, inv_cell_c;
 			bool have_triangle = false;
 
 			if(rEpithelialMeshVector[i][0] == cell_a)
@@ -1392,7 +1392,7 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 
 	mCellPopulationNodeIndexMap.clear();
 
-	for(int iter; iter<num_nodes; iter++)
+	for(unsigned iter=0; iter<num_nodes; iter++)
 	{
 		mCellPopulationNodeIndexMap[iter] = -1;
 	}
@@ -1603,7 +1603,7 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 	// std::cout<<"_____________________________________________________________\n\n";
 	
 	// Uncomment these to print angle_sum data - NOTE: for this to work, need a "results" folder in Chaste directory
-	std::ofstream myfile;
+	// std::ofstream myfile;
 
 	// std::string angle_string = "results/angle_string_" + std::to_string(SimulationTime::Instance()->GetTime()) + ".txt";
 	// // imac
@@ -1611,9 +1611,9 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 	// // server
 	// std::string angle_string = "/tmp/dgermano/testoutput/" + mOutputDirectory + "/angle_string_" + std::to_string(SimulationTime::Instance()->GetTime()) + ".txt";
 	// // macbook
-	std::string angle_string = "/tmp/domenicgermano/testoutput/" + mOutputDirectory + "/angle_string_" + std::to_string(SimulationTime::Instance()->GetTime()) + ".txt";
-	myfile.open (angle_string);
-	myfile << SimulationTime::Instance()->GetTime() << ", ";
+	// std::string angle_string = "/tmp/domenicgermano/testoutput/" + mOutputDirectory + "/angle_string_" + std::to_string(SimulationTime::Instance()->GetTime()) + ".txt";
+	// myfile.open (angle_string);
+	// myfile << SimulationTime::Instance()->GetTime() << ", ";
 
 	for (AbstractCellPopulation<3>::Iterator cell_iter = rCellPopulation.Begin();
          cell_iter != rCellPopulation.End();
@@ -1637,7 +1637,7 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 
 			std::vector<unsigned> second_order_neighs;
 
-			int first_order_neighs[10];
+			unsigned first_order_neighs[10];
 			
 			for(unsigned j=0; j<10; j++)
 			{
@@ -1750,7 +1750,7 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 			force_curvature[1] = force_due_to_curvature[1];
 			force_curvature[2] = force_due_to_curvature[2];
 
-			myfile  << std::fixed << std::setprecision(12) << force_due_to_curvature[3] << ", ";
+			// myfile  << std::fixed << std::setprecision(12) << force_due_to_curvature[3] << ", ";
 			if((p_cell_i_ext->GetAge()) < 1)
 			{
 				basement_membrane_parameter = (p_cell_i_ext->GetAge()) *get_basement_membrane_parameter;
@@ -1761,23 +1761,24 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 			}
 
 			rCellPopulation.GetNode(cell_i_ext)->AddAppliedForceContribution(basement_membrane_parameter*force_curvature);
-			int sim_time = (SimulationTime::Instance()->GetTime())/(SimulationTime::Instance()->GetTimeStep());
+			
+			// int sim_time = (SimulationTime::Instance()->GetTime())/(SimulationTime::Instance()->GetTimeStep());
 			// if(cell_i_ext == 154 && (sim_time%10 == 0) )
 			// {
 			// 	PRINT_VARIABLE(SimulationTime::Instance()->GetTime());
 			// 	PRINT_VECTOR(force_due_to_curvature);
 			// }
-			if(cell_i_ext == 250 )
-				{
-					PRINT_VECTOR(force_due_to_curvature);
-					PRINT_VECTOR(first_order_neighs_vect);
+			// if(cell_i_ext == 250 )
+			// 	{
+			// 		PRINT_VECTOR(force_due_to_curvature);
+			// 		PRINT_VECTOR(first_order_neighs_vect);
 
-				}
+			// 	}
 		}		
 		
 	}
 
-	myfile.close();
+	// myfile.close();
 	// delete mpExtendedMesh;
 	
 }

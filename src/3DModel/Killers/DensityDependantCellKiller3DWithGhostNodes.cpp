@@ -184,7 +184,7 @@ std::vector<c_vector<unsigned,2> > DensityDependantCellKiller3DWithGhostNodes::R
 	unsigned num_cells = p_tissue->GetNumRealCells();
     std::vector<Node<3>*> extended_nodes(4*num_cells);
 	std::map<unsigned, unsigned> mExtendedMeshNodeIndexMap;
-	MutableMesh<3,3>* mpExtendedMesh;
+	MutableMesh<3,3>* mpExtendedMesh = nullptr;
 
 	unsigned count = 0;
 	// Dom - Create a copy of original mesh

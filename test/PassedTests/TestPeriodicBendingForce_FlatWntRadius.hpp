@@ -48,7 +48,7 @@
 #include "DriftPreventForce.hpp"
 
 // #include "MeshModifier.hpp"
-#include "MeshRemeshModifier.hpp"
+// #include "MeshRemeshModifier.hpp"
 // #include "PeriodicRemeshCellsModifier.hpp"
 
 #include "DomSimpleWntCellCycleModel.hpp"
@@ -73,7 +73,7 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "FlatWntRadius_0203_03";
+        std::string output_directory = "FlatWntRadius_NoMeshMod";
 
         unsigned width = 8;	   // x
         unsigned height = 10;      // y
@@ -113,8 +113,8 @@ public:
         double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 10;
-        double plot_step = 1.0;
+        double end_time = 0.01;
+        double plot_step = 1;
 
         bool include_springs = true;
         bool include_bending = true;
@@ -294,7 +294,7 @@ public:
         // cell_population.InitialiseCells();
 
         // Make sure we have a Voronoi tessellation to begin with
-        cell_population.CreateVoronoiTessellation();
+        // cell_population.CreateVoronoiTessellation();
         
         cell_population.AddCellWriter<CellIdWriter>();
         // cell_population.AddCellWriter<CellMutationStatesWriter>();
@@ -391,11 +391,11 @@ public:
 
         simulator.SetOutputDirectory(output_directory);	 
 
-        MAKE_PTR(MeshRemeshModifier<3>, p_modifier);
-        p_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
-        p_modifier->SetWidth(periodic_width);
-        p_modifier->SetDepth(periodic_height);
-        simulator.AddSimulationModifier(p_modifier);
+        // MAKE_PTR(MeshRemeshModifier<3>, p_modifier);
+        // p_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
+        // p_modifier->SetWidth(periodic_width);
+        // p_modifier->SetDepth(periodic_height);
+        // simulator.AddSimulationModifier(p_modifier);
 
         // MAKE_PTR(PeriodicRemeshCellsModifier<3>, p_per_modifier);
         // p_per_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");

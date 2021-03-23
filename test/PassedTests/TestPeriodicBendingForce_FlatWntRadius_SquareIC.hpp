@@ -73,10 +73,10 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "FlatWntRadius_1603_03";
+        std::string output_directory = "FlatWntRadius_2303_01";
 
         unsigned width = 10;	   // x
-        unsigned height = 10;      // y
+        unsigned height = 12;      // y
         unsigned ghosts_bottom = 0;       // ghosts > depth
         unsigned ghosts_top = 2;       // ghosts > depth
         unsigned num_tissue_depth = 1;
@@ -113,8 +113,8 @@ public:
         double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 0.01;
-        double plot_step = 1.0;
+        double end_time = 480;
+        double plot_step = 10.0;
 
         bool include_springs = true;
         bool include_bending = true;
@@ -235,9 +235,9 @@ public:
             p_model->SetDimension(3);
             // p_model->SetMaxTransitGenerations(100);
 
-            p_model->SetTransitCellG1Duration(1);
-            p_model->SetSDuration(1);
-            p_model->SetG2Duration(1);
+            p_model->SetTransitCellG1Duration(6);
+            p_model->SetSDuration(3);
+            p_model->SetG2Duration(2);
             p_model->SetMDuration(1);
 
             // p_model->SetTransitCellG1Duration(11);
