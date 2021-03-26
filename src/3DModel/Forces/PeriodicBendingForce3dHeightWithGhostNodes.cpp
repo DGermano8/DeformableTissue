@@ -1539,8 +1539,6 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
         count++;
     }
 
-	
-
     // We now construct mpExtendedMesh using extended_nodes
     if (mpExtendedMesh != NULL)
     {

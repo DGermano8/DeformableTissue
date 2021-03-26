@@ -4,7 +4,7 @@ close all;
 addpath /Users/domenicgermano/Workspace/ChasteDom/anim/matlab
 % addpath /Users/germanod/workspace/ChasteDom/anim/matlab
 
-addpath /Users/domenicgermano/Workspace/results/FlatWntRadius_2303_02/results_from_time_0
+addpath /Users/domenicgermano/Workspace/results/FlatWntRadius_2303_01/results_from_time_0
 % addpath /Users/germanod/Workspace/results/FlatWntRadius_0803_01/results_from_time_0
 
 filename = 'results';
@@ -63,12 +63,6 @@ t1_velocity_i = zeros(1,(length(holder_init))/7);
 node_i_radial_position_with_time = zeros(CellIdholder(end-3),length(timeData));
 number_of_cells_end = CellIdholder(end-3);
 
-number_to_do = 20;
-interval = 20;
-
-radius_intervals = zeros(number_to_do,101);
-counter_intervals = zeros(number_to_do,101);
-count = 1;
 for i = 1:length(timeData);
     
     time = timeData(i);
@@ -125,9 +119,9 @@ end
 %%
 
 delta_t = 0.01;
-sample_interval = 1000;
-when_to_sample = 10000;
-when_to_stop = 31000;
+sample_interval = 1200;
+when_to_sample = 24000;
+when_to_stop = 48000;
 average_velocity = zeros(number_of_cells_end,length(when_to_sample:sample_interval:when_to_stop));
 average_position =  zeros(number_of_cells_end,length(when_to_sample:sample_interval:when_to_stop));
 figure;
@@ -274,18 +268,31 @@ hold off
 %%
 figure;
 
-upp_IC =mean(region_velocity) + 1.96*sqrt(var(region_velocity))/sqrt(size((region_velocity),2));
-c =mean(region_velocity) - 1.96*sqrt(var(region_velocity))/sqrt(size((region_velocity),2));
+upp_IC =mean(region_velocity) + 1.96*sqrt(var(region_velocity))/sqrt(size(region_velocity,1));
+low_IC =mean(region_velocity) - 1.96*sqrt(var(region_velocity))/sqrt(size(region_velocity,1));
+
+CI_plot = [low_IC, fliplr(upp_IC)];
+CI_xaxe = [region_mean(1,:), fliplr(region_mean(1,:))];
 
 hold on
-plot(region_mean(1,:),mean(region_velocity),'bo-')
-plot(region_mean(1,:),upp_IC,'ro-')
-plot(region_mean(1,:),low_IC,'ro-')
+fill(CI_xaxe, CI_plot, 1,'facecolor', 'red', 'edgecolor', 'none', 'facealpha', 0.4);
+
+% plot(region_mean(1,:),upp_IC,'ro-')
+% plot(region_mean(1,:),low_IC,'ro-')
+
+
+% plot(region_mean(1,:),mean(region_velocity),'o-', 'Color', [0,0.5,1],'linewidth',2.5)
+plot(region_mean(1,:),mean(region_velocity),'o-', 'Color', 'black','linewidth',2)
+
 
 plot([2 2], [-0.05 max(mean(region_velocity))*1.2] ,'k--')
-plot([width/2-1 width/2-1], [-0.05 max(mean(region_velocity))*1.2] ,'k--')
-plot([hight/2-1 hight/2-1], [-0.05 max(mean(region_velocity))*1.2] ,'k--')
-xlabel('Radial distance','FontSize',14)
-ylabel('radial velocity','FontSize',14)
+% plot([width/2-1 width/2-1], [-0.05 max(mean(region_velocity))*1.2] ,'k--')
+plot(sqrt(0.75)*[hight/2-1 hight/2-1], [-0.05 max(mean(region_velocity))*1.2] ,'k--')
+xlabel('Radial distance (CD)','FontSize',16,'interpreter','Latex')
+ylabel('Radial velocity (CD/hr)','FontSize',16,'interpreter','Latex')
+text(0.5,0,'Renewal','FontSize',14,'interpreter','Latex')
+text(5.2,0,'Death','FontSize',14,'interpreter','Latex')
+% text(5.2,0,'Death y')
 hold off
-axis(1.01*[0 max(region_mean(1,:)) min(low_IC) max(upp_IC)])
+axis(1.01*[0 max(region_mean(1,:)) min(low_IC)-0.001 max(upp_IC)])
+title('Renewing tissue with a CCD of 12hrs','FontSize',18,'interpreter','Latex')

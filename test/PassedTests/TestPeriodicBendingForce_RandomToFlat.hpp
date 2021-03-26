@@ -64,17 +64,17 @@ public:
      */
     void TestPeriodicCubeWithGhosts() throw (Exception)
     {
-    	RandomNumberGenerator::Instance()->Reseed(1);
+    	RandomNumberGenerator::Instance()->Reseed(2);
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "RandomToFlat";
+        std::string output_directory = "Equilibrium_Tissue";
 
-        unsigned width = 10;	   // x
+        unsigned width = 8;	   // x
         unsigned height = 10;      // y
         unsigned ghosts_bottom = 0;       // ghosts > depth
         unsigned ghosts_top = 1;       // ghosts > depth
-        unsigned num_tissue_depth = 2;
+        unsigned num_tissue_depth = 1;
         unsigned depth = num_tissue_depth + (ghosts_bottom + ghosts_top) + 1;        // z
 
         // Initialise the tissue in an equilibrum state
@@ -136,17 +136,17 @@ public:
                         
                     c_vector<double, 3> node_i_new_location;
 
-                    x_coordinate = (double) (i + 0.5*(j%2 + k%2))*width_space       + 0.15*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
-                    y_coordinate = (double) j*height_space                          + 0.15*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                    x_coordinate = (double) (i + 0.5*(j%2 + k%2))*width_space       + 0*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                    y_coordinate = (double) j*height_space                          + 0*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
                     
                     if( k == depth)
                     {
-                        z_coordinate = (double) tissue_base + (-1.0)*depth_space    + 0.15*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                        z_coordinate = (double) tissue_base + (-1.0)*depth_space    + 0*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
 
                     }
                     else
                     {
-                        z_coordinate = (double) tissue_base + k*depth_space         +  0.15*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                        z_coordinate = (double) tissue_base + k*depth_space         +  0*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
                     }    
                     if( pow(x_coordinate - 0.5*periodic_width,2)+ pow(y_coordinate - 0.5*periodic_height ,2) <= pow(1.0,2) )
                     {
