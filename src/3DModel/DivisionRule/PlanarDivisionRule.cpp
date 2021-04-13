@@ -231,4 +231,4 @@ std::pair<c_vector<double, 3>, c_vector<double, 3> > PlanarDivisionRule::Calcula
 
 // Serialization for Boost >= 1.36
 #include "SerializationExportWrapperForCpp.hpp"
-// EXPORT_TEMPLATE_CLASS_ALL_DIMS(PlanarDivisionRule)
+CHASTE_CLASS_EXPORT(PlanarDivisionRule)

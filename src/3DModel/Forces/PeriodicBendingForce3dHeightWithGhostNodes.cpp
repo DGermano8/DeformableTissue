@@ -865,6 +865,8 @@ c_vector<double, 4> PeriodicBendingForce3dHeightWithGhostNodes::GetForceDueToDis
 				c_vector<double, 3> vect_ab = b_loc - a_loc;
 				c_vector<double, 3> vect_ac = c_loc - a_loc;
 
+				// PRINT_3_VARIABLES(cell_a,cell_b,cell_c);
+
 				// double mag_ab = sqrt(pow(vect_ab[0],2) + pow(vect_ab[1],2) + pow(vect_ab[2],2));
 				// double mag_ac = sqrt(pow(vect_ac[0],2) + pow(vect_ac[1],2) + pow(vect_ac[2],2));
 				double mag_ab = sqrt(pow(b_loc[0] - a_loc[0],2) + pow(b_loc[1] - a_loc[1],2) + pow(b_loc[2] - a_loc[2],2));
@@ -914,7 +916,7 @@ c_vector<double, 4> PeriodicBendingForce3dHeightWithGhostNodes::GetForceDueToDis
 					// if(cell_i == 154)
 					// {
 					// 	std::cout<< " a {" << grad_hold[0] << ", " << grad_hold[1] << ", " << grad_hold[2] << "} \n";
-					// 	// PRINT_VECTOR(grad_hold);
+						// PRINT_VECTOR(grad_hold);
 					// }
 
 				}
@@ -930,7 +932,7 @@ c_vector<double, 4> PeriodicBendingForce3dHeightWithGhostNodes::GetForceDueToDis
 					// if(cell_i == 154)
 					// {
 					// 	std::cout<< " b {" << grad_hold[0] << ", " << grad_hold[1] << ", " << grad_hold[2] << "} \n";
-					// 	// PRINT_VECTOR(grad_hold);
+						// PRINT_VECTOR(grad_hold);
 					// }
 
 				}
@@ -945,10 +947,11 @@ c_vector<double, 4> PeriodicBendingForce3dHeightWithGhostNodes::GetForceDueToDis
 					// if(cell_i == 154)
 					// {
 					// 	std::cout<< " c {" << grad_hold[0] << ", " << grad_hold[1] << ", " << grad_hold[2] << "} \n";
-					// 	// PRINT_VECTOR(grad_hold);
+						// PRINT_VECTOR(grad_hold);
 					// }
 
 				}
+				// PRINT_VECTOR(grad_hold);
 				// else
 				// {
 				// 	grad_hold[0] = 0.0;
@@ -960,6 +963,7 @@ c_vector<double, 4> PeriodicBendingForce3dHeightWithGhostNodes::GetForceDueToDis
 			}
 			
 		}
+		// PRINT_VARIABLE(ang_sum);
 
 
 		// angle_sum.push_back(ang_sum);
@@ -1400,10 +1404,14 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
     // Create a vector of nodes for use in constructing mpExtendedMesh
     std::vector<Node<3>*> extended_nodes(4*num_cells);
 
+
+	double max_height = -10.0;
+	double min_height = 10.0;
+
     // We iterate over all cells in the population
     unsigned count = 0;
 
-	// Dom - Create a copy of original mesh
+	// Dom - Create a copy of original mesh (and calculate the tissue height)
 	for (AbstractCellPopulation<3>::Iterator cell_iter = rCellPopulation.Begin();
          cell_iter != rCellPopulation.End();
          ++cell_iter)
@@ -1423,7 +1431,30 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 		
 
         count++;
+
+		// caluclating tissue height here.
+		CellPtr p_cell_i_ext = rCellPopulation.GetCellUsingLocationIndex(real_node_index);
+
+		// bool is_wild = p_cell_i_ext->GetMutationState()->IsType<WildTypeCellMutationState>();
+        // bool is_stom = p_cell_i_ext->GetMutationState()->IsType<StromalCellMutationState>();
+
+		// if (is_wild && !is_stom)
+		if (p_cell_i_ext->GetMutationState()->IsType<WildTypeCellMutationState>())
+		{
+			if (real_node_location[2] > max_height)
+			{
+				max_height = real_node_location[2];
+			}
+			if (real_node_location[2] < min_height)
+			{
+				min_height = real_node_location[2];
+			}
+		}
     }
+
+	double CryptHeight = max_height - min_height;
+	double heightparameter_ratio = GetHeightDependantCurvatureParameter();
+	double max_height_for_curvature = min_height + heightparameter_ratio*CryptHeight + 10.0;
 
 
     // First, extend the mesh in the x-direction
@@ -1545,7 +1576,7 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
     	delete mpExtendedMesh;
     }
     mpExtendedMesh = new MutableMesh<3,3>(extended_nodes);
-    
+    // TRACE("Extend Mesh");
 	///////////////////////////////////////////////////////////////////////////////////////
 	// Dom - everything above this is just creating the extended mesh - leave it as it is
 	///////////////////////////////////////////////////////////////////////////////////////
@@ -1562,42 +1593,43 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 	// c_vector<unsigned, 2> CryptMaxMin = GetMaxMinEpithelialCells(rCellPopulation);
 
 	////
-	double max_height = -10.0;
-	double min_height = 10.0;
+	// double max_height = -10.0;
+	// double min_height = 10.0;
 
-	double tissue_max_height = -10.0;
-	double tissue_min_height = 10.0;
+	// double tissue_max_height = -10.0;
+	// double tissue_min_height = 10.0;
 
-	for (AbstractCellPopulation<3>::Iterator cell_iter = rCellPopulation.Begin();
-         cell_iter != rCellPopulation.End();
-         ++cell_iter)
-    {
-        // First, create and store a copy of this real node and cell
-        unsigned real_node_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
-        c_vector<double, 3> real_node_location = rCellPopulation.GetLocationOfCellCentre(*cell_iter);
+	// for (AbstractCellPopulation<3>::Iterator cell_iter = rCellPopulation.Begin();
+    //      cell_iter != rCellPopulation.End();
+    //      ++cell_iter)
+    // {
+    //     // First, create and store a copy of this real node and cell
+    //     unsigned real_node_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
+    //     c_vector<double, 3> real_node_location = rCellPopulation.GetLocationOfCellCentre(*cell_iter);
 
-		CellPtr p_cell_i_ext = rCellPopulation.GetCellUsingLocationIndex(real_node_index);
+	// 	CellPtr p_cell_i_ext = rCellPopulation.GetCellUsingLocationIndex(real_node_index);
 
-		bool is_wild = p_cell_i_ext->GetMutationState()->IsType<WildTypeCellMutationState>();
-        bool is_stom = p_cell_i_ext->GetMutationState()->IsType<StromalCellMutationState>();
+	// 	// bool is_wild = p_cell_i_ext->GetMutationState()->IsType<WildTypeCellMutationState>();
+    //     // bool is_stom = p_cell_i_ext->GetMutationState()->IsType<StromalCellMutationState>();
 
-		if (is_wild && !is_stom)
-		{
-			if (real_node_location[2] > max_height)
-			{
-				max_height = real_node_location[2];
-			}
-			if (real_node_location[2] < min_height)
-			{
-				min_height = real_node_location[2];
-			}
-		}
+	// 	// if (is_wild && !is_stom)
+	// 	if (p_cell_i_ext->GetMutationState()->IsType<WildTypeCellMutationState>())
+	// 	{
+	// 		if (real_node_location[2] > max_height)
+	// 		{
+	// 			max_height = real_node_location[2];
+	// 		}
+	// 		if (real_node_location[2] < min_height)
+	// 		{
+	// 			min_height = real_node_location[2];
+	// 		}
+	// 	}
 
-	}
+	// }
 	
-	double CryptHeight = max_height - min_height;
-	double heightparameter_ratio = GetHeightDependantCurvatureParameter();
-	double max_height_for_curvature = min_height + heightparameter_ratio*CryptHeight + 10.0;
+	// double CryptHeight = max_height - min_height;
+	// double heightparameter_ratio = GetHeightDependantCurvatureParameter();
+	// double max_height_for_curvature = min_height + heightparameter_ratio*CryptHeight + 10.0;
 	// std::cout<<"_____________________________________________________________\n\n";
 	
 	// Uncomment these to print angle_sum data - NOTE: for this to work, need a "results" folder in Chaste directory
@@ -1612,7 +1644,7 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 	// std::string angle_string = "/tmp/domenicgermano/testoutput/" + mOutputDirectory + "/angle_string_" + std::to_string(SimulationTime::Instance()->GetTime()) + ".txt";
 	// myfile.open (angle_string);
 	// myfile << SimulationTime::Instance()->GetTime() << ", ";
-
+	// TRACE("Computing Bending Force");
 	for (AbstractCellPopulation<3>::Iterator cell_iter = rCellPopulation.Begin();
          cell_iter != rCellPopulation.End();
          ++cell_iter)
@@ -1632,6 +1664,7 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 				
         if(p_cell_i_ext->GetMutationState()->IsType<WildTypeCellMutationState>() == true && cell_is_dead == false && is_ghost == false)
 		{
+			// PRINT_VARIABLE(real_node_index);
 
 			std::vector<unsigned> second_order_neighs;
 
@@ -1706,6 +1739,21 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 			// Remove zero from vector
 			first_order_neighs_vect.erase(std::remove(first_order_neighs_vect.begin(), first_order_neighs_vect.end(), 0), first_order_neighs_vect.end());
 			// PRINT_VECTOR(first_order_neighs_vect);
+
+			// for (unsigned j=0; j<second_order_neighs.size(); j++)
+			// {
+			// 	unsigned neigh_i = mExtendedMeshNodeIndexMap[second_order_neighs[j]];
+			// 	std::cout<< neigh_i << ", ";
+			// }
+			// std::cout<< "\n";
+
+			// for(unsigned jj=0; jj<first_order_neighs_vect.size(); jj++)
+			// {
+			// 	unsigned neigh_i = mExtendedMeshNodeIndexMap[first_order_neighs_vect[jj]];
+			// 	std::cout<< neigh_i << ", ";
+			// }
+			// std::cout<< "\n";
+
 			/* 
 			* Need:
 			* First order neighbours  ->  first_order_neighs_vect
@@ -1768,13 +1816,14 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 			// }
 			// if(cell_i_ext == 250 )
 			// 	{
-			// 		PRINT_VECTOR(force_due_to_curvature);
+					// PRINT_VECTOR(force_due_to_curvature);
 			// 		PRINT_VECTOR(first_order_neighs_vect);
 
 			// 	}
 		}		
 		
 	}
+	// std::cout<< "\n\n";
 
 	// myfile.close();
 	// delete mpExtendedMesh;

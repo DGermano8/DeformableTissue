@@ -4,7 +4,7 @@ close all;
 addpath /Users/domenicgermano/Workspace/ChasteDom/anim/matlab
 % addpath /Users/germanod/workspace/ChasteDom/anim/matlab
 
-addpath /Users/domenicgermano/Workspace/results/FlatWntRadius_2303_01/results_from_time_0
+addpath /Users/domenicgermano/Workspace/results/FlatWntRadius_0804_01/results_from_time_0
 % addpath /Users/germanod/Workspace/results/FlatWntRadius_0803_01/results_from_time_0
 
 filename = 'results';
@@ -20,7 +20,7 @@ celltypesdata = LoadNonConstantLengthData(celltypesfile);
 
 % tissue size
 width = 10;
-hight = 12;
+hight = 10;
 
 ghost = 1 + 1;
 stromal = 1;
@@ -29,7 +29,8 @@ epithelial = 1;
 initial_cells = (stromal + epithelial)*width*hight;
 
 x_centre = 0.5 * width;
-y_centre = 0.5 * sqrt(0.75) * hight;
+% y_centre = 0.5 * sqrt(0.75) * hight;
+y_centre = 0.5 * hight; % Use this one for square IC
 % x_centre = 0.5 * width * 0.96;
 % y_centre = 0.5 * sqrt(0.75) * hight * 0.96;
 
@@ -37,6 +38,21 @@ max_radius = sqrt((x_centre)^2 + (y_centre)^2);
 
 
 %%
+nodeVelocityRaw = readtable('nodevelocities.dat');
+dimensionData = size(nodeVelocityRaw);
+
+timeData = table2array(nodeVelocityRaw(1:dimensionData(1),1));
+
+number_of_cells_1 = zeros(1,length(timeData));
+
+for i = 1:length(timeData)
+    types = celltypesdata{i}(2:end);
+    
+    number_of_cells_1(i) = length(types)-width*hight*stromal;
+end
+plot(number_of_cells_1)
+%%
+
 
 % data structure is:
 % time | node_0 | x_0 | y_0 | z_0 | u_0 | v_0 | w_0 | node_1 | x_1 | y_1 | z_1 | u_1 | v_1 | w_1 | ...
@@ -52,6 +68,9 @@ timeData = table2array(nodeVelocityRaw(1:dimensionData(1),1));
 holder_init = str2double(split(table2array(nodeVelocityRaw(end,2))));
 
 CellIdholder = str2double(split(table2array(CellIdRaw(end,2))));
+number_of_cells_end = CellIdholder(end-3);
+% number_of_cells_end = table2array(CellIdRaw(end-100,end-3));
+% number_of_cells_end = str2double(number_of_cells_end{1});
 
 t1_centre_dist = zeros(1,(length(holder_init))/7);
 t1_velocity_i = zeros(1,(length(holder_init))/7);
@@ -60,19 +79,22 @@ t1_velocity_i = zeros(1,(length(holder_init))/7);
 % t1_velocity_i = zeros(1,(dimensionData(2)-1)/7);
 
 % node_i_radial_velocity_with_time = zeros(CellIdholder(end-3),length(timeData));
-node_i_radial_position_with_time = zeros(CellIdholder(end-3),length(timeData));
-number_of_cells_end = CellIdholder(end-3);
+node_i_radial_position_with_time = zeros(number_of_cells_end,length(timeData));
 
-for i = 1:length(timeData);
+number_of_cells = zeros(1,length(timeData));
+
+
+for i = 1:length(timeData)-10;
     
     time = timeData(i);
     
     holder = str2double(split(table2array(nodeVelocityRaw(i,2))));
 %     holder = table2array(nodeVelocityRaw(i,2:end));
-    holder_CellId = str2double(split(table2array(CellIdRaw(i,2))));
+%     holder_CellId = str2double(split(table2array(CellIdRaw(i,2:end))));
+%     holder_CellId = table2array(CellIdRaw(i,2:end));
 
-    holder_cell_id = holder_CellId(1:5:end);
-    holder_node_id = holder_CellId(2:5:end);
+%     holder_cell_id = holder_CellId(1:5:end);
+%     holder_node_id = holder_CellId(2:5:end);
     
     node_ind_i = holder(1:7:end)';
     
@@ -86,6 +108,9 @@ for i = 1:length(timeData);
     
     types = celltypesdata{i}(2:end);
     
+    number_of_cells(i) = length(node_ind_i);
+    number_of_cells(i) = length(types);
+    
 %     if(i==1)
 %         for j=node_ind_i(~isnan(node_ind_i))
 %             matlab_node_numb = j+1;
@@ -98,14 +123,15 @@ for i = 1:length(timeData);
     
     
 %     for j=node_ind_i(~isnan(node_ind_i))
-    for j=1:length(holder_cell_id)
+    for j=1:length(node_ind_i)
         
-        node_i = holder_cell_id(j) + 1;
+        node_i = node_ind_i(j) + 1;
         
 %         if (ismember(types(j),[1 2 3 6]))
             
             xt = node_x_i(j) - x_centre;
             yt = node_y_i(j) - y_centre;
+            zt = node_z_i(j);
             
             node_i_radial_position_with_time(node_i,i) = sqrt( (xt).^2 + (yt).^2 );
 
@@ -118,10 +144,10 @@ end
 
 %%
 
-delta_t = 0.01;
-sample_interval = 1200;
-when_to_sample = 24000;
-when_to_stop = 48000;
+delta_t = 0.1;
+sample_interval = 1000;
+when_to_sample = 5600;
+when_to_stop = 9600;
 average_velocity = zeros(number_of_cells_end,length(when_to_sample:sample_interval:when_to_stop));
 average_position =  zeros(number_of_cells_end,length(when_to_sample:sample_interval:when_to_stop));
 figure;

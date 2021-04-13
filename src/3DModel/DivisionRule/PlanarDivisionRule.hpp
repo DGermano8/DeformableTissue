@@ -103,6 +103,6 @@ public:
 };
 
 #include "SerializationExportWrapper.hpp"
-// EXPORT_TEMPLATE_CLASS_ALL_DIMS(PlanarDivisionRule)
+CHASTE_CLASS_EXPORT(PlanarDivisionRule)
 
 #endif // PlanarDivisionRule_HPP_

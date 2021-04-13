@@ -892,6 +892,8 @@ c_vector<double, 4> PeriodicBendingForce3dHeightWithGhostNodesV2::GetForceDueToD
 				c_vector<double, 3> vect_ab = b_loc - a_loc;
 				c_vector<double, 3> vect_ac = c_loc - a_loc;
 
+				// PRINT_3_VARIABLES(cell_a,cell_b,cell_c);				
+
 				// double mag_ab = sqrt(pow(vect_ab[0],2) + pow(vect_ab[1],2) + pow(vect_ab[2],2));
 				// double mag_ac = sqrt(pow(vect_ac[0],2) + pow(vect_ac[1],2) + pow(vect_ac[2],2));
 				double mag_ab = sqrt(pow(b_loc[0] - a_loc[0],2) + pow(b_loc[1] - a_loc[1],2) + pow(b_loc[2] - a_loc[2],2));
@@ -941,7 +943,7 @@ c_vector<double, 4> PeriodicBendingForce3dHeightWithGhostNodesV2::GetForceDueToD
 					// if(cell_i == 154)
 					// {
 					// 	std::cout<< " a {" << grad_hold[0] << ", " << grad_hold[1] << ", " << grad_hold[2] << "} \n";
-					// 	// PRINT_VECTOR(grad_hold);
+						// PRINT_VECTOR(grad_hold);
 					// }
 
 				}
@@ -957,7 +959,7 @@ c_vector<double, 4> PeriodicBendingForce3dHeightWithGhostNodesV2::GetForceDueToD
 					// if(cell_i == 154)
 					// {
 					// 	std::cout<< " b {" << grad_hold[0] << ", " << grad_hold[1] << ", " << grad_hold[2] << "} \n";
-					// 	// PRINT_VECTOR(grad_hold);
+						// PRINT_VECTOR(grad_hold);
 					// }
 
 				}
@@ -972,7 +974,7 @@ c_vector<double, 4> PeriodicBendingForce3dHeightWithGhostNodesV2::GetForceDueToD
 					// if(cell_i == 154)
 					// {
 					// 	std::cout<< " c {" << grad_hold[0] << ", " << grad_hold[1] << ", " << grad_hold[2] << "} \n";
-					// 	// PRINT_VECTOR(grad_hold);
+						// PRINT_VECTOR(grad_hold);
 					// }
 
 				}
@@ -983,11 +985,13 @@ c_vector<double, 4> PeriodicBendingForce3dHeightWithGhostNodesV2::GetForceDueToD
 				// 	grad_hold[2] = 0.0;
 				// 	grad_i_phi_j_el += grad_hold;
 				// }
+				// PRINT_VECTOR(grad_hold);
 
 			}
 			
 		}
 
+		// PRINT_VARIABLE(ang_sum);
 
 		// angle_sum.push_back(ang_sum);
 		// angle_sum_indicats.push_back(cell_a);
@@ -1400,14 +1404,14 @@ bool PeriodicBendingForce3dHeightWithGhostNodesV2::DoesElementContainLongEdge(Ab
 // Dom - adds the force to the cell - will use this
 void PeriodicBendingForce3dHeightWithGhostNodesV2::AddForceContribution(AbstractCellPopulation<3>& rCellPopulation)
 {
-	TRACE("Inside force contribution");
+	// TRACE("Inside force contribution");
 	DomPeriodicMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomPeriodicMeshBasedCellPopulationWithGhostNodes<3>*>(&rCellPopulation);
 
 	// Creat a new mesh
     MutableMesh<3,3>& mpExtendedMesh = p_tissue->rGetPeriodicMesh();
 
 	unsigned num_cells = p_tissue->GetNumNodes();
-    PRINT_VARIABLE(num_cells);
+    // PRINT_VARIABLE(num_cells);
 	///////////////////////////////////////////////////////////////////////////////////////
 	// Dom - everything above this is just creating the extended mesh - leave it as it is
 	///////////////////////////////////////////////////////////////////////////////////////
@@ -1481,7 +1485,9 @@ void PeriodicBendingForce3dHeightWithGhostNodesV2::AddForceContribution(Abstract
     //      cell_iter != rCellPopulation.End();
     //      ++cell_iter)
     // {
-		for (unsigned i=0; i<p_tissue->GetNumNodes(); i++)
+
+	TRACE("Computing Bending Force");
+	for (unsigned i=0; i<p_tissue->GetNumNodes(); i++)
     {
         int real_node_index = p_tissue->GetNode(i)->GetIndex();
 
@@ -1492,7 +1498,6 @@ void PeriodicBendingForce3dHeightWithGhostNodesV2::AddForceContribution(Abstract
 		{
 			const c_vector<double, 3>& epithelial_location = p_tissue->GetNode(real_node_index)->rGetLocation();
 
-			// PRINT_VARIABLE(real_node_index);
 			CellPtr p_cell_i_ext = rCellPopulation.GetCellUsingLocationIndex(real_node_index);
 
 
@@ -1504,6 +1509,8 @@ void PeriodicBendingForce3dHeightWithGhostNodesV2::AddForceContribution(Abstract
 					
 			if(p_cell_i_ext->GetMutationState()->IsType<WildTypeCellMutationState>() == true && cell_is_dead == false)
 			{
+				// PRINT_VARIABLE(real_node_index);
+
 				std::vector<unsigned> second_order_neighs;
 
 				int first_order_neighs[10];
@@ -1574,7 +1581,22 @@ void PeriodicBendingForce3dHeightWithGhostNodesV2::AddForceContribution(Abstract
 				first_order_neighs_vect.erase(std::unique(first_order_neighs_vect.begin(), first_order_neighs_vect.end()), first_order_neighs_vect.end());
 				// Remove zero from vector
 				first_order_neighs_vect.erase(std::remove(first_order_neighs_vect.begin(), first_order_neighs_vect.end(), 0), first_order_neighs_vect.end());
-				// PRINT_VECTOR(first_order_neighs_vect);
+				
+				// for (unsigned j=0; j<second_order_neighs.size(); j++)
+				// {
+				// 	unsigned neigh_i = p_tissue->ExtendedMeshNodeIndexMap(second_order_neighs[j]);
+				// 	std::cout<< neigh_i << ", ";
+				// }
+				// std::cout<< "\n";
+
+
+				// // PRINT_VECTOR(first_order_neighs_vect);
+				// for(unsigned jj=0; jj<first_order_neighs_vect.size(); jj++)
+				// {
+				// 	unsigned neigh_i = p_tissue->ExtendedMeshNodeIndexMap(first_order_neighs_vect[jj]);
+				// 	std::cout<< neigh_i << ", ";
+				// }
+				// std::cout<< "\n";
 				/* 
 				* Need:
 				* First order neighbours  ->  first_order_neighs_vect
@@ -1627,25 +1649,27 @@ void PeriodicBendingForce3dHeightWithGhostNodesV2::AddForceContribution(Abstract
 				}
 
 				rCellPopulation.GetNode(real_node_index)->AddAppliedForceContribution(basement_membrane_parameter*force_curvature);
-				int sim_time = (SimulationTime::Instance()->GetTime())/(SimulationTime::Instance()->GetTimeStep());
+				
+				// int sim_time = (SimulationTime::Instance()->GetTime())/(SimulationTime::Instance()->GetTimeStep());
 				// if(cell_i_ext == 154 && (sim_time%10 == 0) )
 				// {
-				// PRINT_VARIABLE(SimulationTime::Instance()->GetTime());
-				// 	PRINT_VECTOR(force_due_to_curvature);
+				//  PRINT_VARIABLE(SimulationTime::Instance()->GetTime());
+					// PRINT_VECTOR(force_due_to_curvature);
 				// }
-				if(real_node_index == 250 )
-				{
-					PRINT_VECTOR(force_due_to_curvature);
-					PRINT_VECTOR(first_order_neighs_vect);
+				// if(real_node_index == 250 )
+				// {
+					// PRINT_VECTOR(force_due_to_curvature);
+				// 	PRINT_VECTOR(first_order_neighs_vect);
 
-				}
+				// }
 			}		
 		}	
 	}
+	// std::cout<< "\n\n";
 
 	myfile.close();
 	// delete mpExtendedMesh;
-	TRACE("Left Force contribution");
+	// TRACE("Left Force contribution");
 }
 
 double PeriodicBendingForce3dHeightWithGhostNodesV2::GetPeriodicDomainWidth()
