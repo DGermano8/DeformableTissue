@@ -5,7 +5,7 @@ close all;
 addpath /Users/germanod/workspace/ChasteDom/anim/matlab
 
 % addpath /Users/domenicgermano/Workspace/results/FlatWntRadius_0303_06/results_from_time_0
-addpath /Users/germanod/Workspace/results/FlatWntRadius_0803_01/results_from_time_0
+addpath /Users/germanod/Workspace/results/FlatWntRadius_2203_01/results_from_time_0
 
 filename = 'results';
 
@@ -19,8 +19,8 @@ celltypesdata = LoadNonConstantLengthData(celltypesfile);
 % input these manually...
 
 % tissue size
-width = 14;
-hight = 18;
+width = 10;
+hight = 12;
 
 ghost = 1 + 1;
 stromal = 1;
@@ -65,10 +65,10 @@ node_i_radial_velocity_with_time = zeros(CellIdholder(end-3),length(timeData));
 number_to_do = 20;
 interval = 20;
 
-radius_intervals = zeros(number_to_do,101);
-counter_intervals = zeros(number_to_do,101);
+radius_intervals = zeros(length(timeData),101);
+counter_intervals = zeros(length(timeData),101);
 count = 1;
-for i = (length(timeData)- number_to_do*interval+interval):1:length(timeData);
+for i = 1:length(timeData);
     
     time = timeData(i);
     
