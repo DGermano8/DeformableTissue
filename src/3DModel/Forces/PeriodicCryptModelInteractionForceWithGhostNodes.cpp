@@ -147,23 +147,25 @@ double PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::VariableSpringCons
 
     if (mUseEpithelialStromalCellDependentSprings)
     {
-        if ( (p_cell_A->GetMutationState()->IsType<StromalCellMutationState>()==false)			// If both not stromal => epithelial
-			&& (p_cell_B->GetMutationState()->IsType<StromalCellMutationState>()==false) )
+        bool is_a_stromal_1 = p_cell_A->GetMutationState()->IsType<StromalCellMutationState>();
+        bool is_b_stromal_1 = p_cell_B->GetMutationState()->IsType<StromalCellMutationState>();
+        if ( (is_a_stromal_1==false)			// If both not stromal => epithelial
+			&& (is_b_stromal_1==false) )
 		{
 			multiplication_factor *= mEpithelialEpithelialMultiplier;
 		}
-		else if ( (p_cell_A->GetMutationState()->IsType<StromalCellMutationState>()==true)		// If both stromal
-				&& (p_cell_B->GetMutationState()->IsType<StromalCellMutationState>()==true) )
+		else if ( (is_a_stromal_1==true)		// If both stromal
+				&& (is_b_stromal_1==true) )
 		{
 			multiplication_factor *= mStromalStromalMultiplier;
 		}
-        else if ( ( (p_cell_A->GetMutationState()->IsType<StromalCellMutationState>()==false) && (p_cell_B->GetMutationState()->IsType<StromalCellMutationState>()==true) )
-        	|| ( (p_cell_A->GetMutationState()->IsType<StromalCellMutationState>()==true) && (p_cell_B->GetMutationState()->IsType<StromalCellMutationState>()==false) ) )
+        else if ( ( (is_a_stromal_1==false) && (is_b_stromal_1==true) )
+        	|| ( (is_a_stromal_1==true) && (is_b_stromal_1==false) ) )
         {
         	multiplication_factor *= mEpithelialStromalMultiplier;
         }
-        else if ( ( (p_cell_A->GetMutationState()->IsType<ApcTwoHitCellMutationState>()) && (p_cell_A->GetMutationState()->IsType<StromalCellMutationState>()==false) && (p_cell_B->GetMutationState()->IsType<StromalCellMutationState>()==true) )
-        		||  ( (p_cell_A->GetMutationState()->IsType<StromalCellMutationState>()==true) && (p_cell_B->GetMutationState()->IsType<ApcTwoHitCellMutationState>()) && (p_cell_B->GetMutationState()->IsType<StromalCellMutationState>()==false) ) )
+        else if ( ( (p_cell_A->GetMutationState()->IsType<ApcTwoHitCellMutationState>()) && (is_a_stromal_1==false) && (is_b_stromal_1==true) )
+        		||  ( (is_a_stromal_1==true) && (p_cell_B->GetMutationState()->IsType<ApcTwoHitCellMutationState>()) && (is_b_stromal_1==false) ) )
         {
         	multiplication_factor *= mApcTwoHitStromalMultiplier;
         }
@@ -465,10 +467,6 @@ void PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::AddForceContribution
             {
             	delete mpExtendedMesh;
             }
-            if (mpExtendedMesh != NULL)
-            {
-            	delete mpExtendedMesh;
-            }
             mpExtendedMesh = new MutableMesh<DIM,DIM>(extended_nodes);
 
         	// Now loop over the extended mesh and calculate the force acting on real nodes
@@ -673,6 +671,9 @@ void PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::AddForceContribution
                 // Dom - Hijacked "mUseOneWaySprings" to implement stromal cells as ghosts...
                 if(mUseOneWaySprings)
                 {
+                    
+                    
+
                     if (nodeA_global_index < num_cells)
                     {
                         unsigned real_A_node_index = mExtendedMeshNodeIndexMap[nodeA_global_index];
@@ -681,14 +682,16 @@ void PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::AddForceContribution
                         CellPtr p_cell_A = rCellPopulation.GetCellUsingLocationIndex(real_A_node_index);
                         CellPtr p_cell_B = rCellPopulation.GetCellUsingLocationIndex(real_B_node_index);
 
+                        boost::shared_ptr<AbstractCellMutationState> p_state_A = p_cell_A->GetMutationState();
+    	                boost::shared_ptr<AbstractCellMutationState> p_state_B = p_cell_B->GetMutationState();
 
-                        if ( (p_cell_A->GetMutationState()->IsType<WildTypeCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<StromalCellMutationState>() == true) )
+                        if ( (p_state_A->IsType<WildTypeCellMutationState>() == true) && (p_state_B->IsType<StromalCellMutationState>() == true) )
                         {
                             rCellPopulation.GetNode(real_A_node_index)->AddAppliedForceContribution(zero_vector<double>(DIM));
                         }
-                        else if( ( (p_cell_A->GetMutationState()->IsType<StromalCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<StromalCellMutationState>() == true) ) 
-                        || ( (p_cell_A->GetMutationState()->IsType<WildTypeCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<WildTypeCellMutationState>() == true) ) 
-                        || ( (p_cell_A->GetMutationState()->IsType<StromalCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<WildTypeCellMutationState>() == true) ) )
+                        else if( ( (p_state_A->IsType<StromalCellMutationState>() == true) && (p_state_B->IsType<StromalCellMutationState>() == true) ) 
+                        || ( (p_state_A->IsType<WildTypeCellMutationState>() == true) && (p_state_B->IsType<WildTypeCellMutationState>() == true) ) 
+                        || ( (p_state_A->IsType<StromalCellMutationState>() == true) && (p_state_B->IsType<WildTypeCellMutationState>() == true) ) )
                         {
                             rCellPopulation.GetNode(real_A_node_index)->AddAppliedForceContribution(force);
                         }
@@ -703,14 +706,16 @@ void PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::AddForceContribution
                         CellPtr p_cell_A = rCellPopulation.GetCellUsingLocationIndex(real_A_node_index);
                         CellPtr p_cell_B = rCellPopulation.GetCellUsingLocationIndex(real_B_node_index);
 
+                        boost::shared_ptr<AbstractCellMutationState> p_state_A = p_cell_A->GetMutationState();
+    	                boost::shared_ptr<AbstractCellMutationState> p_state_B = p_cell_B->GetMutationState();
 
-                        if ( (p_cell_A->GetMutationState()->IsType<StromalCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<WildTypeCellMutationState>() == true) )
+                        if ( (p_state_A->IsType<StromalCellMutationState>() == true) && (p_state_B->IsType<WildTypeCellMutationState>() == true) )
                         {
                             rCellPopulation.GetNode(real_B_node_index)->AddAppliedForceContribution(zero_vector<double>(DIM));
                         }
-                        else if( ( (p_cell_A->GetMutationState()->IsType<StromalCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<StromalCellMutationState>() == true) ) 
-                        || ( (p_cell_A->GetMutationState()->IsType<WildTypeCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<WildTypeCellMutationState>() == true) ) 
-                        || ( (p_cell_A->GetMutationState()->IsType<WildTypeCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<StromalCellMutationState>() == true) ) )
+                        else if( ( (p_state_A->IsType<StromalCellMutationState>() == true) && (p_state_B->IsType<StromalCellMutationState>() == true) ) 
+                        || ( (p_state_A->IsType<WildTypeCellMutationState>() == true) && (p_state_B->IsType<WildTypeCellMutationState>() == true) ) 
+                        || ( (p_state_A->IsType<WildTypeCellMutationState>() == true) && (p_state_B->IsType<StromalCellMutationState>() == true) ) )
                         {
                             rCellPopulation.GetNode(real_B_node_index)->AddAppliedForceContribution(-force);
                         }
@@ -821,11 +826,14 @@ c_vector<double, DIM> PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::Cal
     double a_rest_length = rest_length*0.5;
     double b_rest_length = rest_length*0.5;
 
-    bool is_a_stromal = p_cell_A->GetMutationState()->IsType<StromalCellMutationState>();
-    bool is_b_stromal = p_cell_B->GetMutationState()->IsType<StromalCellMutationState>();
+    boost::shared_ptr<AbstractCellMutationState> p_state_A = p_cell_A->GetMutationState();
+    boost::shared_ptr<AbstractCellMutationState> p_state_B = p_cell_B->GetMutationState();
+
+    bool is_a_stromal = p_state_A->IsType<StromalCellMutationState>();
+    bool is_b_stromal = p_state_B->IsType<StromalCellMutationState>();
     
-    bool is_a_epithelial = p_cell_A->GetMutationState()->IsType<WildTypeCellMutationState>();
-    bool is_b_epithelial = p_cell_B->GetMutationState()->IsType<WildTypeCellMutationState>();
+    bool is_a_epithelial = p_state_A->IsType<WildTypeCellMutationState>();
+    bool is_b_epithelial = p_state_B->IsType<WildTypeCellMutationState>();
 
     bool is_a_ghost = p_tissue->IsGhostNode(real_A_node_index);
     bool is_b_ghost = p_tissue->IsGhostNode(real_B_node_index);

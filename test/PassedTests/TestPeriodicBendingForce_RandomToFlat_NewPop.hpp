@@ -68,13 +68,13 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "RandomToFlat";
+        std::string output_directory = "RandomToFlat_NewPop";
 
         unsigned width = 10;	   // x
         unsigned height = 10;      // y
         unsigned ghosts_bottom = 0;       // ghosts > depth
         unsigned ghosts_top = 1;       // ghosts > depth
-        unsigned num_tissue_depth = 2;
+        unsigned num_tissue_depth = 1;
         unsigned depth = num_tissue_depth + (ghosts_bottom + ghosts_top) + 1;        // z
 
         // Initialise the tissue in an equilibrum state
@@ -85,8 +85,8 @@ public:
         unsigned cells_per_layer = width*height;
         unsigned cell_iter = 0;
 
-        double periodic_width = (double) (width+0.0)*width_space;
-        double periodic_height = (double) (height+0.0)*height_space;
+        double periodic_width = (double) (width+0.0)*width_space + 0.00;
+        double periodic_height = (double) (height+0.0)*height_space + 0.00;
 
         double tissue_base = 5.0; //Hieght of tissue to prevent drift
         double tissue_middle = 0.0;
@@ -105,10 +105,10 @@ public:
         double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 0.001;
+        double end_time = 0.005;
         double plot_step = 1.0;
 
-        bool include_springs = true;
+        bool include_springs = false;
         bool include_bending = true;
 
         int is_transit[depth*height*width];
@@ -136,17 +136,17 @@ public:
                         
                     c_vector<double, 3> node_i_new_location;
 
-                    x_coordinate = (double) (i + 0.5*(j%2 + k%2))*width_space       + 0.15*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
-                    y_coordinate = (double) j*height_space                          + 0.15*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                    x_coordinate = (double) (i + 0.5*(j%2 + k%2))*width_space       + 0.0*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                    y_coordinate = (double) j*height_space                          + 0.0*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
                     
                     if( k == depth)
                     {
-                        z_coordinate = (double) tissue_base + (-1.0)*depth_space    + 0.15*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                        z_coordinate = (double) tissue_base + (-1.0)*depth_space    + 0.0*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
 
                     }
                     else
                     {
-                        z_coordinate = (double) tissue_base + k*depth_space         +  0.15*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                        z_coordinate = (double) tissue_base + k*depth_space         +  0.1*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
                     }    
                     if( pow(x_coordinate - 0.5*periodic_width,2)+ pow(y_coordinate - 0.5*periodic_height ,2) <= pow(1.0,2) )
                     {
@@ -312,12 +312,12 @@ public:
         boundary_condition->ImposeBoundaryCondition(node_locations_before);
         simulator.AddCellPopulationBoundaryCondition(boundary_condition);
 
-        MAKE_PTR_ARGS(PeriodicStromalBoxBoundaryCondition3d, stromal_boundary_condition, (&cell_population));
-        stromal_boundary_condition->SetCellPopulationWidth(periodic_width);
-        stromal_boundary_condition->SetCellPopulationDepth(periodic_height);
-        stromal_boundary_condition->SetMaxHeightForPinnedCells(0.0);
-        stromal_boundary_condition->ImposeBoundaryCondition(node_locations_before);
-        simulator.AddCellPopulationBoundaryCondition(stromal_boundary_condition);
+        // MAKE_PTR_ARGS(PeriodicStromalBoxBoundaryCondition3d, stromal_boundary_condition, (&cell_population));
+        // stromal_boundary_condition->SetCellPopulationWidth(periodic_width);
+        // stromal_boundary_condition->SetCellPopulationDepth(periodic_height);
+        // stromal_boundary_condition->SetMaxHeightForPinnedCells(0.0);
+        // stromal_boundary_condition->ImposeBoundaryCondition(node_locations_before);
+        // simulator.AddCellPopulationBoundaryCondition(stromal_boundary_condition);
 
 
 		// Create periodic spring force law

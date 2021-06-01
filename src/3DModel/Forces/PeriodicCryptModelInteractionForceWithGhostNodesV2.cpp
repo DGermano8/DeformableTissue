@@ -17,7 +17,7 @@ PeriodicCryptModelInteractionForceWithGhostNodesV2<DIM>::PeriodicCryptModelInter
    : LinearSpringWithVariableSpringConstantsForce<DIM>(),
    mPeriodicDomainWidth(DOUBLE_UNSET),
    mPeriodicDomainDepth(DOUBLE_UNSET),
-   mpExtendedMesh(NULL),
+//    mpExtendedMesh(NULL),
    mUseCellTypeDependentSprings(false),
    mTransitTransitMultiplier(DOUBLE_UNSET),
    mDifferentiatedDifferentiatedMultiplier(DOUBLE_UNSET),
@@ -41,10 +41,10 @@ template<unsigned DIM>
 PeriodicCryptModelInteractionForceWithGhostNodesV2<DIM>::~PeriodicCryptModelInteractionForceWithGhostNodesV2()
 {
     // Avoid memory leaks
-    if (mpExtendedMesh != NULL)
-    {
-        delete mpExtendedMesh;
-    }
+    // if (mpExtendedMesh != NULL)
+    // {
+    //     delete mpExtendedMesh;
+    // }
 //    mMeinekeOutputFile->close();
 }
 
@@ -409,11 +409,11 @@ void PeriodicCryptModelInteractionForceWithGhostNodesV2<DIM>::AddForceContributi
         mPeriodicDomainWidth = rCellPopulation.GetWidth(0);
     }
 
-    mExtendedMeshNodeIndexMap.clear();
+    // mExtendedMeshNodeIndexMap.clear();
 
     // Create a vector of nodes for use in constructing mpExtendedMesh
     unsigned num_cells = rCellPopulation.GetNumRealCells();
-    std::vector<Node<DIM>*> extended_nodes(4*num_cells);
+    // std::vector<Node<DIM>*> extended_nodes(4*num_cells);
 
     // We iterate over all cells in the population
     unsigned count = 0;
@@ -426,79 +426,6 @@ void PeriodicCryptModelInteractionForceWithGhostNodesV2<DIM>::AddForceContributi
         }
         case 2:
         {
-            for (typename AbstractCellPopulation<DIM>::Iterator cell_iter = rCellPopulation.Begin();
-                 cell_iter != rCellPopulation.End();
-                 ++cell_iter)
-            {
-                // First, create and store a copy of this real node and cell
-                unsigned real_node_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
-                c_vector<double, DIM> real_node_location = rCellPopulation.GetLocationOfCellCentre(*cell_iter);
-
-                // Create a copy of the node corresponding to this cell and store it
-                Node<DIM>* p_real_node = new Node<DIM>(real_node_index, real_node_location);
-                extended_nodes[count] = p_real_node;
-
-                // Compute the location of the image node corresponding to this node
-                c_vector<double,DIM> image_node_location = real_node_location;
-                if (real_node_location[0] >= mPeriodicDomainWidth*0.5)
-                {
-                    image_node_location[0] -= mPeriodicDomainWidth;
-                }
-                else if (real_node_location[0] <  mPeriodicDomainWidth*0.5)
-                {
-                    image_node_location[0] += mPeriodicDomainWidth;
-                }
-
-                // Create a copy of the node corresponding to this cell, suitable translated, and store it
-                Node<DIM>* p_image_node = new Node<DIM>(num_cells+count, image_node_location);
-                extended_nodes[num_cells+count] = p_image_node;
-
-                // Populate mExtendedMeshNodeIndexMap
-                mExtendedMeshNodeIndexMap[count] = real_node_index;
-                mExtendedMeshNodeIndexMap[num_cells+count] = real_node_index;
-
-                count++;
-            }
-
-            // We now construct mpExtendedMesh using extended_nodes (and avoid memory leaks)
-            if (mpExtendedMesh != NULL)
-            {
-            	delete mpExtendedMesh;
-            }
-            if (mpExtendedMesh != NULL)
-            {
-            	delete mpExtendedMesh;
-            }
-            mpExtendedMesh = new MutableMesh<DIM,DIM>(extended_nodes);
-
-        	// Now loop over the extended mesh and calculate the force acting on real nodes
-        	// (using the edge iterator ensures that each edge is visited exactly once)
-            for (typename MutableMesh<DIM,DIM>::EdgeIterator edge_iterator = mpExtendedMesh->EdgesBegin();
-                 edge_iterator != mpExtendedMesh->EdgesEnd();
-                 ++edge_iterator)
-            {
-                unsigned nodeA_global_index = edge_iterator.GetNodeA()->GetIndex();
-                unsigned nodeB_global_index = edge_iterator.GetNodeB()->GetIndex();
-
-                c_vector<double, DIM> force = CalculateForceBetweenNodes(nodeA_global_index, nodeB_global_index, rCellPopulation);
-
-                // Apply this force to any real nodes (i.e. nodes whose indices are less than num_real_nodes)
-                if (nodeA_global_index < num_cells)
-                {
-                    unsigned real_node_index_A = mExtendedMeshNodeIndexMap[nodeA_global_index];
-                    //rForces[real_node_index_A] += force;
-                   // rCellPopulation.GetNode(real_node_index_A)->AddAppliedForceContribution(force);
-                    rCellPopulation.GetNode(real_node_index_A)->AddAppliedForceContribution(force);
-                }
-                if (nodeB_global_index < num_cells)
-                {
-                    unsigned real_node_index_B = mExtendedMeshNodeIndexMap[nodeB_global_index];
-                    //rForces[real_node_index_B] -= force;
-                   // rCellPopulation.GetNode(real_node_index_B)->AddAppliedForceContribution(-force);
-                    rCellPopulation.GetNode(real_node_index_B)->AddAppliedForceContribution(-force);
-                }
-            }
-
 			break;
         }
         case 3:
@@ -509,230 +436,235 @@ void PeriodicCryptModelInteractionForceWithGhostNodesV2<DIM>::AddForceContributi
             	mPeriodicDomainDepth = rCellPopulation.GetWidth(1);
             }
 
-            // Dom - Create a copy of original mesh
-            for (typename AbstractCellPopulation<DIM>::Iterator cell_iter = rCellPopulation.Begin();
-                cell_iter != rCellPopulation.End();
-                ++cell_iter)
-            {
-                // First, create and store a copy of this real node and cell
-                unsigned real_node_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
-                c_vector<double, 3> real_node_location = rCellPopulation.GetLocationOfCellCentre(*cell_iter);
+            // // Dom - Create a copy of original mesh
+            // for (typename AbstractCellPopulation<DIM>::Iterator cell_iter = rCellPopulation.Begin();
+            //     cell_iter != rCellPopulation.End();
+            //     ++cell_iter)
+            // {
+            //     // First, create and store a copy of this real node and cell
+            //     unsigned real_node_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
+            //     c_vector<double, 3> real_node_location = rCellPopulation.GetLocationOfCellCentre(*cell_iter);
 
-                // Create a copy of the node corresponding to this cell and store it
-                Node<DIM>* p_real_node = new Node<DIM>(real_node_index, real_node_location);
-                extended_nodes[count] = p_real_node;
+            //     // Create a copy of the node corresponding to this cell and store it
+            //     Node<DIM>* p_real_node = new Node<DIM>(real_node_index, real_node_location);
+            //     extended_nodes[count] = p_real_node;
 
-                // Populate mExtendedMeshNodeIndexMap
-                mExtendedMeshNodeIndexMap[count] = real_node_index;
+            //     // Populate mExtendedMeshNodeIndexMap
+            //     mExtendedMeshNodeIndexMap[count] = real_node_index;
 
 
-                count++;
-            }
-            // First, extend the mesh in the x-direction
-            for (typename AbstractCellPopulation<DIM>::Iterator cell_iter = rCellPopulation.Begin();
-                cell_iter != rCellPopulation.End();
-                ++cell_iter)
-            {
-                // First, create and store a copy of this real node and cell
-                unsigned real_node_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
-                c_vector<double, 3> real_node_location = rCellPopulation.GetLocationOfCellCentre(*cell_iter);
+            //     count++;
+            // }
+            // // First, extend the mesh in the x-direction
+            // for (typename AbstractCellPopulation<DIM>::Iterator cell_iter = rCellPopulation.Begin();
+            //     cell_iter != rCellPopulation.End();
+            //     ++cell_iter)
+            // {
+            //     // First, create and store a copy of this real node and cell
+            //     unsigned real_node_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
+            //     c_vector<double, 3> real_node_location = rCellPopulation.GetLocationOfCellCentre(*cell_iter);
 
-                // Create a copy of the node corresponding to this cell and store it
-                Node<DIM>* p_real_node = new Node<DIM>(real_node_index, real_node_location);
-            //        extended_nodes[count] = p_real_node;
+            //     // Create a copy of the node corresponding to this cell and store it
+            //     Node<DIM>* p_real_node = new Node<DIM>(real_node_index, real_node_location);
+            // //        extended_nodes[count] = p_real_node;
 
-                // Compute the location of the image node corresponding to this node
-                c_vector<double,3> image_node_location = real_node_location;
-                if (real_node_location[0] >= mPeriodicDomainWidth*0.5)
-                {
-                    image_node_location[0] -= mPeriodicDomainWidth;
-                }
-                else if (real_node_location[0] <  mPeriodicDomainWidth*0.5)
-                {
-                    image_node_location[0] += mPeriodicDomainWidth;
-                }
+            //     // Compute the location of the image node corresponding to this node
+            //     c_vector<double,3> image_node_location = real_node_location;
+            //     if (real_node_location[0] >= mPeriodicDomainWidth*0.5)
+            //     {
+            //         image_node_location[0] -= mPeriodicDomainWidth;
+            //     }
+            //     else if (real_node_location[0] <  mPeriodicDomainWidth*0.5)
+            //     {
+            //         image_node_location[0] += mPeriodicDomainWidth;
+            //     }
 
-                // Create a copy of the node corresponding to this cell, suitable translated, and store it
-            //        Node<3>* p_image_node = new Node<3>(num_cells+count, image_node_location);
-                Node<DIM>* p_image_node = new Node<DIM>(count, image_node_location);
+            //     // Create a copy of the node corresponding to this cell, suitable translated, and store it
+            // //        Node<3>* p_image_node = new Node<3>(num_cells+count, image_node_location);
+            //     Node<DIM>* p_image_node = new Node<DIM>(count, image_node_location);
 
-            //        extended_nodes[num_cells+count] = p_image_node;
-                extended_nodes[count] = p_image_node;
+            // //        extended_nodes[num_cells+count] = p_image_node;
+            //     extended_nodes[count] = p_image_node;
 
-                // Populate mExtendedMeshNodeIndexMap
-                mExtendedMeshNodeIndexMap[count] = real_node_index;
+            //     // Populate mExtendedMeshNodeIndexMap
+            //     mExtendedMeshNodeIndexMap[count] = real_node_index;
 
-                count++;
-            }
+            //     count++;
+            // }
 
-            // Second, extend this extended mesh in the y-direction
-            // (We don't need to store the real nodes anymore)
-            for (typename AbstractCellPopulation<DIM>::Iterator cell_iter = rCellPopulation.Begin();
-                cell_iter != rCellPopulation.End();
-                ++cell_iter)
-            {
-                // First, create and store a copy of this real node and cell
-                unsigned real_node_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
-                c_vector<double, 3> real_node_location = rCellPopulation.GetLocationOfCellCentre(*cell_iter);
+            // // Second, extend this extended mesh in the y-direction
+            // // (We don't need to store the real nodes anymore)
+            // for (typename AbstractCellPopulation<DIM>::Iterator cell_iter = rCellPopulation.Begin();
+            //     cell_iter != rCellPopulation.End();
+            //     ++cell_iter)
+            // {
+            //     // First, create and store a copy of this real node and cell
+            //     unsigned real_node_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
+            //     c_vector<double, 3> real_node_location = rCellPopulation.GetLocationOfCellCentre(*cell_iter);
 
-                // Compute the location of the image node corresponding to this node
-                c_vector<double,3> image_node_location = real_node_location;
+            //     // Compute the location of the image node corresponding to this node
+            //     c_vector<double,3> image_node_location = real_node_location;
 
-                if (real_node_location[1] >= mPeriodicDomainDepth*0.5)
-                {
-                    image_node_location[1] -= mPeriodicDomainDepth;
-                }
-                else if (real_node_location[1] <  mPeriodicDomainDepth*0.5)
-                {
-                    image_node_location[1] += mPeriodicDomainDepth;
-                }
+            //     if (real_node_location[1] >= mPeriodicDomainDepth*0.5)
+            //     {
+            //         image_node_location[1] -= mPeriodicDomainDepth;
+            //     }
+            //     else if (real_node_location[1] <  mPeriodicDomainDepth*0.5)
+            //     {
+            //         image_node_location[1] += mPeriodicDomainDepth;
+            //     }
 
-                // Create a copy of the node corresponding to this cell, suitable translated, and store it
-            //        Node<3>* p_image_node = new Node<3>(num_cells+count, image_node_location);
-                Node<DIM>* p_image_node = new Node<DIM>(count, image_node_location);
-            //        extended_nodes[num_cells+count] = p_image_node;
-                extended_nodes[count] = p_image_node;
+            //     // Create a copy of the node corresponding to this cell, suitable translated, and store it
+            // //        Node<3>* p_image_node = new Node<3>(num_cells+count, image_node_location);
+            //     Node<DIM>* p_image_node = new Node<DIM>(count, image_node_location);
+            // //        extended_nodes[num_cells+count] = p_image_node;
+            //     extended_nodes[count] = p_image_node;
 
-                // Populate mExtendedMeshNodeIndexMap
-            //        mExtendedMeshNodeIndexMap[num_cells+count] = real_node_index;
-                mExtendedMeshNodeIndexMap[count] = real_node_index;
+            //     // Populate mExtendedMeshNodeIndexMap
+            // //        mExtendedMeshNodeIndexMap[num_cells+count] = real_node_index;
+            //     mExtendedMeshNodeIndexMap[count] = real_node_index;
 
-                count++;
-            }
+            //     count++;
+            // }
 
-            // Thirdly, extend this extended mesh so that we cover the corners too
-            // (We don't need to store the real nodes anymore)
-            for (typename AbstractCellPopulation<DIM>::Iterator cell_iter = rCellPopulation.Begin();
-                cell_iter != rCellPopulation.End();
-                ++cell_iter)
-            {
-                // First, create and store a copy of this real node and cell
-                unsigned real_node_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
-                c_vector<double, 3> real_node_location = rCellPopulation.GetLocationOfCellCentre(*cell_iter);
+            // // Thirdly, extend this extended mesh so that we cover the corners too
+            // // (We don't need to store the real nodes anymore)
+            // for (typename AbstractCellPopulation<DIM>::Iterator cell_iter = rCellPopulation.Begin();
+            //     cell_iter != rCellPopulation.End();
+            //     ++cell_iter)
+            // {
+            //     // First, create and store a copy of this real node and cell
+            //     unsigned real_node_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
+            //     c_vector<double, 3> real_node_location = rCellPopulation.GetLocationOfCellCentre(*cell_iter);
 
-                // Compute the location of the image node corresponding to this node
-                c_vector<double,3> image_node_location = real_node_location;
+            //     // Compute the location of the image node corresponding to this node
+            //     c_vector<double,3> image_node_location = real_node_location;
 
-                if (real_node_location[1] >= mPeriodicDomainDepth*0.5)
-                {
-                    if (real_node_location[0] >= mPeriodicDomainWidth*0.5)
-                    {
-                        image_node_location[0] -= mPeriodicDomainWidth;
-                    }
-                    else if (real_node_location[0] <  mPeriodicDomainWidth*0.5)
-                    {
-                        image_node_location[0] += mPeriodicDomainWidth;
-                    }
-                    image_node_location[1] -= mPeriodicDomainDepth;
-                }
-                else if (real_node_location[1] <  mPeriodicDomainDepth*0.5)
-                {
-                    if (real_node_location[0] >= mPeriodicDomainWidth*0.5)
-                    {
-                        image_node_location[0] -= mPeriodicDomainWidth;
-                    }
-                    else if (real_node_location[0] <  mPeriodicDomainWidth*0.5)
-                    {
-                        image_node_location[0] += mPeriodicDomainWidth;
-                    }
-                    image_node_location[1] += mPeriodicDomainDepth;
-                }
+            //     if (real_node_location[1] >= mPeriodicDomainDepth*0.5)
+            //     {
+            //         if (real_node_location[0] >= mPeriodicDomainWidth*0.5)
+            //         {
+            //             image_node_location[0] -= mPeriodicDomainWidth;
+            //         }
+            //         else if (real_node_location[0] <  mPeriodicDomainWidth*0.5)
+            //         {
+            //             image_node_location[0] += mPeriodicDomainWidth;
+            //         }
+            //         image_node_location[1] -= mPeriodicDomainDepth;
+            //     }
+            //     else if (real_node_location[1] <  mPeriodicDomainDepth*0.5)
+            //     {
+            //         if (real_node_location[0] >= mPeriodicDomainWidth*0.5)
+            //         {
+            //             image_node_location[0] -= mPeriodicDomainWidth;
+            //         }
+            //         else if (real_node_location[0] <  mPeriodicDomainWidth*0.5)
+            //         {
+            //             image_node_location[0] += mPeriodicDomainWidth;
+            //         }
+            //         image_node_location[1] += mPeriodicDomainDepth;
+            //     }
 
-                // Create a copy of the node corresponding to this cell, suitable translated, and store it
-            //        Node<3>* p_image_node = new Node<3>(num_cells+count, image_node_location);
-                Node<DIM>* p_image_node = new Node<DIM>(count, image_node_location);
-            //        extended_nodes[num_cells+count] = p_image_node;
-                extended_nodes[count] = p_image_node;
+            //     // Create a copy of the node corresponding to this cell, suitable translated, and store it
+            // //        Node<3>* p_image_node = new Node<3>(num_cells+count, image_node_location);
+            //     Node<DIM>* p_image_node = new Node<DIM>(count, image_node_location);
+            // //        extended_nodes[num_cells+count] = p_image_node;
+            //     extended_nodes[count] = p_image_node;
 
-                // Populate mExtendedMeshNodeIndexMap
-            //        mExtendedMeshNodeIndexMap[num_cells+count] = real_node_index;
-                mExtendedMeshNodeIndexMap[count] = real_node_index;
+            //     // Populate mExtendedMeshNodeIndexMap
+            // //        mExtendedMeshNodeIndexMap[num_cells+count] = real_node_index;
+            //     mExtendedMeshNodeIndexMap[count] = real_node_index;
 
-                count++;
-            }
+            //     count++;
+            // }
 
-            // We now construct mpExtendedMesh using extended_nodes
-            if (mpExtendedMesh != NULL)
-            {
-            	delete mpExtendedMesh;
-            }
-            mpExtendedMesh = new MutableMesh<DIM,DIM>(extended_nodes);
+            // // We now construct mpExtendedMesh using extended_nodes
+            // if (mpExtendedMesh != NULL)
+            // {
+            // 	delete mpExtendedMesh;
+            // }
+            // mpExtendedMesh = new MutableMesh<DIM,DIM>(extended_nodes);
+            
+            DomPeriodicMeshBasedCellPopulationWithGhostNodes<DIM>* p_tissue = static_cast<DomPeriodicMeshBasedCellPopulationWithGhostNodes<DIM>*>(&rCellPopulation);
+
+            MutableMesh<DIM,DIM>& mpExtendedMesh = p_tissue->rGetPeriodicMesh();
+
 
         	// Now loop over the extended mesh and calculate the force acting on real nodes
         	// (using the edge iterator ensures that each edge is visited exactly once)
-            for (typename MutableMesh<DIM,DIM>::EdgeIterator edge_iterator = mpExtendedMesh->EdgesBegin();
-                 edge_iterator != mpExtendedMesh->EdgesEnd();
+            for (typename MutableMesh<DIM,DIM>::EdgeIterator edge_iterator = mpExtendedMesh.EdgesBegin();
+                 edge_iterator != mpExtendedMesh.EdgesEnd();
                  ++edge_iterator)
             {
                 unsigned nodeA_global_index = edge_iterator.GetNodeA()->GetIndex();
                 unsigned nodeB_global_index = edge_iterator.GetNodeB()->GetIndex();
 
-
-                c_vector<double, DIM> force = CalculateForceBetweenNodes(nodeA_global_index, nodeB_global_index, rCellPopulation);
-
-                // Dom - Hijacked "mUseOneWaySprings" to implement stromal cells as ghosts...
-                if(mUseOneWaySprings)
+                unsigned real_A_node_index = p_tissue->ExtendedMeshNodeIndexMap(nodeA_global_index);
+                unsigned real_B_node_index = p_tissue->ExtendedMeshNodeIndexMap(nodeB_global_index);
+                
+                if(!(p_tissue->IsGhostNode(real_A_node_index)) && !(p_tissue->IsGhostNode(real_B_node_index)))
                 {
-                    if (nodeA_global_index < num_cells)
+
+                    c_vector<double, DIM> force = CalculateForceBetweenNodes(nodeA_global_index, nodeB_global_index, rCellPopulation);
+
+                    // Dom - Hijacked "mUseOneWaySprings" to implement stromal cells as ghosts...
+                    if(mUseOneWaySprings)
                     {
-                        unsigned real_A_node_index = mExtendedMeshNodeIndexMap[nodeA_global_index];
-                        unsigned real_B_node_index = mExtendedMeshNodeIndexMap[nodeB_global_index];
-
-                        CellPtr p_cell_A = rCellPopulation.GetCellUsingLocationIndex(real_A_node_index);
-                        CellPtr p_cell_B = rCellPopulation.GetCellUsingLocationIndex(real_B_node_index);
-
-
-                        if ( (p_cell_A->GetMutationState()->IsType<WildTypeCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<StromalCellMutationState>() == true) )
+                        if (nodeA_global_index < num_cells)
                         {
-                            rCellPopulation.GetNode(real_A_node_index)->AddAppliedForceContribution(zero_vector<double>(DIM));
-                        }
-                        else if( ( (p_cell_A->GetMutationState()->IsType<StromalCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<StromalCellMutationState>() == true) ) 
-                        || ( (p_cell_A->GetMutationState()->IsType<WildTypeCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<WildTypeCellMutationState>() == true) ) 
-                        || ( (p_cell_A->GetMutationState()->IsType<StromalCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<WildTypeCellMutationState>() == true) ) )
-                        {
-                            rCellPopulation.GetNode(real_A_node_index)->AddAppliedForceContribution(force);
+                            CellPtr p_cell_A = rCellPopulation.GetCellUsingLocationIndex(real_A_node_index);
+                            CellPtr p_cell_B = rCellPopulation.GetCellUsingLocationIndex(real_B_node_index);
+
+
+                            if ( (p_cell_A->GetMutationState()->IsType<WildTypeCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<StromalCellMutationState>() == true) )
+                            {
+                                rCellPopulation.GetNode(real_A_node_index)->AddAppliedForceContribution(zero_vector<double>(DIM));
+                            }
+                            else if( ( (p_cell_A->GetMutationState()->IsType<StromalCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<StromalCellMutationState>() == true) ) 
+                            || ( (p_cell_A->GetMutationState()->IsType<WildTypeCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<WildTypeCellMutationState>() == true) ) 
+                            || ( (p_cell_A->GetMutationState()->IsType<StromalCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<WildTypeCellMutationState>() == true) ) )
+                            {
+                                rCellPopulation.GetNode(real_A_node_index)->AddAppliedForceContribution(force);
+                            }
+
                         }
 
+                        if (nodeB_global_index < num_cells)
+                        {
+                            CellPtr p_cell_A = rCellPopulation.GetCellUsingLocationIndex(real_A_node_index);
+                            CellPtr p_cell_B = rCellPopulation.GetCellUsingLocationIndex(real_B_node_index);
+
+
+                            if ( (p_cell_A->GetMutationState()->IsType<StromalCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<WildTypeCellMutationState>() == true) )
+                            {
+                                rCellPopulation.GetNode(real_B_node_index)->AddAppliedForceContribution(zero_vector<double>(DIM));
+                            }
+                            else if( ( (p_cell_A->GetMutationState()->IsType<StromalCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<StromalCellMutationState>() == true) ) 
+                            || ( (p_cell_A->GetMutationState()->IsType<WildTypeCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<WildTypeCellMutationState>() == true) ) 
+                            || ( (p_cell_A->GetMutationState()->IsType<WildTypeCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<StromalCellMutationState>() == true) ) )
+                            {
+                                rCellPopulation.GetNode(real_B_node_index)->AddAppliedForceContribution(-force);
+                            }
+                            
+                        }
                     }
 
-                    if (nodeB_global_index < num_cells)
+                    else
                     {
-                        unsigned real_A_node_index = mExtendedMeshNodeIndexMap[nodeA_global_index];
-                        unsigned real_B_node_index = mExtendedMeshNodeIndexMap[nodeB_global_index];
-
-                        CellPtr p_cell_A = rCellPopulation.GetCellUsingLocationIndex(real_A_node_index);
-                        CellPtr p_cell_B = rCellPopulation.GetCellUsingLocationIndex(real_B_node_index);
-
-
-                        if ( (p_cell_A->GetMutationState()->IsType<StromalCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<WildTypeCellMutationState>() == true) )
+                        // Apply this force to any real nodes (i.e. nodes whose indices are less than num_real_nodes)
+                        if (nodeA_global_index < num_cells)
                         {
-                            rCellPopulation.GetNode(real_B_node_index)->AddAppliedForceContribution(zero_vector<double>(DIM));
+                            unsigned real_node_index_A = p_tissue->ExtendedMeshNodeIndexMap(nodeA_global_index);
+                            rCellPopulation.GetNode(real_node_index_A)->AddAppliedForceContribution(force);
+                                                
                         }
-                        else if( ( (p_cell_A->GetMutationState()->IsType<StromalCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<StromalCellMutationState>() == true) ) 
-                        || ( (p_cell_A->GetMutationState()->IsType<WildTypeCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<WildTypeCellMutationState>() == true) ) 
-                        || ( (p_cell_A->GetMutationState()->IsType<WildTypeCellMutationState>() == true) && (p_cell_B->GetMutationState()->IsType<StromalCellMutationState>() == true) ) )
+                        if (nodeB_global_index < num_cells)
                         {
-                            rCellPopulation.GetNode(real_B_node_index)->AddAppliedForceContribution(-force);
+
+                            unsigned real_node_index_B = p_tissue->ExtendedMeshNodeIndexMap(nodeB_global_index);
+                            rCellPopulation.GetNode(real_node_index_B)->AddAppliedForceContribution(-force);
+                            
                         }
-                        
-                    }
-                }
-
-                else
-                {
-                    // Apply this force to any real nodes (i.e. nodes whose indices are less than num_real_nodes)
-                    if (nodeA_global_index < num_cells)
-                    {
-                        unsigned real_node_index_A = mExtendedMeshNodeIndexMap[nodeA_global_index];
-                        rCellPopulation.GetNode(real_node_index_A)->AddAppliedForceContribution(force);
-                                            
-                    }
-                    if (nodeB_global_index < num_cells)
-                    {
-
-                        unsigned real_node_index_B = mExtendedMeshNodeIndexMap[nodeB_global_index];
-                        rCellPopulation.GetNode(real_node_index_B)->AddAppliedForceContribution(-force);
-                        
                     }
                 }
             }
@@ -756,6 +688,8 @@ c_vector<double, DIM> PeriodicCryptModelInteractionForceWithGhostNodesV2<DIM>::C
 {
     assert(dynamic_cast<DomPeriodicMeshBasedCellPopulationWithGhostNodes<DIM>*>(&rCellPopulation) != nullptr);
     DomPeriodicMeshBasedCellPopulationWithGhostNodes<DIM>* p_tissue = static_cast<DomPeriodicMeshBasedCellPopulationWithGhostNodes<DIM>*>(&rCellPopulation);
+    
+    MutableMesh<DIM,DIM>& mpExtendedMesh = p_tissue->rGetPeriodicMesh();
  //   assert(rCellPopulation.IsMeshBasedCellPopulation());
  //   assert(bool(dynamic_cast<MeshBasedCellPopulation<DIM>*>(&rCellPopulation)))
 
@@ -764,8 +698,8 @@ c_vector<double, DIM> PeriodicCryptModelInteractionForceWithGhostNodesV2<DIM>::C
     assert(nodeAGlobalIndex != nodeBGlobalIndex);
 
     // Get the node locations
-    c_vector<double, DIM> node_a_location = this->mpExtendedMesh->GetNode(nodeAGlobalIndex)->rGetLocation();
-    c_vector<double, DIM> node_b_location = this->mpExtendedMesh->GetNode(nodeBGlobalIndex)->rGetLocation();
+    c_vector<double, DIM> node_a_location = mpExtendedMesh.GetNode(nodeAGlobalIndex)->rGetLocation();
+    c_vector<double, DIM> node_b_location = mpExtendedMesh.GetNode(nodeBGlobalIndex)->rGetLocation();
 
     /*
      * Get the unit vector parallel to the line joining the two nodes.
@@ -775,7 +709,7 @@ c_vector<double, DIM> PeriodicCryptModelInteractionForceWithGhostNodesV2<DIM>::C
      * their positions, because this method can be overloaded (e.g. to enforce a
      * periodic boundary in Cylindrical2dMesh).
      */
-    c_vector<double, DIM> unit_difference = this->mpExtendedMesh->GetVectorFromAtoB(node_a_location, node_b_location);
+    c_vector<double, DIM> unit_difference = mpExtendedMesh.GetVectorFromAtoB(node_a_location, node_b_location);
 
     // Calculate the distance between the two nodes
     double distance_between_nodes = norm_2(unit_difference);
@@ -803,8 +737,8 @@ c_vector<double, DIM> PeriodicCryptModelInteractionForceWithGhostNodesV2<DIM>::C
 
 
 	// Get the corresponding node index in rCellPopulation
-    unsigned real_A_node_index = mExtendedMeshNodeIndexMap[nodeAGlobalIndex];
-    unsigned real_B_node_index = mExtendedMeshNodeIndexMap[nodeBGlobalIndex];
+    unsigned real_A_node_index = p_tissue->ExtendedMeshNodeIndexMap(nodeAGlobalIndex);
+    unsigned real_B_node_index = p_tissue->ExtendedMeshNodeIndexMap(nodeBGlobalIndex);
 
     // Get the corresponding cells
     CellPtr p_cell_A = rCellPopulation.GetCellUsingLocationIndex(real_A_node_index);
@@ -907,7 +841,7 @@ c_vector<double, DIM> PeriodicCryptModelInteractionForceWithGhostNodesV2<DIM>::C
 
     // Although in this class the 'spring constant' is a constant parameter, in
     // subclasses it can depend on properties of each of the cells
-    double multiplication_factor = VariableSpringConstantMultiplicationFactor(this->mExtendedMeshNodeIndexMap[nodeAGlobalIndex], this->mExtendedMeshNodeIndexMap[nodeBGlobalIndex], rCellPopulation, is_closer_than_rest_length);
+    double multiplication_factor = VariableSpringConstantMultiplicationFactor(p_tissue->ExtendedMeshNodeIndexMap(nodeAGlobalIndex), p_tissue->ExtendedMeshNodeIndexMap(nodeBGlobalIndex), rCellPopulation, is_closer_than_rest_length);
     double spring_stiffness = this->GetMeinekeSpringStiffness();
     double overlap = distance_between_nodes - rest_length;
 

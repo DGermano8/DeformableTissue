@@ -70,10 +70,10 @@ protected:
     double mPeriodicDomainDepth;
 
     /** An extended mesh, used to implement periodicity. */
-    MutableMesh<DIM,DIM>* mpExtendedMesh;
+    // MutableMesh<DIM,DIM>* mpExtendedMesh;
 
     /** A map from node indices in mpExtendedMesh to node indices in the cell population. */
-    std::map<unsigned, unsigned> mExtendedMeshNodeIndexMap;
+    // std::map<unsigned, unsigned> mExtendedMeshNodeIndexMap;
 
 	// Whether to use different spring stiffness dependent on the types of neighbouring cells
 	bool mUseCellTypeDependentSprings;

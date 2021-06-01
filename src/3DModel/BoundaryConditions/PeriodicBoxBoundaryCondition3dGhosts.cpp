@@ -19,6 +19,7 @@ PeriodicBoxBoundaryCondition3dGhosts::~PeriodicBoxBoundaryCondition3dGhosts()
 //void PeriodicBoxBoundaryCondition3d::ImposeBoundaryCondition(const std::vector< c_vector<double, 3> >& rOldLocations)
 void PeriodicBoxBoundaryCondition3dGhosts::ImposeBoundaryCondition(const std::map<Node<3>*, c_vector<double, 3> >& rOldLocations)
 {	
+	// TRACE("Imposing BCs");
 	// for (AbstractCellPopulation<3>::Iterator cell_iter = this->mpCellPopulation->Begin();
 	// 	 cell_iter != this->mpCellPopulation->End();
 	// 	 ++cell_iter)
