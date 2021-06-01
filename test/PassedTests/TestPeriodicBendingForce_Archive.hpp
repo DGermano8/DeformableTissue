@@ -111,7 +111,7 @@ public:
         double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 0.05;
+        double end_time = 0.1;
         double plot_step = 1.0;
 
 
@@ -273,7 +273,6 @@ public:
         // CryptSimulation3dGhosts simulator(cell_population, false, true);
         //CryptSimulation3d(rCellPopulation, bool deleteCellPopulationAndForceCollection, bool initialiseCells)
         OffLatticeSimulation<3> simulator(cell_population);
-        
 
         // Pass an adaptive numerical method to the simulation
         // boost::shared_ptr<AbstractNumericalMethod<3,3> > p_method(new ForwardEulerNumericalMethod<3,3>());
@@ -296,7 +295,7 @@ public:
         
         // cell_population.WriteVtkResultsToFile(output_directory);
         //To fix paraview
-        cell_population.SetWriteVtkAsPointsDom(true);
+        // cell_population.SetWriteVtkAsPointsDom(true);
         //std::cout<<cell_population.GetWriteVtkAsPoints() << "\n";
         //PRINT_VARIABLE(cell_population.GetWriteVtkAsPoints());
         // cell_population.SetOutputMeshInVtkDom(false);
@@ -406,20 +405,26 @@ public:
         CellBasedSimulationArchiver<3, OffLatticeSimulation<3>>::Save(&simulator);
 
         double time_of_each_run = 0.1;
-        double end_of_simulation = 0.15;
+        double end_of_simulation = 0.2;
 
         for (double t=end_time; t<end_time+end_of_simulation; t += time_of_each_run)
         {
+            PRINT_VARIABLE(t);
+
             OffLatticeSimulation<3>* p_simulator = CellBasedSimulationArchiver<3, OffLatticeSimulation<3> >::Load(output_directory, t);
-            
+            TRACE("Loaded");
             p_simulator->SetEndTime(t+time_of_each_run);
             p_simulator->Solve();
             CellBasedSimulationArchiver<3, OffLatticeSimulation<3>>::Save(p_simulator);
+            TRACE("Saved");
             delete p_simulator;
+
+            TRACE("Ended");
+
         }
 
-        SimulationTime::Destroy();
-        RandomNumberGenerator::Destroy();
+        // SimulationTime::Destroy();
+        // RandomNumberGenerator::Destroy();
         
     }
 
