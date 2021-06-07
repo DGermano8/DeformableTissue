@@ -1,11 +1,11 @@
 clear all;
 close all;
 
-addpath /Users/domenicgermano/workspace/ChasteDom/anim/matlab
-% addpath /Users/germanod/workspace/ChasteDom/anim/matlab
+% addpath /Users/domenicgermano/workspace/ChasteDom/anim/matlab
+addpath /Users/germanod/workspace/ChasteDom/anim/matlab
 
-addpath /Users/domenicgermano/Workspace/results/TestVertexBasedMonolayer/results_from_time_0
-% addpath /Users/germanod/Workspace/results/TestVertexBasedMonolayer/results_from_time_0
+% addpath /Users/domenicgermano/Workspace/results/FlatWntRadius_2203_01/results_from_time_0
+addpath /Users/germanod/Workspace/results/FlatWntRadius_2203_01/results_from_time_0
 
 filename = 'results';
 
@@ -19,8 +19,8 @@ celltypesdata = LoadNonConstantLengthData(celltypesfile);
 % input these manually...
 
 % tissue size
-width = 14;
-hight = 18;
+width = 10;
+hight = 12;
 
 ghost = 1 + 1;
 stromal = 1;
@@ -46,6 +46,7 @@ max_radius = sqrt((x_centre)^2 + (y_centre)^2);
 CellIdRaw = importdata('loggedcell.dat');
 
 dimensionData = size(CellIdRaw);
+nodeVelocityRaw = readtable('nodevelocities.dat');
 
 % timeData = table2array(split(CellIdRaw(1:dimensionData(1),1)));
 
@@ -61,32 +62,22 @@ node_i_radial_position_with_time = zeros(number_of_cells_end,dimensionData(1));
 
 for i = 1:dimensionData(1)
     
-%     time = timeData(i);
-    
-%     size_12 = size(nodeVelocityRaw(i,2:end));
-%     holder = zeros(1,size_12(2));
-%     for ii = 1:size_12(2)
-%         hold_val = table2array(nodeVelocityRaw(i,ii));
-%         if iscell(hold_val)
-%             holder(ii) = NaN;
-%         else
-%             holder(ii) = hold_val;
-%         end
-%     end
-%     holder = str2double(split(table2array(nodeVelocityRaw(i,2:end))));
+   holder = str2double(split(table2array(nodeVelocityRaw(i,2:end))));
 %     holder = table2array(nodeVelocityRaw(i,2:end));
     holder_CellId = str2double(split(CellIdRaw(i)));
 
-    holder_cell_id = holder_CellId(2:4:end);
+    holder_cell_id = holder_CellId(2:5:end);
 %     holder_node_id = holder_CellId(2:5:end);
     
-%     node_ind_i = holder(1:5:end)';
+    node_ind_i = holder(1:7:end)';
     
-    node_x_i = holder_CellId(4:4:end);
-    node_y_i = holder_CellId(5:4:end);
+    node_x_i = holder(2:7:end);
+    node_y_i = holder(3:7:end);
+    node_z_i = holder(4:7:end);
 
-%     node_u_i = holder(4:5:end);
-%     node_v_i = holder(5:5:end);
+    node_u_i = holder(5:7:end);
+    node_v_i = holder(6:7:end);
+    node_w_i = holder(7:7:end);
     
     types = celltypesdata{i}(2:end);
     
@@ -108,9 +99,9 @@ for i = 1:dimensionData(1)
 end
 %%
 delta_t = 0.01;
-sample_interval = 1200;
-when_to_sample = 2400;
-when_to_stop = 14401;
+sample_interval = 200;
+when_to_sample = 4800;
+when_to_stop = 6600;
 average_velocity = zeros(number_of_cells_end,length(when_to_sample:sample_interval:when_to_stop));
 average_position =  zeros(number_of_cells_end,length(when_to_sample:sample_interval:when_to_stop));
 figure;
@@ -166,7 +157,7 @@ end
 
 
 %%
-time = (14400-when_to_sample)/sample_interval;
+time = (when_to_stop-when_to_sample)/sample_interval;
 region_count = zeros(1,2*ceil(max_radius));
 region_velocity =  zeros(1,2*ceil(max_radius));
 region_mean = zeros(1,2*ceil(max_radius));

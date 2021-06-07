@@ -78,7 +78,7 @@ public:
         RandomNumberGenerator::Instance()->Reseed(1);
     	
 
-        for (unsigned rep=0; rep<20; rep++)
+        for (unsigned rep=0; rep<10; rep++)
         {
             // int rep = 0;
             
@@ -86,14 +86,14 @@ public:
 
             std::vector<Node<3>*> nodes;
 
-            std::string output_directory = "RepSweep_RandomToFlat_Rep5_" + std::to_string(rep);
+            std::string output_directory = "RepSweep_RandomToFlat_Rep8x10x5_" + std::to_string(rep);
 
             unsigned width = 8;	   // x
             unsigned height = 10;      // y
-            unsigned ghosts_bottom = 0;       // ghosts > depth
-            unsigned ghosts_top = 2;       // ghosts > depth
-            unsigned num_tissue_depth = 1;
-            unsigned depth = num_tissue_depth + (ghosts_bottom + ghosts_top);        // z
+            unsigned ghosts_bottom = 1;       // ghosts > depth
+            unsigned ghosts_top = 1 + 1;       // ghosts > depth
+            unsigned num_tissue_depth = 2;
+            unsigned depth = num_tissue_depth + ( ghosts_top);        // z
 
             // Initialise the tissue in an equilibrum state
             double width_space = 1.0;
@@ -126,20 +126,20 @@ public:
             double alpha_parameter = 1.5;
 
             double time_step = 0.001;
-            double end_time = 5;
+            double end_time = 0.1;
             double plot_step = 10.0;
 
             bool include_springs = true;
             bool include_bending = true;
 
-            int is_transit[depth*height*width];
+            int is_transit[(depth + ghosts_bottom)*height*width];
             int num_real_nodes = 0;
 
             std::vector<unsigned> ghost_node_indices, real_node_indices;
-            for (unsigned k=0; k<=(depth); k++) //+1 puts a layer of ghosts on the bottom
+            for (unsigned k=0; k<(depth + ghosts_bottom); k++) //+1 puts a layer of ghosts on the bottom
             {
                 isGhost = true;
-                if(k < num_tissue_depth + 1)
+                if(k <= num_tissue_depth)
                 {
                     isGhost = false;
                 }
@@ -156,18 +156,18 @@ public:
                             
                         c_vector<double, 3> node_i_new_location;
 
-                        x_coordinate = (double) (i + 0.5*(j%2 + k%2))*width_space      + 0.25*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
-                        y_coordinate = (double) j*height_space                         + 0.25*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                        x_coordinate = (double) (i + 0.5*(j%2 + k%2))*width_space      + 0.0*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                        y_coordinate = (double) j*height_space                         + 0.0*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
 
                         // z_coordinate = (double) tissue_base + k*depth_space;
                         
-                        if( k == depth)
+                        if( k >= depth)
                         {
-                            z_coordinate = (double) tissue_base + (-1.0)*depth_space   + 0.25*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                            z_coordinate = (double) tissue_base + (-1.0 - (k-depth) )*depth_space   + 0.0*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
                         }
                         else
                         {
-                            z_coordinate = (double) tissue_base + k*depth_space        + 0.25*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                            z_coordinate = (double) tissue_base + k*depth_space        + 0.0*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
                         }
 
                         if( pow(x_coordinate - 0.5*periodic_width,2)+ pow(y_coordinate - 0.5*periodic_height ,2) <= pow(1.0,2) )
