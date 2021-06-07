@@ -1,105 +1,132 @@
 #include "FixedEpithelialBoundary3d.hpp"
+#include "AbstractCentreBasedCellPopulation.hpp"
+#include "WildTypeCellMutationState.hpp"
 
-    FixedEpithelialBoundary3d::FixedEpithelialBoundary3d(AbstractCellPopulation<3>* pCellPopulation, double maxHeightForPinnedCells, double cellPopulationWidth, double cellPopulationDepth)
-        : AbstractCellPopulationBoundaryCondition<3>(pCellPopulation),
-          mMaxHeightForPinnedCells(maxHeightForPinnedCells),
-          mCellPopulationWidth(cellPopulationWidth),
-          mCellPopulationDepth(cellPopulationDepth)
-    {
-//        mpStaticCastCellPopulation = static_cast<MeshBasedCellPopulation<3>*>(&mpCellPopulation);
-    	assert((this->mpCellPopulation == NULL));
-    }
+FixedEpithelialBoundary3d::FixedEpithelialBoundary3d(AbstractCellPopulation<3>* pCellPopulation)
+    : AbstractCellPopulationBoundaryCondition<3>(pCellPopulation),
+    mCellPopulationWidth(DOUBLE_UNSET),
+    mCellPopulationDepth(DOUBLE_UNSET),
+    mHeightForPinnedCells(DOUBLE_UNSET)
+{
+}
 
-    double FixedEpithelialBoundary3d::GetMaxHeightForPinnedCells()
-    {
-    	return mMaxHeightForPinnedCells;
-    }
+FixedEpithelialBoundary3d::~FixedEpithelialBoundary3d()
+{
+}
+ //void FixedEpithelialBoundary3d::ImposeBoundaryCondition(const std::vector< c_vector<double, 3> >& rOldLocations)
+void FixedEpithelialBoundary3d::ImposeBoundaryCondition(const std::map<Node<3>*, c_vector<double, 3> >& rOldLocations)
+{	
+	double eps = 0.0000001;
 
-    double FixedEpithelialBoundary3d::GetCellPopulationWidth()
-    {
-    	return mCellPopulationWidth;
-    }
+	for (AbstractCellPopulation<3>::Iterator cell_iter = this->mpCellPopulation->Begin();
+		 cell_iter != this->mpCellPopulation->End();
+		 ++cell_iter)
+	{
+		assert(this->mpCellPopulation->IsCellAssociatedWithADeletedLocation(*cell_iter) == false);
 
-    double FixedEpithelialBoundary3d::GetCellPopulationDepth()
-    {
-    	return mCellPopulationDepth;
-    }
+		// Get index of node associated with cell
+        unsigned node_index = this->mpCellPopulation->GetLocationIndexUsingCell(*cell_iter);
 
-    void ImposeBoundaryCondition()
-    {
-        // Iterate over all nodes associated with real cells to update their positions
-        // according to any tissue boundary conditions
-
-        for (AbstractCellPopulation<3>::Iterator cell_iter = this->mpCellPopulation->Begin();
-             cell_iter != this->mpCellPopulation->End();
-             ++cell_iter)
-        {
-			assert(this->mpCellPopulation->IsCellAssociatedWithADeletedLocation(*cell_iter) == false);
-
-			// Get index of node associated with cell
-			unsigned node_index = this->mpCellPopulation->GetLocationIndexUsingCell(*cell_iter);
-//			assert(!(this->mpCellPopulation->IsGhostNode(node_index)));
-
-			// Get pointer to this node
-            Node<3>* p_node = this->mpCellPopulation->GetNode(node_index);
-
-//	        if ( (mpStaticCastCellPopulation->GetCellUsingLocationIndex(node_index)->GetMutationState()->IsType<StromalCellMutationState>())
-//	        		&& ( (p_node->rGetLocation()[2] < mMaxHeightForPinnedCells)
-//	        				|| (p_node->rGetLocation()[0] < 0.5)
-//	        				|| (p_node->rGetLocation()[0] > mCellPopulationWidth-0.5)
-//	        				|| (p_node->rGetLocation()[1] < 0.5)
-//	        				|| (p_node->rGetLocation()[1] > mCellPopulationDepth-0.5) ) )
-
-			// Pin the cells which are at the edges or on the bottom layer (both stromal and wildtype)
-			if ( (p_node->rGetLocation()[2] < mMaxHeightForPinnedCells)
-							|| (p_node->rGetLocation()[0] < 0.5)
-							|| (p_node->rGetLocation()[0] > mCellPopulationWidth-0.5)
-							|| (p_node->rGetLocation()[1] < 0.5)
-							|| (p_node->rGetLocation()[1] > mCellPopulationDepth-0.5)  )
+        // Get pointer to this node
+        Node<3>* p_node = this->mpCellPopulation->GetNode(node_index);
+		
+		if (this->mpCellPopulation->GetCellUsingLocationIndex(node_index)->GetMutationState()->IsType<WildTypeCellMutationState>())
+		{
+			// Pin the epithelial cells 
+			if ( (p_node->rGetLocation()[2] < mHeightForPinnedCells - eps) || (p_node->rGetLocation()[2] > mHeightForPinnedCells + eps) )
 			{
 				// Get old node location
-				c_vector<double, 3> old_node_location = rOldLocations[node_index];
-
+				//c_vector<double, 3> old_node_location = rOldLocations[node_index];
+				// typename std::map<Node<3>*, c_vector<double, 3> >::const_iterator it = rOldLocations.find(p_node);
+    			// c_vector<double, 3> old_node_location = it->second;
+	
 				// Return node to old location
-				p_node->rGetModifiableLocation()[0] = old_node_location[0];
-				p_node->rGetModifiableLocation()[1] = old_node_location[1];
-				p_node->rGetModifiableLocation()[2] = old_node_location[2];
+				p_node->rGetModifiableLocation()[0] = p_node->rGetLocation()[0];
+				p_node->rGetModifiableLocation()[1] = p_node->rGetLocation()[1];
+				// p_node->rGetModifiableLocation()[2] = 0.0;
+				p_node->rGetModifiableLocation()[2] = mHeightForPinnedCells;
 			}
 		}
-    }
+	}
+}
 
-    bool VerifyBoundaryCondition()
+bool FixedEpithelialBoundary3d::VerifyBoundaryCondition()
+{
+	bool boundary_condition_satisfied = true;
+	double eps = 0.000001;
+
+	/*
+	 * Here we verify that the boundary condition is still satisfied by simply
+	 * checking that no cells lies below the Z=0 boundary.
+	 */
+    for (AbstractCellPopulation<3>::Iterator cell_iter = this->mpCellPopulation->Begin();
+         cell_iter != this->mpCellPopulation->End();
+         ++cell_iter)
     {
-        bool condition_satisfied = true;
+        // Get index of node associated with cell
+        unsigned node_index = this->mpCellPopulation->GetLocationIndexUsingCell(*cell_iter);
 
-        for (AbstractCellPopulation<3>::Iterator cell_iter = this->mpCellPopulation->Begin();
-             cell_iter != this->mpCellPopulation->End();
-             ++cell_iter)
+        // Get pointer to this node
+        Node<3>* p_node = this->mpCellPopulation->GetNode(node_index);
+
+        // If this node lies below the z=0 boundary(NO! - Dom), or outside of the periodic boundaries, break and return false
+		// if ( (cell_iter->GetMutationState()->IsType<StromalCellMutationState>()) && 
+        // 		((p_node->rGetLocation()[2] < 0.0) || (p_node->rGetLocation()[0] < 0.0) || (p_node->rGetLocation()[0] > mCellPopulationWidth)
+        // 		|| (p_node->rGetLocation()[1] < 0.0) || (p_node->rGetLocation()[1] > mCellPopulationDepth)) )
+
+        // If this node is outside of the periodic boundaries, break and return false
+        if ( (cell_iter->GetMutationState()->IsType<WildTypeCellMutationState>()) &&
+			(p_node->rGetLocation()[2] < mHeightForPinnedCells - eps) || (p_node->rGetLocation()[2] > mHeightForPinnedCells + eps) )
         {
-            c_vector<double, 3> cell_location = this->mpCellPopulation->GetLocationOfCellCentre(*cell_iter);
-            double x_coordinate = cell_location(0);
-            double y_coordinate = cell_location(1);
-            double z_coordinate = cell_location(2);
-
-            if ( (x_coordinate < 0.5) || (x_coordinate > mCellPopulationWidth-0.5)
-            		|| (y_coordinate < 0.5) || (y_coordinate > mCellPopulationDepth-0.5) ) // Note, don't think we can check the bottom layer are pinned
-            {
-                condition_satisfied = false;
-                break;
-            }
+        	// boundary_condition_satisfied = false;
+        	// break;
         }
-        return condition_satisfied;
     }
 
-    void OutputCellPopulationBoundaryConditionParameters(out_stream& rParamsFile)
-    {
-        *rParamsFile << "\t\t<MaxHeightForPinnedCells>" << mMaxHeightForPinnedCells << "</MaxHeightForPinnedCells>\n";
-    	*rParamsFile << "\t\t<CellPopulationWidth>" << mCellPopulationWidth << "</CellPopulationWidth>\n";
-        *rParamsFile << "\t\t<CellPopulationDepth>" << mCellPopulationDepth << "</CellPopulationDepth>\n";
+    return boundary_condition_satisfied;
+}
 
-        AbstractCellPopulationBoundaryCondition<3>::OutputCellPopulationBoundaryConditionParameters(rParamsFile);
-    }
-};
+void FixedEpithelialBoundary3d::SetHeightForPinnedCells(double heightForPinnedCells)
+{
+	mHeightForPinnedCells = heightForPinnedCells;
+}
 
+double FixedEpithelialBoundary3d::GetHeightForPinnedCells()
+{
+	return mHeightForPinnedCells;
+}
+
+void FixedEpithelialBoundary3d::SetCellPopulationWidth(double cellPopulationWidth)
+{
+	mCellPopulationWidth = cellPopulationWidth;
+}
+
+double FixedEpithelialBoundary3d::GetCellPopulationWidth()
+{
+	return mCellPopulationWidth;
+}
+
+void FixedEpithelialBoundary3d::SetCellPopulationDepth(double cellPopulationDepth)
+{
+	mCellPopulationDepth = cellPopulationDepth;
+}
+
+double FixedEpithelialBoundary3d::GetCellPopulationDepth()
+{
+	return mCellPopulationDepth;
+}
+
+
+void FixedEpithelialBoundary3d::OutputCellPopulationBoundaryConditionParameters(out_stream& rParamsFile)
+{
+    *rParamsFile << "\t\t<CellPopulationDepth>" << mCellPopulationDepth << "</CellPopulationDepth>\n";
+    *rParamsFile << "\t\t<CellPopulationWidth>" << mCellPopulationWidth << "</CellPopulationWidth>\n";
+    *rParamsFile << "\t\t<MaxHeightForPinnedCells>" << mHeightForPinnedCells << "</MaxHeightForPinnedCells>\n";
+    
+    // Call method on direct parent class
+	AbstractCellPopulationBoundaryCondition<3>::OutputCellPopulationBoundaryConditionParameters(rParamsFile);
+}
+
+// Serialization for Boost >= 1.36
 #include "SerializationExportWrapperForCpp.hpp"
 CHASTE_CLASS_EXPORT(FixedEpithelialBoundary3d)
