@@ -178,7 +178,7 @@ bool DensityDependantCellKiller3DWithGhostNodes::IsCellTooSmall(MutableMesh<3,3>
 std::vector<c_vector<unsigned,2> > DensityDependantCellKiller3DWithGhostNodes::RemoveByAnoikis()
 {
 	DomMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<3>*> (this->mpCellPopulation);
-	double domain_tollerance = mCutOffLength;
+	double domain_tollerance = 0.1;
 
 
 	unsigned num_cells = p_tissue->GetNumRealCells();
@@ -370,8 +370,13 @@ std::vector<c_vector<unsigned,2> > DensityDependantCellKiller3DWithGhostNodes::R
 					if ( x_location <= domain_tollerance || x_location >= mCellPopulationWidth - domain_tollerance ||
 						 y_location <= domain_tollerance || y_location >= mCellPopulationDepth - domain_tollerance   )
 					{
-						// TRACE("Got A Cell");
-						individual_node_information[1] = 1;
+						if ( pow(x_location - 0.5*mCellPopulationWidth,2) + pow(y_location - 0.5*mCellPopulationDepth,2) <= pow(mCutOffLength,2) )
+						{
+							// TRACE("Got A Cell");
+							individual_node_information[1] = 1;
+						}
+
+						
 					}
 					
 				}
