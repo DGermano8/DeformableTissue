@@ -73,7 +73,7 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "FlatWntRadius_20210623";
+        std::string output_directory = "FlatWntRadius_20210623_03";
 
         unsigned width = 12;	   // x
         unsigned height = 14;      // y
