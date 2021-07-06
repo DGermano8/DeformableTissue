@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "CellBasedSimulationArchiver.hpp"
+#include "Timer.hpp"
 
 #include "TrianglesMeshReader.hpp"
 #include "OffLatticeSimulation.hpp"
@@ -66,14 +67,14 @@ public:
      */
     void TestPeriodicCubeWithGhosts() throw (Exception)
     {
-    	RandomNumberGenerator::Instance()->Reseed(1);
+    	RandomNumberGenerator::Instance()->Reseed(2);
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "FixedEp_WntRadius_0504";
+        std::string output_directory = "FixedEp_WntRadius_20210630_02";
 
-        unsigned width = 10;	   // x
-        unsigned height = 12;      // y
+        unsigned width = 12;	   // x
+        unsigned height = 14;      // y
         unsigned ghosts_bottom = 0;       // ghosts > depth
         unsigned ghosts_top = 1;       // ghosts > depth
         unsigned num_tissue_depth = 1;
@@ -107,7 +108,7 @@ public:
         double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 48;
+        double end_time = 480;
         double plot_step = 10.0;
 
         bool include_springs = true;
@@ -345,7 +346,7 @@ public:
         MAKE_PTR_ARGS(FixedEpithelialBoundary3d, epithelial_boundary_condition, (&cell_population));
         epithelial_boundary_condition->SetCellPopulationWidth(periodic_width);
         epithelial_boundary_condition->SetCellPopulationDepth(periodic_height);
-        epithelial_boundary_condition->SetHeightForPinnedCells(5.738431453704834);
+        epithelial_boundary_condition->SetHeightForPinnedCells(5.738431453704834); //Magic number used for single ghost top and bottom and single stromal
         epithelial_boundary_condition->ImposeBoundaryCondition(node_locations_before);
         simulator.AddCellPopulationBoundaryCondition(epithelial_boundary_condition);
 
@@ -388,14 +389,14 @@ public:
         // p_random_force->SetMovementParameter(0.001); //0.1 causes dissasociation, 0.001 is not enough
         // simulator.AddForce(p_random_force);
 
-        double cut_off = 1.5;
-        double density_threshold = 0.99;
-        double domain_tol = 1.0;
+        double cut_off = 2.0;
+        double density_threshold = 0.95;
+        double density_radius = 4.0;
         // Add anoikis cell killer
-        MAKE_PTR_ARGS(AnoikisCellKiller3DWithGhostNodes, anoikis, (&cell_population, cut_off, periodic_width, periodic_height));
-        simulator.AddCellKiller(anoikis);
+        // MAKE_PTR_ARGS(AnoikisCellKiller3DWithGhostNodes, anoikis, (&cell_population, cut_off, periodic_width, periodic_height));
+        // simulator.AddCellKiller(anoikis);
 
-        MAKE_PTR_ARGS(DensityDependantCellKiller3DWithGhostNodes, density, (&cell_population, domain_tol, density_threshold, periodic_width, periodic_height));
+        MAKE_PTR_ARGS(DensityDependantCellKiller3DWithGhostNodes, density, (&cell_population, density_radius, density_threshold, periodic_width, periodic_height));
         simulator.AddCellKiller(density);
 
         // std::string output_directory = "Test_WithSpringsBending_randz_alpha_2";
@@ -408,12 +409,12 @@ public:
 
         simulator.AddSimulationModifier(p_modifier);
 
-        MAKE_PTR(PeriodicRemeshCellsModifier<3>, p_per_modifier);
-        p_per_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
-        p_per_modifier->SetWidth(periodic_width);
-        p_per_modifier->SetDepth(periodic_height);
+        // MAKE_PTR(PeriodicRemeshCellsModifier<3>, p_per_modifier);
+        // p_per_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
+        // p_per_modifier->SetWidth(periodic_width);
+        // p_per_modifier->SetDepth(periodic_height);
 
-        simulator.AddSimulationModifier(p_per_modifier);
+        // simulator.AddSimulationModifier(p_per_modifier);
 
 
 
@@ -427,12 +428,9 @@ public:
 		simulator.SetEndTime(end_time);
         simulator.SetDt(time_step);
 
-        auto t1 = std::chrono::high_resolution_clock::now();
+        Timer::Reset();
         simulator.Solve();
-        auto t2 = std::chrono::high_resolution_clock::now();
-        auto duration = pow(10.0,-6)*(std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count());
-
-        std::cout << "\nTime taken = " << duration << " seconds\n\n";
+        Timer::Print("Time Ellapsed");
         
     }     
 

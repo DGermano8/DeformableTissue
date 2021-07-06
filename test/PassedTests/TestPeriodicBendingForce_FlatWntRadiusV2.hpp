@@ -73,7 +73,7 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "FlatWntRadius_20210623_03";
+        std::string output_directory = "FlatWntRadius_20210701_01";
 
         unsigned width = 12;	   // x
         unsigned height = 14;      // y
@@ -113,7 +113,7 @@ public:
         double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 120;
+        double end_time = 240;
         double plot_step = 10;
 
         bool include_springs = true;
@@ -311,8 +311,6 @@ public:
         //std::cout<<cell_population.GetWriteVtkAsPoints() << "\n";
         // cell_population.SetOutputMeshInVtkDom(false);
 
-
-
         std::map<Node<3>*, c_vector<double,3> > node_locations_before;
         for (std::list<CellPtr>::iterator cell_iter = cell_population.rGetCells().begin();
              cell_iter != cell_population.rGetCells().end();
@@ -379,14 +377,14 @@ public:
         // p_random_force->SetMovementParameter(0.001); //0.1 causes dissasociation, 0.001 is not enough
         // simulator.AddForce(p_random_force);
         
-        double cut_off = 4;
+        double cut_off = 2.0;
         double density_threshold = 0.99;
-        double domain_tol = 1.0;
+        double density_radius = 4.0;
         // Add anoikis cell killer
         MAKE_PTR_ARGS(AnoikisCellKiller3DWithGhostNodes, anoikis, (&cell_population, cut_off, periodic_width, periodic_height));
         simulator.AddCellKiller(anoikis);
 
-        MAKE_PTR_ARGS(DensityDependantCellKiller3DWithGhostNodes, density, (&cell_population, domain_tol, density_threshold, periodic_width, periodic_height));
+        MAKE_PTR_ARGS(DensityDependantCellKiller3DWithGhostNodes, density, (&cell_population, density_radius, density_threshold, periodic_width, periodic_height));
         simulator.AddCellKiller(density);
 
         simulator.SetOutputDirectory(output_directory);	 

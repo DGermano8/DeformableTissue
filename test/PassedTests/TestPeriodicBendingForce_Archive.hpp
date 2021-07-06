@@ -401,11 +401,8 @@ public:
 		simulator.SetEndTime(end_time);
         simulator.SetDt(time_step);
 
-<<<<<<< HEAD
         TRACE("Solving");
 
-=======
->>>>>>> a6daa7449bdba751e468a21f7e90a9f874b0a128
         simulator.Solve();
         CellBasedSimulationArchiver<3, OffLatticeSimulation<3>>::Save(&simulator);
 
@@ -417,7 +414,6 @@ public:
             PRINT_VARIABLE(t);
 
             OffLatticeSimulation<3>* p_simulator = CellBasedSimulationArchiver<3, OffLatticeSimulation<3> >::Load(output_directory, t);
-<<<<<<< HEAD
             
             p_simulator->SetEndTime(t+time_of_each_run);
             p_simulator->Solve();
@@ -425,17 +421,6 @@ public:
             delete p_simulator;
 
             TRACE("Ended");
-=======
-            TRACE("Loaded");
-            p_simulator->SetEndTime(t+time_of_each_run);
-            p_simulator->Solve();
-            CellBasedSimulationArchiver<3, OffLatticeSimulation<3>>::Save(p_simulator);
-            TRACE("Saved");
-            delete p_simulator;
-
-            TRACE("Ended");
-
->>>>>>> a6daa7449bdba751e468a21f7e90a9f874b0a128
         }
 
         // SimulationTime::Destroy();

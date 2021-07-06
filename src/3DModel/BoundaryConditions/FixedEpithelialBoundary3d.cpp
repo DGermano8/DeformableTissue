@@ -63,6 +63,8 @@ bool FixedEpithelialBoundary3d::VerifyBoundaryCondition()
          cell_iter != this->mpCellPopulation->End();
          ++cell_iter)
     {
+		assert(this->mpCellPopulation->IsCellAssociatedWithADeletedLocation(*cell_iter) == false);
+		
         // Get index of node associated with cell
         unsigned node_index = this->mpCellPopulation->GetLocationIndexUsingCell(*cell_iter);
 
@@ -78,8 +80,8 @@ bool FixedEpithelialBoundary3d::VerifyBoundaryCondition()
         if ( (cell_iter->GetMutationState()->IsType<WildTypeCellMutationState>()) &&
 			(p_node->rGetLocation()[2] < mHeightForPinnedCells - eps) || (p_node->rGetLocation()[2] > mHeightForPinnedCells + eps) )
         {
-        	// boundary_condition_satisfied = false;
-        	// break;
+        	boundary_condition_satisfied = false;
+        	break;
         }
     }
 
