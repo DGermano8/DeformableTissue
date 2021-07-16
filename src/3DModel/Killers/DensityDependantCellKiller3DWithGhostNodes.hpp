@@ -91,7 +91,11 @@ public:
 
     std::set<unsigned> GetNeighbouringNodeIndices(MutableMesh<3,3>* ExtendedMesh, std::map<unsigned, unsigned> mExtendedMeshNodeIndexMap, unsigned nodeIndex);
 
-    bool IsCellTooSmall(MutableMesh<3,3>* ExtendedMesh, std::map<unsigned, unsigned> ExtendedMeshNodeIndexMap, unsigned nodeIndex);
+    bool IsCellTooSmall(MutableMesh<3,3>* ExtendedMesh, std::map<unsigned, unsigned> ExtendedMeshNodeIndexMap, unsigned nodeIndex, std::vector<unsigned> first_order_neighs);
+
+    std::vector<c_vector<unsigned, 3> > GetEpithelialMesh(MutableMesh<3,3>* ExtendedMesh, std::map<unsigned, unsigned> ExtendedMeshNodeIndexMap);
+
+    std::vector<c_vector<unsigned, 10> > GetEpithelialNeighbours(std::vector<c_vector<unsigned, 3> > rEpithelialMeshVector, unsigned number_of_cells);
 
     std::vector<c_vector<unsigned,2> > RemoveByAnoikis();
 

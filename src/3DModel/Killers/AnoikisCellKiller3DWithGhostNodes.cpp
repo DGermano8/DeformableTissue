@@ -1,10 +1,14 @@
 #include "AnoikisCellKiller3DWithGhostNodes.hpp"
+#include "OutputFileHandler.hpp"
 #include "Debug.hpp"
 
 /* Apoptosis for cells that are epithelial and lose contact with the basement membrane
  *
  */
-AnoikisCellKiller3DWithGhostNodes::AnoikisCellKiller3DWithGhostNodes(AbstractCellPopulation<3>* pCrypt, double cut_off, double cellPopulationWidth, double cellPopulationDepth)
+AnoikisCellKiller3DWithGhostNodes::AnoikisCellKiller3DWithGhostNodes(AbstractCellPopulation<3>* pCrypt,
+																	double cut_off,
+																	double cellPopulationWidth,
+																	double cellPopulationDepth)
     : AbstractCellKiller<3>(pCrypt),
     mCellsRemovedByAnoikis(0),
 	mCutOffLength(cut_off),
@@ -14,6 +18,24 @@ AnoikisCellKiller3DWithGhostNodes::AnoikisCellKiller3DWithGhostNodes(AbstractCel
     // Sets up output file
 //	OutputFileHandler output_file_handler(mOutputDirectory + "AnoikisData/", false);
 //	mAnoikisOutputFile = output_file_handler.OpenOutputFile("results.anoikis");
+	
+	// TRACE("Start of anoikus");
+	// TRACE(GetOutputDirectory());
+	// OutputFileHandler output_file_handler(GetOutputDirectory()+"/", false);
+	// TRACE("A");
+    // out_stream deathLocationFile = output_file_handler.OpenOutputFile("anoikisDeaths.dat");
+	// TRACE("B");
+    // *deathLocationFile << "time \t";
+	// TRACE("C");
+    // for (unsigned i=0; i<3; i++)
+    // {
+    //     *deathLocationFile << "location" << i << "\t";
+    // }
+	// TRACE("D");
+    // *deathLocationFile << "Cell ID " << "\n";
+	// TRACE("E");
+    // deathLocationFile->close();
+	// TRACE("closed file");
 }
 
 AnoikisCellKiller3DWithGhostNodes::~AnoikisCellKiller3DWithGhostNodes()
@@ -24,6 +46,16 @@ AnoikisCellKiller3DWithGhostNodes::~AnoikisCellKiller3DWithGhostNodes()
 void AnoikisCellKiller3DWithGhostNodes::SetOutputDirectory(std::string outputDirectory)
 {
 	mOutputDirectory = outputDirectory;
+	
+	OutputFileHandler output_file_handler(mOutputDirectory+"/", false);
+    out_stream deathLocationFile = output_file_handler.OpenOutputFile("anoikisDeaths.dat");
+    *deathLocationFile << "time \t";
+    for (unsigned i=0; i<3; i++)
+    {
+        *deathLocationFile << "location" << i << "\t";
+    }
+    *deathLocationFile << "Cell ID " << "\n";
+    deathLocationFile->close();
 }
 
 std::string AnoikisCellKiller3DWithGhostNodes::GetOutputDirectory()
@@ -239,6 +271,22 @@ void AnoikisCellKiller3DWithGhostNodes::CheckAndLabelCellsForApoptosisOrDeath()
 			
     		CellPtr p_cell = p_tissue->GetCellUsingLocationIndex(cells_to_remove[i][0]);
 			p_cell->Kill();
+
+			SimulationTime* p_time = SimulationTime::Instance();
+            c_vector<double, 3> cell_location = p_tissue->GetNode(cells_to_remove[i][0])->rGetLocation();
+
+
+			OutputFileHandler output_file_handler(mOutputDirectory+"/", false);
+            out_stream deathLocationFile = output_file_handler.OpenOutputFile("anoikisDeaths.dat", std::ios::app);
+
+            *deathLocationFile << p_time->GetTime() << "\t";
+            for (unsigned i=0; i<3; i++)
+            {
+                *deathLocationFile << cell_location[i] << "\t";
+            }
+            *deathLocationFile << cells_to_remove[i][0] << "\n";
+            deathLocationFile->close();
+
 			// TRACE("Cell removed by Anoikis");
 			
 			// c_vector<double, 3> node_A_location = p_tissue->GetNode(cells_to_remove[i][0])->rGetLocation();

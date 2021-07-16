@@ -73,7 +73,7 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "FlatWntRadius_20210701_01";
+        std::string output_directory = "FlatWntRadius_20210712_01";
 
         unsigned width = 12;	   // x
         unsigned height = 14;      // y
@@ -84,7 +84,7 @@ public:
 
         // Initialise the tissue in an equilibrum state
         double width_space = 1.0;
-        double height_space = 1.0*sqrt(0.75);
+        double height_space = 1.00*sqrt(0.75);
         double ghost_sep = 1.0;
         double depth_space = 0.738431690356779*1.0; //Magic number for z-spaceing... 
         unsigned cells_per_layer = width*height;
@@ -109,12 +109,12 @@ public:
 
         double radius =  2.0;//periodic_width+1.0;
         double target_curvature = -0.2; //maximum curvature is 0.2066 -> higher curvature means smaller sphere
-        double beta_parameter = 2.0*spring_strength;
+        double beta_parameter = 4.0*spring_strength;
         double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 240;
-        double plot_step = 10;
+        double end_time = 5;
+        double plot_step = 1;
 
         bool include_springs = true;
         bool include_bending = true;
@@ -378,13 +378,15 @@ public:
         // simulator.AddForce(p_random_force);
         
         double cut_off = 2.0;
-        double density_threshold = 0.99;
+        double density_threshold = 0.98;
         double density_radius = 4.0;
         // Add anoikis cell killer
         MAKE_PTR_ARGS(AnoikisCellKiller3DWithGhostNodes, anoikis, (&cell_population, cut_off, periodic_width, periodic_height));
+        anoikis->SetOutputDirectory(output_directory);
         simulator.AddCellKiller(anoikis);
 
         MAKE_PTR_ARGS(DensityDependantCellKiller3DWithGhostNodes, density, (&cell_population, density_radius, density_threshold, periodic_width, periodic_height));
+        density->SetOutputDirectory(output_directory);
         simulator.AddCellKiller(density);
 
         simulator.SetOutputDirectory(output_directory);	 

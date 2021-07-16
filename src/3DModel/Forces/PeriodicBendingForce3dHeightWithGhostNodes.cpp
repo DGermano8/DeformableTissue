@@ -261,15 +261,13 @@ std::vector<c_vector<unsigned, 10> > PeriodicBendingForce3dHeightWithGhostNodes:
 		}
 		if(std::find(std::begin(row_neighs_A), std::end(row_neighs_A), node_B) == std::end(row_neighs_A))
 		{
-			unsigned iter_A = 0;
-			while(iter_A < 10)
+			for (unsigned iter_A = 0; iter_A<10; iter_A++) 
 			{
 				if(temp_neighbours[node_A][iter_A] == 0)
 				{
 					temp_neighbours[node_A][iter_A] = node_B;
-					iter_A = 10;
+					break;
 				}
-				iter_A++;
 			}
 		}
 		for(unsigned j=0; j<10; j++)
@@ -278,18 +276,15 @@ std::vector<c_vector<unsigned, 10> > PeriodicBendingForce3dHeightWithGhostNodes:
 		}
 		if(std::find(std::begin(row_neighs_A), std::end(row_neighs_A), node_C) == std::end(row_neighs_A))
 		{
-			unsigned iter_A = 0;
-			while(iter_A < 10)
+			for (unsigned iter_A = 0; iter_A<10; iter_A++) 
 			{
 				if(temp_neighbours[node_A][iter_A] == 0)
 				{
 					temp_neighbours[node_A][iter_A] = node_C;
-					iter_A = 10;
+					break;
 				}
-				iter_A++;
 			}
 		}
-
 
 
 		// Then do node_B
@@ -300,15 +295,13 @@ std::vector<c_vector<unsigned, 10> > PeriodicBendingForce3dHeightWithGhostNodes:
 		}
 		if(std::find(std::begin(row_neighs_B), std::end(row_neighs_B), node_A) == std::end(row_neighs_B))
 		{
-			unsigned iter_B = 0;
-			while(iter_B < 10)
+			for (unsigned iter_B = 0; iter_B<10; iter_B++) 
 			{
 				if(temp_neighbours[node_B][iter_B] == 0)
 				{
 					temp_neighbours[node_B][iter_B] = node_A;
-					iter_B = 10;
+					break;
 				}
-				iter_B++;
 			}
 		}
 		for(unsigned j=0; j<10; j++)
@@ -317,15 +310,13 @@ std::vector<c_vector<unsigned, 10> > PeriodicBendingForce3dHeightWithGhostNodes:
 		}
 		if(std::find(std::begin(row_neighs_B), std::end(row_neighs_B), node_C) == std::end(row_neighs_B))
 		{
-			unsigned iter_B = 0;
-			while(iter_B < 10)
+			for (unsigned iter_B = 0; iter_B<10; iter_B++) 
 			{
 				if(temp_neighbours[node_B][iter_B] == 0)
 				{
 					temp_neighbours[node_B][iter_B] = node_C;
-					iter_B = 10;
+					break;
 				}
-				iter_B++;
 			}
 		}
 
@@ -337,15 +328,13 @@ std::vector<c_vector<unsigned, 10> > PeriodicBendingForce3dHeightWithGhostNodes:
 		}
 		if(std::find(std::begin(row_neighs_C), std::end(row_neighs_C), node_A) == std::end(row_neighs_C))
 		{
-			unsigned iter_B = 0;
-			while(iter_B < 10)
+			for (unsigned iter_C = 0; iter_C<10; iter_C++) 
 			{
-				if(temp_neighbours[node_C][iter_B] == 0)
+				if(temp_neighbours[node_C][iter_C] == 0)
 				{
-					temp_neighbours[node_C][iter_B] = node_A;
-					iter_B = 10;
+					temp_neighbours[node_C][iter_C] = node_A;
+					break;
 				}
-				iter_B++;
 			}
 		}
 		for(unsigned j=0; j<10; j++)
@@ -354,18 +343,15 @@ std::vector<c_vector<unsigned, 10> > PeriodicBendingForce3dHeightWithGhostNodes:
 		}
 		if(std::find(std::begin(row_neighs_C), std::end(row_neighs_C), node_B) == std::end(row_neighs_C))
 		{
-			unsigned iter_B = 0;
-			while(iter_B < 10)
+			for (unsigned iter_C = 0; iter_C<10; iter_C++) 
 			{
-				if(temp_neighbours[node_C][iter_B] == 0)
+				if(temp_neighbours[node_C][iter_C] == 0)
 				{
-					temp_neighbours[node_C][iter_B] = node_B;
-					iter_B = 10;
+					temp_neighbours[node_C][iter_C] = node_B;
+					break;
 				}
-				iter_B++;
 			}
 		}
-
 
 	}
 	
@@ -405,63 +391,63 @@ std::vector<c_vector<unsigned, 3> > PeriodicBendingForce3dHeightWithGhostNodes::
 std::vector<c_vector<unsigned, 3> > epithelial_triangulation;
 
 
-DomMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<3>*>(&rCellPopulation);
-for (unsigned elem_index=0; elem_index<mpExtendedMesh->GetNumElements(); elem_index++) 
-{ 
+	DomMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<3>*>(&rCellPopulation);
+	for (unsigned elem_index=0; elem_index<mpExtendedMesh->GetNumElements(); elem_index++) 
+	{ 
 
-    // Get a pointer to the element
-    Element<3,3>* p_element = mpExtendedMesh->GetElement(elem_index);
-        
-    unsigned Node0Index = p_element->GetNodeGlobalIndex(0);
-    unsigned Node1Index = p_element->GetNodeGlobalIndex(1);
-    unsigned Node2Index = p_element->GetNodeGlobalIndex(2);
-    unsigned Node3Index = p_element->GetNodeGlobalIndex(3);
-    unsigned node_index[4] = {Node0Index, Node1Index, Node2Index, Node3Index};
+		// Get a pointer to the element
+		Element<3,3>* p_element = mpExtendedMesh->GetElement(elem_index);
+			
+		unsigned Node0Index = p_element->GetNodeGlobalIndex(0);
+		unsigned Node1Index = p_element->GetNodeGlobalIndex(1);
+		unsigned Node2Index = p_element->GetNodeGlobalIndex(2);
+		unsigned Node3Index = p_element->GetNodeGlobalIndex(3);
+		unsigned node_index[4] = {Node0Index, Node1Index, Node2Index, Node3Index};
 
-	unsigned node0GlobalIndex = mExtendedMeshNodeIndexMap[Node0Index];
-	unsigned node1GlobalIndex = mExtendedMeshNodeIndexMap[Node1Index];
-	unsigned node2GlobalIndex = mExtendedMeshNodeIndexMap[Node2Index];
-	unsigned node3GlobalIndex = mExtendedMeshNodeIndexMap[Node3Index];
-	unsigned node_global_intex[4] = {node0GlobalIndex, node1GlobalIndex, node2GlobalIndex, node3GlobalIndex};
+		unsigned node0GlobalIndex = mExtendedMeshNodeIndexMap[Node0Index];
+		unsigned node1GlobalIndex = mExtendedMeshNodeIndexMap[Node1Index];
+		unsigned node2GlobalIndex = mExtendedMeshNodeIndexMap[Node2Index];
+		unsigned node3GlobalIndex = mExtendedMeshNodeIndexMap[Node3Index];
+		unsigned node_global_intex[4] = {node0GlobalIndex, node1GlobalIndex, node2GlobalIndex, node3GlobalIndex};
 
-	for(unsigned j=0; j<4; j++)
-    {
-		c_vector<unsigned, 3> tri_el = zero_vector<double>(3);
+		for(unsigned j=0; j<4; j++)
+		{
+			c_vector<unsigned, 3> tri_el = zero_vector<double>(3);
 
-        CellPtr p_cell = rCellPopulation.GetCellUsingLocationIndex(node_global_intex[(0+j)%4]);
-        boost::shared_ptr<AbstractCellMutationState> p_state = p_cell->GetMutationState();
+			CellPtr p_cell = rCellPopulation.GetCellUsingLocationIndex(node_global_intex[(0+j)%4]);
+			boost::shared_ptr<AbstractCellMutationState> p_state = p_cell->GetMutationState();
 
-        bool is_0_stromal_cell = (p_state->IsType<StromalCellMutationState>()==true);
+			bool is_0_stromal_cell = (p_state->IsType<StromalCellMutationState>()==true);
 
-        if(is_0_stromal_cell) 
-        {
-            CellPtr p_cell_1 = rCellPopulation.GetCellUsingLocationIndex(node_global_intex[(1+j)%4]);
-            boost::shared_ptr<AbstractCellMutationState> p_state_1 = p_cell_1->GetMutationState();
+			if(is_0_stromal_cell) 
+			{
+				CellPtr p_cell_1 = rCellPopulation.GetCellUsingLocationIndex(node_global_intex[(1+j)%4]);
+				boost::shared_ptr<AbstractCellMutationState> p_state_1 = p_cell_1->GetMutationState();
 
-            CellPtr p_cell_2 = rCellPopulation.GetCellUsingLocationIndex(node_global_intex[(2+j)%4]);
-            boost::shared_ptr<AbstractCellMutationState> p_state_2 = p_cell_2->GetMutationState();
-                    
-            CellPtr p_cell_3 = rCellPopulation.GetCellUsingLocationIndex(node_global_intex[(3+j)%4]);
-            boost::shared_ptr<AbstractCellMutationState> p_state_3 = p_cell_3->GetMutationState();
-                    
-            unsigned number_of_epithelial_cell = (p_state_1->IsType<WildTypeCellMutationState>()==true) + (p_state_2->IsType<WildTypeCellMutationState>()==true) + (p_state_3->IsType<WildTypeCellMutationState>()==true);
+				CellPtr p_cell_2 = rCellPopulation.GetCellUsingLocationIndex(node_global_intex[(2+j)%4]);
+				boost::shared_ptr<AbstractCellMutationState> p_state_2 = p_cell_2->GetMutationState();
+						
+				CellPtr p_cell_3 = rCellPopulation.GetCellUsingLocationIndex(node_global_intex[(3+j)%4]);
+				boost::shared_ptr<AbstractCellMutationState> p_state_3 = p_cell_3->GetMutationState();
+						
+				unsigned number_of_epithelial_cell = (p_state_1->IsType<WildTypeCellMutationState>()==true) + (p_state_2->IsType<WildTypeCellMutationState>()==true) + (p_state_3->IsType<WildTypeCellMutationState>()==true);
 
-            if (number_of_epithelial_cell == 3)
-            {
-				tri_el[0] = node_index[(1+j)%4];
-				tri_el[1] = node_index[(2+j)%4];
-				tri_el[2] = node_index[(3+j)%4];
+				if (number_of_epithelial_cell == 3)
+				{
+					tri_el[0] = node_index[(1+j)%4];
+					tri_el[1] = node_index[(2+j)%4];
+					tri_el[2] = node_index[(3+j)%4];
 
-				epithelial_triangulation.push_back(tri_el);
-            }
-                    
-        }
-                
-                
-    }
+					epithelial_triangulation.push_back(tri_el);
+				}
+						
+			}
+					
+					
+		}
 
 
-}
+	}
 
 	return epithelial_triangulation;
 }
@@ -1679,9 +1665,7 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 				{
 					unsigned extended_node_index_j = first_order_neighs[j];
 					second_order_neighs.push_back(epithelial_neighbours[extended_node_index_j][k]);
-
 				}
-				
 			}
 
 			std::sort(second_order_neighs.begin(), second_order_neighs.end());
