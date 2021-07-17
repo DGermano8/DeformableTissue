@@ -73,7 +73,7 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "FlatWntRadius_20210712_01";
+        std::string output_directory = "FlatWntRadius_20210716_01";
 
         unsigned width = 12;	   // x
         unsigned height = 14;      // y
@@ -113,8 +113,8 @@ public:
         double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 5;
-        double plot_step = 1;
+        double end_time = 480;
+        double plot_step = 10;
 
         bool include_springs = true;
         bool include_bending = true;

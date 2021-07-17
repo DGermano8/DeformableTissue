@@ -1,6 +1,8 @@
 #include "UniformCellKiller3dWithGhostNodes.hpp"
 #include "Debug.hpp"
 #include "SimulationTime.hpp"
+#include "OutputFileHandler.hpp"
+
 
 
 /* Apoptosis for cells that are epithelial and lose contact with the basement membrane
@@ -25,6 +27,16 @@ UniformCellKiller3dWithGhostNodes::~UniformCellKiller3dWithGhostNodes()
 void UniformCellKiller3dWithGhostNodes::SetOutputDirectory(std::string outputDirectory)
 {
 	mOutputDirectory = outputDirectory;
+
+	OutputFileHandler output_file_handler(mOutputDirectory+"/", false);
+    out_stream deathLocationFile = output_file_handler.OpenOutputFile("uniformDeaths.dat");
+    *deathLocationFile << "time \t";
+    for (unsigned i=0; i<3; i++)
+    {
+        *deathLocationFile << "location" << i << "\t";
+    }
+    *deathLocationFile << "Cell ID " << "\n";
+    deathLocationFile->close();
 }
 
 std::string UniformCellKiller3dWithGhostNodes::GetOutputDirectory()
@@ -220,6 +232,21 @@ void UniformCellKiller3dWithGhostNodes::CheckAndLabelCellsForApoptosisOrDeath()
 				if (p_cell_A->GetTimeUntilDeath() <= 2*SimulationTime::Instance()->GetTimeStep())
 				{
 					p_cell_A->Kill();
+
+					SimulationTime* p_time = SimulationTime::Instance();
+            		c_vector<double, 3> cell_location = p_tissue->GetNode(node_index)->rGetLocation();
+
+
+					OutputFileHandler output_file_handler(mOutputDirectory+"/", false);
+					out_stream deathLocationFile = output_file_handler.OpenOutputFile("uniformDeaths.dat", std::ios::app);
+
+					*deathLocationFile << p_time->GetTime() << "\t";
+					for (unsigned i=0; i<3; i++)
+					{
+						*deathLocationFile << cell_location[i] << "\t";
+					}
+					*deathLocationFile << node_index << "\n";
+					deathLocationFile->close();
 				}
 			}
 		}
