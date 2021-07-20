@@ -73,7 +73,11 @@ public:
 
         std::vector<Node<3>*> nodes;
 
+<<<<<<< HEAD
         std::string output_directory = "FixedEp_WntRadius_20210716_02";
+=======
+        std::string output_directory = "FixedEp_WntRadius_20210716_04";
+>>>>>>> 89afbf2755d16197c55bced18586c2d49d6a3160
 
         unsigned width = 12;	   // x
         unsigned height = 14;      // y
@@ -110,7 +114,7 @@ public:
         double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 240;
+        double end_time = 480;
         double plot_step = 10.0;
 
         bool include_springs = true;

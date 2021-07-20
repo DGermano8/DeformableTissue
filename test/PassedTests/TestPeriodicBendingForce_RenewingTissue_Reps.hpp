@@ -63,19 +63,20 @@ public:
      */
     void TestPeriodicCubeWithGhosts() throw (Exception)
     {
-    	RandomNumberGenerator::Instance()->Reseed(1);
 
-        auto t1 = std::chrono::high_resolution_clock::now();
+        Timer::Reset();
 
         for (int repeat = 0; repeat < 2; repeat ++)
         {
-                
+
+            RandomNumberGenerator::Instance()->Reseed(repeat);
+
             std::vector<Node<3>*> nodes;
 
-            std::string output_directory = "RenewingTissueWithBendingForce_Rep_" + std::to_string(repeat);
+            std::string output_directory = "RenewingTissueWithBendingForce_20210717_01_Rep_" + std::to_string(repeat);
 
-            unsigned width = 10;	   // x
-            unsigned height = 10;      // y
+            unsigned width = 12;	   // x
+            unsigned height = 14;      // y
             unsigned ghosts_bottom = 0;       // ghosts > depth
             unsigned ghosts_top = 1;       // ghosts > depth
             unsigned num_tissue_depth = 2;
@@ -105,11 +106,11 @@ public:
 
             double radius =  0;//periodic_width+1.0;
             double target_curvature = -0.2; //maximum curvature is 0.2066 -> higher curvature means smaller sphere
-            double beta_parameter = 2.0*spring_strength;
+            double beta_parameter = 4.0*spring_strength;
             double alpha_parameter = 1.2;
 
             double time_step = 0.001;
-            double end_time = 48;
+            double end_time = 1;
             double plot_step = 10.0;
 
             bool include_springs = true;
@@ -214,7 +215,6 @@ public:
                 cells.push_back(p_differentiated_cell);
             }
 
-
             // Initialise Epithelial cells
             for (unsigned i=real_node_indices.size()-num_epithelial_cells; i<real_node_indices.size(); i++)
             {
@@ -289,7 +289,7 @@ public:
             simulator.SetNumericalMethod(p_method);
 
 
-    //        cell_population.InitialiseCells();
+            // cell_population.InitialiseCells();
 
             // Make sure we have a Voronoi tessellation to begin with
             cell_population.CreateVoronoiTessellation();
@@ -368,9 +368,9 @@ public:
             }
 
 
-            MAKE_PTR(DriftPreventForce<3>, p_drift_force);
-            p_drift_force->SetTissueMiddle(tissue_middle);
-            simulator.AddForce(p_drift_force);
+            // MAKE_PTR(DriftPreventForce<3>, p_drift_force);
+            // p_drift_force->SetTissueMiddle(tissue_middle);
+            // simulator.AddForce(p_drift_force);
 
             // Prevents getting stuck in a local minimums -> used to help break symmetry in cell anoikus
             // MAKE_PTR(RandomMotionForce<3>, p_random_force);
@@ -378,8 +378,11 @@ public:
             // simulator.AddForce(p_random_force);
 
             double cut_off = 2.0;
+            double density_threshold = 0.98;
+            double density_radius = 4.0;
             // Add anoikis cell killer
             MAKE_PTR_ARGS(AnoikisCellKiller3DWithGhostNodes, anoikis, (&cell_population, cut_off, periodic_width, periodic_height));
+            anoikis->SetOutputDirectory(output_directory);
             simulator.AddCellKiller(anoikis);
 
             // std::string output_directory = "Test_WithSpringsBending_randz_alpha_2";
@@ -392,12 +395,12 @@ public:
 
             simulator.AddSimulationModifier(p_modifier);
 
-            MAKE_PTR(PeriodicRemeshCellsModifier<3>, p_per_modifier);
-            p_per_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
-            p_per_modifier->SetWidth(periodic_width);
-            p_per_modifier->SetDepth(periodic_height);
+            // MAKE_PTR(PeriodicRemeshCellsModifier<3>, p_per_modifier);
+            // p_per_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
+            // p_per_modifier->SetWidth(periodic_width);
+            // p_per_modifier->SetDepth(periodic_height);
 
-            simulator.AddSimulationModifier(p_per_modifier);
+            // simulator.AddSimulationModifier(p_per_modifier);
 
 
 
@@ -405,6 +408,7 @@ public:
             //                                                              ProbabilityOfDeathInAnHour,    MinXBoundary,                MaxXBoundary,     MinYBoundary,                    MaxYBoundary
             // MAKE_PTR_ARGS(UniformCellKiller3dWithGhostNodes, random_cell_death, (&cell_population, 1.0, 1.5*width_space,  periodic_width-1.5*width_space, 1.5*height_space,  periodic_height-1.5*height_space, num_epithelial_cells+num_tissue_cells));
             MAKE_PTR_ARGS(UniformCellKiller3dWithGhostNodes, random_cell_death, (&cell_population, 1.0, periodic_width + 1,  0 - 1, periodic_height + 1,  0 - 1 , num_epithelial_cells+num_tissue_cells));
+            random_cell_death->SetOutputDirectory(output_directory);
             simulator.AddCellKiller(random_cell_death);
             
             simulator.SetSamplingTimestepMultiple(plot_step);			// Every hour
@@ -418,9 +422,7 @@ public:
 		    SimulationTime::Instance()->SetStartTime(0.0);
 
         }
-        auto t2 = std::chrono::high_resolution_clock::now();
-        auto duration = pow(10.0,-6)*(std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count());
-        std::cout << "\nTime taken = " << duration << " seconds\n\n";  
+        Timer::Print("Time Ellapsed");
     }     
 
 };
