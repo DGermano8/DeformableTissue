@@ -47,7 +47,7 @@
 #include "MeshModifier.hpp"
 #include "MeshRemeshModifier.hpp"
 #include "PeriodicRemeshCellsModifier.hpp"
-#include "DensityDependantCellKiller3DWithGhostNodes.hpp"
+#include "DensityDependantCellKillerStrip3DWithGhostNodes.hpp"
 
 #include "DomSimpleWntCellCycleModel.hpp"
 #include "NodeVelocityWriter.hpp"
@@ -73,7 +73,7 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "FixedEp_WntRadius_20210716_02";
+        std::string output_directory = "FixedEp_WntStrip_20210720_01";
 
         unsigned width = 12;	   // x
         unsigned height = 14;      // y
@@ -110,7 +110,7 @@ public:
         double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 240;
+        double end_time = 10;
         double plot_step = 10.0;
 
         bool include_springs = true;
@@ -282,7 +282,7 @@ public:
         //CryptSimulation3d(rCellPopulation, bool deleteCellPopulationAndForceCollection, bool initialiseCells)
         OffLatticeSimulation<3> simulator(cell_population);
 
-        DomWntConcentration<3>::Instance()->SetType(DomRADIAL);
+        DomWntConcentration<3>::Instance()->SetType(DomLINEAR);
         DomWntConcentration<3>::Instance()->SetCellPopulation(cell_population);
         DomWntConcentration<3>::Instance()->SetCryptLength(20.0);
         DomWntConcentration<3>::Instance()->SetCryptCentreX(0.5*periodic_width);
@@ -394,14 +394,14 @@ public:
         // p_random_force->SetMovementParameter(0.001); //0.1 causes dissasociation, 0.001 is not enough
         // simulator.AddForce(p_random_force);
 
-        double cut_off = 2.0;
+        double cut_off = 2.5;
         double density_threshold = 0.98;
         double density_radius = 4.0;
         // Add anoikis cell killer
         // MAKE_PTR_ARGS(AnoikisCellKiller3DWithGhostNodes, anoikis, (&cell_population, cut_off, periodic_width, periodic_height));
         // simulator.AddCellKiller(anoikis);
 
-        MAKE_PTR_ARGS(DensityDependantCellKiller3DWithGhostNodes, density, (&cell_population, density_radius, density_threshold, periodic_width, periodic_height));
+        MAKE_PTR_ARGS(DensityDependantCellKillerStrip3DWithGhostNodes, density, (&cell_population, density_radius, density_threshold, periodic_width, periodic_height));
         density->SetOutputDirectory(output_directory);
         simulator.AddCellKiller(density);
 

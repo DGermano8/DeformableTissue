@@ -2,10 +2,10 @@ clear all;
 close all;
 
 % addpath /Users/domenicgermano/workspace/ChasteDom/anim/matlab
-addpath /Users/germanod/workspace/ChasteDom/anim/matlab
+addpath /Users/domenicgermano/workspace/ChasteDom/anim/matlab
 
 % addpath /Users/domenicgermano/Workspace/results/FlatWntRadius_2203_01/results_from_time_0
-addpath /Users/germanod/Workspace/results/FlatWntRadius_2203_01/results_from_time_0
+addpath /Users/domenicgermano/Workspace/results/FlatWntRadius_Sweeps/FlatWntRadius_2303_02/results_from_time_0
 
 filename = 'results';
 
@@ -13,7 +13,7 @@ filename = 'results';
 celltypesfile = [filename, '.vizcelltypes'];
 
 % nodedata = LoadNonConstantLengthData(nodesfile);
-celltypesdata = LoadNonConstantLengthData(celltypesfile);
+% celltypesdata = LoadNonConstantLengthData(celltypesfile);
 
 %%
 % input these manually...
@@ -79,7 +79,7 @@ for i = 1:dimensionData(1)
     node_v_i = holder(6:7:end);
     node_w_i = holder(7:7:end);
     
-    types = celltypesdata{i}(2:end);
+%     types = celltypesdata{i}(2:end);
     
     for j=1:length(holder_cell_id)
         
@@ -100,8 +100,8 @@ end
 %%
 delta_t = 0.01;
 sample_interval = 200;
-when_to_sample = 4800;
-when_to_stop = 6600;
+when_to_sample = 14000;
+when_to_stop = 28000;
 average_velocity = zeros(number_of_cells_end,length(when_to_sample:sample_interval:when_to_stop));
 average_position =  zeros(number_of_cells_end,length(when_to_sample:sample_interval:when_to_stop));
 figure;

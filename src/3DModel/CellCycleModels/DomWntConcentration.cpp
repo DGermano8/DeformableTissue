@@ -114,6 +114,14 @@ double DomWntConcentration<DIM>::GetWntLevel(CellPtr pCell)
 
         rad_diff = GetCryptRadius() - sqrt(radius_sqrd_from_xy0);
     }
+    else if (mWntType == DomLINEAR)
+    {
+        double x0 = GetCryptCentreX();
+        double y0 = GetCryptCentreY();
+        double radius_sqrd_from_x0 = pow(rLocation[0] - x0,2);
+
+        rad_diff = GetCryptRadius() - sqrt(radius_sqrd_from_x0);
+    }
     else
     {
         height = mpCellPopulation->GetLocationOfCellCentre(pCell)[DIM-1];
@@ -203,10 +211,17 @@ double DomWntConcentration<DIM>::GetWntLevel(double height, double rad_diff)
     // The first type of Wnt concentration to try
     if (mWntType==DomLINEAR)
     {
-        if ((height >= -1e-9) && (height < mWntConcentrationParameter*GetCryptLength()))
+        if(rad_diff >= 0)
         {
-            wnt_level = 1.0 - height/(mWntConcentrationParameter*GetCryptLength()); //this
-            // wnt_level = 1.0 - height/(GetCryptLength());
+            if ((height >= -1e-9) && (height < mWntConcentrationParameter*GetCryptLength()))
+            {
+                wnt_level = 1.0 - height/(mWntConcentrationParameter*GetCryptLength()); //this
+                // wnt_level = 1.0 - height/(GetCryptLength());
+            }
+            else
+            {
+                wnt_level = 0.0;
+            }
         }
         else
         {
