@@ -1,4 +1,4 @@
-#include "DensityDependantCellKillerStrip3DWithGhostNodes.hpp"
+#include "DensityDependantCellKillerStrip3DWithGhostNodesV2.hpp"
 #include "Debug.hpp"
 
 /* Apoptosis for cells that are epithelial that go outside the box by the cutoff length from the centre:
@@ -9,7 +9,7 @@
  *	|		  |			 	  |		    |
  *	|_________|_______________|_________|
  */
-DensityDependantCellKillerStrip3DWithGhostNodes::DensityDependantCellKillerStrip3DWithGhostNodes(AbstractCellPopulation<3>* pCrypt, double cut_off, double density_threshold, double cellPopulationWidth, double cellPopulationDepth)
+DensityDependantCellKillerStrip3DWithGhostNodesV2::DensityDependantCellKillerStrip3DWithGhostNodesV2(AbstractCellPopulation<3>* pCrypt, double cut_off, double density_threshold, double cellPopulationWidth, double cellPopulationDepth)
     : AbstractCellKiller<3>(pCrypt),
     mCellsRemovedByAnoikis(0),
 	mCutOffLength(cut_off),
@@ -22,12 +22,12 @@ DensityDependantCellKillerStrip3DWithGhostNodes::DensityDependantCellKillerStrip
 //	mAnoikisOutputFile = output_file_handler.OpenOutputFile("results.anoikis");
 }
 
-DensityDependantCellKillerStrip3DWithGhostNodes::~DensityDependantCellKillerStrip3DWithGhostNodes()
+DensityDependantCellKillerStrip3DWithGhostNodesV2::~DensityDependantCellKillerStrip3DWithGhostNodesV2()
 {
 //    mAnoikisOutputFile->close();
 }
 
-void DensityDependantCellKillerStrip3DWithGhostNodes::SetOutputDirectory(std::string outputDirectory)
+void DensityDependantCellKillerStrip3DWithGhostNodesV2::SetOutputDirectory(std::string outputDirectory)
 {
 	mOutputDirectory = outputDirectory;
 
@@ -38,11 +38,12 @@ void DensityDependantCellKillerStrip3DWithGhostNodes::SetOutputDirectory(std::st
     {
         *deathLocationFile << "location" << i << "\t";
     }
+    *deathLocationFile << "Cell Density " << "\t";
     *deathLocationFile << "Cell ID " << "\n";
     deathLocationFile->close();
 }
 
-std::string DensityDependantCellKillerStrip3DWithGhostNodes::GetOutputDirectory()
+std::string DensityDependantCellKillerStrip3DWithGhostNodesV2::GetOutputDirectory()
 {
 	return mOutputDirectory;
 }
@@ -51,7 +52,7 @@ std::string DensityDependantCellKillerStrip3DWithGhostNodes::GetOutputDirectory(
  * Method to get the neighbouring nodes (excluding ghost nodes) of a particular node
  * Can then be used to identify the type of cells that surround a particular cell.
  */
-std::set<unsigned> DensityDependantCellKillerStrip3DWithGhostNodes::GetNeighbouringNodeIndices(MutableMesh<3,3>* ExtendedMesh, std::map<unsigned, unsigned> ExtendedMeshNodeIndexMap, unsigned nodeIndex)
+std::set<unsigned> DensityDependantCellKillerStrip3DWithGhostNodesV2::GetNeighbouringNodeIndices(MutableMesh<3,3>* ExtendedMesh, std::map<unsigned, unsigned> ExtendedMeshNodeIndexMap, unsigned nodeIndex)
 {
 	// Create a set of neighbouring node indices
 	std::set<unsigned> neighbouring_node_indices;
@@ -118,11 +119,14 @@ std::set<unsigned> DensityDependantCellKillerStrip3DWithGhostNodes::GetNeighbour
  * TRUE if cell has popped up
  * FALSE if cell remains in the monolayer
  */
-bool DensityDependantCellKillerStrip3DWithGhostNodes::IsCellTooSmall(MutableMesh<3,3>* ExtendedMesh, std::map<unsigned, unsigned> ExtendedMeshNodeIndexMap, unsigned nodeIndex, std::vector<unsigned> first_order_neighs)
+c_vector<double,2> DensityDependantCellKillerStrip3DWithGhostNodesV2::IsCellTooSmall(MutableMesh<3,3>* ExtendedMesh, std::map<unsigned, unsigned> ExtendedMeshNodeIndexMap, unsigned nodeIndex, std::vector<unsigned> first_order_neighs)
 {
+	c_vector<double,2> is_too_small_density;
+
 	DomMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<3>*> (this->mpCellPopulation);
 
 	bool has_cell_popped_up = false;	// Initialising
+	is_too_small_density[0] = 0.0;
 
    	unsigned num_stromal_neighbours = 0;
 	unsigned num_ghost_neighbours = 0;
@@ -174,20 +178,23 @@ bool DensityDependantCellKillerStrip3DWithGhostNodes::IsCellTooSmall(MutableMesh
    	}
 
 	average_cell_distance = (average_cell_distance/num_epithelial_neighbours);
+	is_too_small_density[1] = average_cell_distance;
 
 	// Add cell density in cell data here.
 
    	if( (average_cell_distance < mDensityThreshold) && (has_neighbours_begun_apoptosis == false))
    	{
    		has_cell_popped_up = true;
+		   is_too_small_density[0] = 1.0;
    	}
 	//PRINT_VARIABLE(num_stromal_neighbours);
    
     // PRINT_2_VARIABLES(average_cell_distance,has_cell_popped_up);
-	return has_cell_popped_up;
+	// return has_cell_popped_up;
+	return is_too_small_density;
 }
 
-std::vector<c_vector<unsigned, 3> > DensityDependantCellKillerStrip3DWithGhostNodes::GetEpithelialMesh(MutableMesh<3,3>* ExtendedMesh, std::map<unsigned, unsigned> ExtendedMeshNodeIndexMap)
+std::vector<c_vector<unsigned, 3> > DensityDependantCellKillerStrip3DWithGhostNodesV2::GetEpithelialMesh(MutableMesh<3,3>* ExtendedMesh, std::map<unsigned, unsigned> ExtendedMeshNodeIndexMap)
 {
     // Get a pointer to this node in mpExtendedMesh
     std::vector<c_vector<unsigned, 3> > epithelial_triangulation;
@@ -211,39 +218,44 @@ std::vector<c_vector<unsigned, 3> > DensityDependantCellKillerStrip3DWithGhostNo
 		unsigned node3GlobalIndex = ExtendedMeshNodeIndexMap[Node3Index];
 		unsigned node_global_intex[4] = {node0GlobalIndex, node1GlobalIndex, node2GlobalIndex, node3GlobalIndex}; //check for 4 unique
 
-		for(unsigned j=0; j<4; j++)
+		unsigned number_of_ghosts = (p_tissue->IsGhostNode(node0GlobalIndex)) + (p_tissue->IsGhostNode(node1GlobalIndex)) + (p_tissue->IsGhostNode(node2GlobalIndex)) + (p_tissue->IsGhostNode(node3GlobalIndex));
+
+		if(number_of_ghosts == 0)
 		{
-			c_vector<unsigned, 3> tri_el = zero_vector<double>(3);
-
-			CellPtr p_cell = p_tissue->GetCellUsingLocationIndex(node_global_intex[(0+j)%4]);
-			boost::shared_ptr<AbstractCellMutationState> p_state = p_cell->GetMutationState();
-
-			bool is_0_stromal_cell = (p_state->IsType<StromalCellMutationState>()==true);
-
-			if(is_0_stromal_cell)
+			for(unsigned j=0; j<4; j++)
 			{
-				CellPtr p_cell_1 = p_tissue->GetCellUsingLocationIndex(node_global_intex[(1+j)%4]);
-				boost::shared_ptr<AbstractCellMutationState> p_state_1 = p_cell_1->GetMutationState();
+				c_vector<unsigned, 3> tri_el = zero_vector<double>(3);
 
-				CellPtr p_cell_2 = p_tissue->GetCellUsingLocationIndex(node_global_intex[(2+j)%4]);
-				boost::shared_ptr<AbstractCellMutationState> p_state_2 = p_cell_2->GetMutationState();
-						
-				CellPtr p_cell_3 = p_tissue->GetCellUsingLocationIndex(node_global_intex[(3+j)%4]);
-				boost::shared_ptr<AbstractCellMutationState> p_state_3 = p_cell_3->GetMutationState();
-						
-				unsigned number_of_epithelial_cell = (p_state_1->IsType<WildTypeCellMutationState>()==true) + (p_state_2->IsType<WildTypeCellMutationState>()==true) + (p_state_3->IsType<WildTypeCellMutationState>()==true);
+				CellPtr p_cell = p_tissue->GetCellUsingLocationIndex(node_global_intex[(0+j)%4]);
+				boost::shared_ptr<AbstractCellMutationState> p_state = p_cell->GetMutationState();
 
-				if (number_of_epithelial_cell == 3)
+				bool is_0_stromal_cell = (p_state->IsType<StromalCellMutationState>()==true);
+
+				if(is_0_stromal_cell)
 				{
-					tri_el[0] = node_index[(1+j)%4];
-					tri_el[1] = node_index[(2+j)%4];
-					tri_el[2] = node_index[(3+j)%4];
+					CellPtr p_cell_1 = p_tissue->GetCellUsingLocationIndex(node_global_intex[(1+j)%4]);
+					boost::shared_ptr<AbstractCellMutationState> p_state_1 = p_cell_1->GetMutationState();
 
-					epithelial_triangulation.push_back(tri_el);
+					CellPtr p_cell_2 = p_tissue->GetCellUsingLocationIndex(node_global_intex[(2+j)%4]);
+					boost::shared_ptr<AbstractCellMutationState> p_state_2 = p_cell_2->GetMutationState();
+							
+					CellPtr p_cell_3 = p_tissue->GetCellUsingLocationIndex(node_global_intex[(3+j)%4]);
+					boost::shared_ptr<AbstractCellMutationState> p_state_3 = p_cell_3->GetMutationState();
+							
+					unsigned number_of_epithelial_cell = (p_state_1->IsType<WildTypeCellMutationState>()==true) + (p_state_2->IsType<WildTypeCellMutationState>()==true) + (p_state_3->IsType<WildTypeCellMutationState>()==true);
+
+					if (number_of_epithelial_cell == 3)
+					{
+						tri_el[0] = node_index[(1+j)%4];
+						tri_el[1] = node_index[(2+j)%4];
+						tri_el[2] = node_index[(3+j)%4];
+
+						epithelial_triangulation.push_back(tri_el);
+					}
+							
 				}
 						
 			}
-					
 		}
 
 	}
@@ -251,7 +263,7 @@ std::vector<c_vector<unsigned, 3> > DensityDependantCellKillerStrip3DWithGhostNo
 	return epithelial_triangulation;
 }
 
-std::vector<c_vector<unsigned, 10> > DensityDependantCellKillerStrip3DWithGhostNodes::GetEpithelialNeighbours(std::vector<c_vector<unsigned, 3> > rEpithelialMeshVector, unsigned number_of_cells)
+std::vector<c_vector<unsigned, 10> > DensityDependantCellKillerStrip3DWithGhostNodesV2::GetEpithelialNeighbours(std::vector<c_vector<unsigned, 3> > rEpithelialMeshVector, unsigned number_of_cells)
 {
 	std::vector<c_vector<unsigned, 10> > node_neighbours;
 
@@ -404,26 +416,62 @@ std::vector<c_vector<unsigned, 10> > DensityDependantCellKillerStrip3DWithGhostN
 
 /** A method to return a vector that indicates which cells should be killed by anoikis
  */
-std::vector<c_vector<unsigned,2> > DensityDependantCellKillerStrip3DWithGhostNodes::RemoveByAnoikis()
+std::vector<c_vector<unsigned,2> > DensityDependantCellKillerStrip3DWithGhostNodesV2::RemoveByAnoikis()
 {
-	DomMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<3>*> (this->mpCellPopulation);
-	double domain_tollerance = 0.01;
+	std::vector<c_vector<unsigned,2> > cells_to_remove;
 
+	return cells_to_remove;
+}
+
+/* Cell Killer that kills transit cells that move beyond the walls of the box
+ * and also any transit cells that pop upwards and become detached from the stromal
+ * cells
+*/
+void DensityDependantCellKillerStrip3DWithGhostNodesV2::CheckAndLabelCellsForApoptosisOrDeath()
+{
+    // Get the information at this timestep for each node index that says whether to remove by anoikis 
+    DomMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<3>*> (this->mpCellPopulation);
+	double domain_tollerance = 0.1;
+
+
+	// unsigned num_cells = p_tissue->GetNumRealCells();
+    // std::vector<Node<3>*> extended_nodes(4*num_cells);
+	// std::map<unsigned, unsigned> mExtendedMeshNodeIndexMap;
+	// MutableMesh<3,3>* mpExtendedMesh = nullptr;
+
+	// unsigned count = 0;
+	// // Dom - Create a copy of original mesh
+    // for (typename AbstractCellPopulation<3>::Iterator cell_iter = mpCellPopulation->Begin();
+    //     cell_iter != mpCellPopulation->End();
+    //     ++cell_iter)
+    // {
+    //     // First, create and store a copy of this real node and cell
+    //     unsigned real_node_index = mpCellPopulation->GetLocationIndexUsingCell(*cell_iter);
+    //     c_vector<double, 3> real_node_location = mpCellPopulation->GetLocationOfCellCentre(*cell_iter);
+
+    //     // Create a copy of the node corresponding to this cell and store it
+    //     Node<3>* p_real_node = new Node<3>(real_node_index, real_node_location);
+    //     extended_nodes[count] = p_real_node;
+
+    //     // Populate mExtendedMeshNodeIndexMap
+    //     mExtendedMeshNodeIndexMap[count] = real_node_index;
+
+    //     count++;
+    // }
 
 	unsigned num_cells = p_tissue->GetNumRealCells();
-    std::vector<Node<3>*> extended_nodes(4*num_cells);
+	unsigned num_nodes = mpCellPopulation->GetNumNodes();
+    std::vector<Node<3>*> extended_nodes(4*num_nodes);
 	std::map<unsigned, unsigned> mExtendedMeshNodeIndexMap;
 	MutableMesh<3,3>* mpExtendedMesh = nullptr;
 
 	unsigned count = 0;
 	// Dom - Create a copy of original mesh
-    for (typename AbstractCellPopulation<3>::Iterator cell_iter = mpCellPopulation->Begin();
-        cell_iter != mpCellPopulation->End();
-        ++cell_iter)
+    for (unsigned i=0; i<num_nodes; i++)
     {
         // First, create and store a copy of this real node and cell
-        unsigned real_node_index = mpCellPopulation->GetLocationIndexUsingCell(*cell_iter);
-        c_vector<double, 3> real_node_location = mpCellPopulation->GetLocationOfCellCentre(*cell_iter);
+        unsigned real_node_index = i;
+        c_vector<double, 3> real_node_location = mpCellPopulation->GetNode(real_node_index)->rGetLocation();
 
         // Create a copy of the node corresponding to this cell and store it
         Node<3>* p_real_node = new Node<3>(real_node_index, real_node_location);
@@ -437,16 +485,42 @@ std::vector<c_vector<unsigned,2> > DensityDependantCellKillerStrip3DWithGhostNod
 
 
     // First, extend the mesh in the x-direction
-    for (typename AbstractCellPopulation<3>::Iterator cell_iter = mpCellPopulation->Begin();
-        cell_iter != mpCellPopulation->End();
-        ++cell_iter)
+    // for (typename AbstractCellPopulation<3>::Iterator cell_iter = mpCellPopulation->Begin();
+    //     cell_iter != mpCellPopulation->End();
+    //     ++cell_iter)
+    // {
+    //     // First, create and store a copy of this real node and cell
+    //     unsigned real_node_index = mpCellPopulation->GetLocationIndexUsingCell(*cell_iter);
+    //     c_vector<double, 3> real_node_location = mpCellPopulation->GetLocationOfCellCentre(*cell_iter);
+
+    //     // Create a copy of the node corresponding to this cell and store it
+    //      Node<3>* p_real_node = new Node<3>(real_node_index, real_node_location);
+
+    //     // Compute the location of the image node corresponding to this node
+    //     c_vector<double,3> image_node_location = real_node_location;
+    //     if (real_node_location[0] >= mCellPopulationWidth*0.5)
+    //     {
+    //         image_node_location[0] -= mCellPopulationWidth;
+    //     }
+    //     else if (real_node_location[0] <  mCellPopulationWidth*0.5)
+    //     {
+    //         image_node_location[0] += mCellPopulationWidth;
+    //     }
+
+    //     // Create a copy of the node corresponding to this cell, suitable translated, and store it
+    //     Node<3>* p_image_node = new Node<3>(count, image_node_location);
+    //     extended_nodes[count] = p_image_node;
+
+    //     // Populate mExtendedMeshNodeIndexMap
+    //     mExtendedMeshNodeIndexMap[count] = real_node_index;
+
+    //     count++;
+    // }
+	for (unsigned i=0; i<num_nodes; i++)
     {
         // First, create and store a copy of this real node and cell
-        unsigned real_node_index = mpCellPopulation->GetLocationIndexUsingCell(*cell_iter);
-        c_vector<double, 3> real_node_location = mpCellPopulation->GetLocationOfCellCentre(*cell_iter);
-
-        // Create a copy of the node corresponding to this cell and store it
-         Node<3>* p_real_node = new Node<3>(real_node_index, real_node_location);
+        unsigned real_node_index = i;
+        c_vector<double, 3> real_node_location = mpCellPopulation->GetNode(real_node_index)->rGetLocation();
 
         // Compute the location of the image node corresponding to this node
         c_vector<double,3> image_node_location = real_node_location;
@@ -469,15 +543,43 @@ std::vector<c_vector<unsigned,2> > DensityDependantCellKillerStrip3DWithGhostNod
         count++;
     }
 
+
     // Second, extend this extended mesh in the y-direction
     // (We don't need to store the real nodes anymore)
-    for (typename AbstractCellPopulation<3>::Iterator cell_iter = mpCellPopulation->Begin();
-        cell_iter != mpCellPopulation->End();
-        ++cell_iter)
+    // for (typename AbstractCellPopulation<3>::Iterator cell_iter = mpCellPopulation->Begin();
+    //     cell_iter != mpCellPopulation->End();
+    //     ++cell_iter)
+    // {
+    //     // First, create and store a copy of this real node and cell
+    //     unsigned real_node_index = mpCellPopulation->GetLocationIndexUsingCell(*cell_iter);
+    //     c_vector<double, 3> real_node_location = mpCellPopulation->GetLocationOfCellCentre(*cell_iter);
+
+    //     // Compute the location of the image node corresponding to this node
+    //     c_vector<double,3> image_node_location = real_node_location;
+
+    //     if (real_node_location[1] >= mCellPopulationDepth*0.5)
+    //     {
+    //         image_node_location[1] -= mCellPopulationDepth;
+    //     }
+    //     else if (real_node_location[1] <  mCellPopulationDepth*0.5)
+    //     {
+    //         image_node_location[1] += mCellPopulationDepth;
+    //     }
+
+    //     // Create a copy of the node corresponding to this cell, suitable translated, and store it
+    //     Node<3>* p_image_node = new Node<3>(count, image_node_location);
+    //     extended_nodes[count] = p_image_node;
+
+    //     // Populate mExtendedMeshNodeIndexMap
+    //     mExtendedMeshNodeIndexMap[count] = real_node_index;
+
+    //     count++;
+    // }
+	for (unsigned i=0; i<num_nodes; i++)
     {
         // First, create and store a copy of this real node and cell
-        unsigned real_node_index = mpCellPopulation->GetLocationIndexUsingCell(*cell_iter);
-        c_vector<double, 3> real_node_location = mpCellPopulation->GetLocationOfCellCentre(*cell_iter);
+        unsigned real_node_index = i;
+        c_vector<double, 3> real_node_location = mpCellPopulation->GetNode(real_node_index)->rGetLocation();
 
         // Compute the location of the image node corresponding to this node
         c_vector<double,3> image_node_location = real_node_location;
@@ -503,13 +605,48 @@ std::vector<c_vector<unsigned,2> > DensityDependantCellKillerStrip3DWithGhostNod
 
     // Thirdly, extend this extended mesh so that we cover the corners too
     // (We don't need to store the real nodes anymore)
-    for (typename AbstractCellPopulation<3>::Iterator cell_iter = mpCellPopulation->Begin();
-        cell_iter != mpCellPopulation->End();
-        ++cell_iter)
+    // for (typename AbstractCellPopulation<3>::Iterator cell_iter = mpCellPopulation->Begin();
+    //     cell_iter != mpCellPopulation->End();
+    //     ++cell_iter)
+    // {
+    //     // First, create and store a copy of this real node and cell
+    //     unsigned real_node_index = mpCellPopulation->GetLocationIndexUsingCell(*cell_iter);
+    //     c_vector<double, 3> real_node_location = mpCellPopulation->GetLocationOfCellCentre(*cell_iter);
+
+    //     // Compute the location of the image node corresponding to this node
+    //     c_vector<double,3> image_node_location = real_node_location;
+
+    //     if (real_node_location[1] >= mCellPopulationDepth*0.5)
+    //     {
+    //         image_node_location[1] -= mCellPopulationDepth;
+    //     }
+    //     else if (real_node_location[1] <  mCellPopulationDepth*0.5)
+    //     {
+    //         image_node_location[1] += mCellPopulationDepth;
+    //     }
+	// 	if (real_node_location[0] >= mCellPopulationWidth*0.5)
+    //     {
+    //         image_node_location[0] -= mCellPopulationWidth;
+    //     }
+    //     else if (real_node_location[0] <  mCellPopulationWidth*0.5)
+    //     {
+    //         image_node_location[0] += mCellPopulationWidth;
+    //     }
+
+    //     // Create a copy of the node corresponding to this cell, suitable translated, and store it
+    //     Node<3>* p_image_node = new Node<3>(count, image_node_location);
+    //     extended_nodes[count] = p_image_node;
+
+    //     // Populate mExtendedMeshNodeIndexMap
+    //     mExtendedMeshNodeIndexMap[count] = real_node_index;
+
+    //     count++;
+    // }
+	for (unsigned i=0; i<num_nodes; i++)
     {
         // First, create and store a copy of this real node and cell
-        unsigned real_node_index = mpCellPopulation->GetLocationIndexUsingCell(*cell_iter);
-        c_vector<double, 3> real_node_location = mpCellPopulation->GetLocationOfCellCentre(*cell_iter);
+        unsigned real_node_index = i;
+        c_vector<double, 3> real_node_location = mpCellPopulation->GetNode(real_node_index)->rGetLocation();
 
         // Compute the location of the image node corresponding to this node
         c_vector<double,3> image_node_location = real_node_location;
@@ -547,7 +684,7 @@ std::vector<c_vector<unsigned,2> > DensityDependantCellKillerStrip3DWithGhostNod
     	delete mpExtendedMesh;
     }
     mpExtendedMesh = new MutableMesh<3,3>(extended_nodes);
-	
+	// TRACE("Extended Mesh");
 	//This needs fixing
 	//   assert(p_tissue->GetVoronoiTessellation()!=NULL);	// This fails during archiving of a simulation as Voronoi stuff not archived yet
 
@@ -555,16 +692,25 @@ std::vector<c_vector<unsigned,2> > DensityDependantCellKillerStrip3DWithGhostNod
     c_vector<unsigned,2> individual_node_information;	// Will store the node index and whether to remove or not (1 or 0)
 
 	std::vector<c_vector<unsigned, 3> > epithelial_triangulation = GetEpithelialMesh(mpExtendedMesh, mExtendedMeshNodeIndexMap);
-
-	std::vector<c_vector<unsigned, 10> > epithelial_neighbours = GetEpithelialNeighbours(epithelial_triangulation, num_cells);
+	// TRACE("Got Ep Mesh");
+	// std::vector<c_vector<unsigned, 10> > epithelial_neighbours = GetEpithelialNeighbours(epithelial_triangulation, num_cells);
+	std::vector<c_vector<unsigned, 10> > epithelial_neighbours = GetEpithelialNeighbours(epithelial_triangulation, num_nodes);
+	// TRACE("Got Neighbours");
 
 	// PRINT_VARIABLE(SimulationTime::Instance()->GetTime());
 
-	for (AbstractCellPopulation<3>::Iterator cell_iter = p_tissue->Begin();
-    	 cell_iter != p_tissue->End();
-    	 ++cell_iter)
+	// for (AbstractCellPopulation<3>::Iterator cell_iter = p_tissue->Begin();
+    // 	 cell_iter != p_tissue->End();
+    // 	 ++cell_iter)
+	for (typename AbstractCellPopulation<3>::Iterator cell_iter = mpCellPopulation->Begin();
+        cell_iter != mpCellPopulation->End();
+        ++cell_iter)
 	{
-		unsigned node_index = p_tissue->GetNodeCorrespondingToCell(*cell_iter)->GetIndex();
+
+		unsigned node_index = mpCellPopulation->GetLocationIndexUsingCell(*cell_iter);
+
+
+		// unsigned node_index = p_tissue->GetNodeCorrespondingToCell(*cell_iter)->GetIndex();
 		//assert((!p_tissue->IsGhostNode(node_index)));
 		if(!p_tissue->IsGhostNode(node_index))
 		{
@@ -572,57 +718,10 @@ std::vector<c_vector<unsigned,2> > DensityDependantCellKillerStrip3DWithGhostNod
 			individual_node_information[0] = node_index;
 			individual_node_information[1] = 0;
 
-			// Examine each epithelial node to see if it should be removed by anoikis
-			// if (cell_iter->GetMutationState()->IsType<StromalCellMutationState>()==false && cell_iter->GetMutationState()->IsType<WildTypeCellMutationState>()==true)
-			// {
-			// 	std::vector<unsigned> first_order_neighs_vect;
-			// 	for(unsigned j=0; j<10; j++)
-			// 	{
-			// 		first_order_neighs_vect.push_back(epithelial_neighbours[node_index][j]);
-			// 		// first_order_neighs_vect.push_back(epithelial_neighbours[cell_i_ext][j]);
-			// 	}
-			// 	// order and remove doubles
-			// 	std::sort(first_order_neighs_vect.begin(), first_order_neighs_vect.end());
-			// 	first_order_neighs_vect.erase(std::unique(first_order_neighs_vect.begin(), first_order_neighs_vect.end()), first_order_neighs_vect.end());
-			// 	// Remove zero from vector
-			// 	first_order_neighs_vect.erase(std::remove(first_order_neighs_vect.begin(), first_order_neighs_vect.end(), 0), first_order_neighs_vect.end());
-			// 	first_order_neighs_vect.erase(std::remove(first_order_neighs_vect.begin(), first_order_neighs_vect.end(), node_index), first_order_neighs_vect.end());
-			
-			// 	assert(cell_iter->GetMutationState()->IsType<WildTypeCellMutationState>()==true);
 
-			// 	CellPtr p_cell = p_tissue->GetCellUsingLocationIndex(node_index);
-				
-			// 	// Determining whether to remove this cell by anoikis
-			// 	if((!cell_iter->IsDead()) && (p_cell->GetAge() > 1) && (this->IsCellTooSmall(mpExtendedMesh,mExtendedMeshNodeIndexMap,node_index, first_order_neighs_vect)==true) )
-			// 	{
+			// CellPtr p_cell = p_tissue->GetCellUsingLocationIndex(node_index);
+			CellPtr p_cell = mpCellPopulation->GetCellUsingLocationIndex(node_index);
 
-			// 		// c_vector<double, 3> node_A_location = p_tissue->GetNode(node_index)->rGetLocation();
-
-			// 		double x_location = this->mpCellPopulation->GetLocationOfCellCentre(p_cell)[0];
-			// 		double y_location = this->mpCellPopulation->GetLocationOfCellCentre(p_cell)[1];
-			// 		double z_location = this->mpCellPopulation->GetLocationOfCellCentre(p_cell)[2];
-
-					
-			// 		// Make sure cell is well inside tissue and not just an edge
-			// 		// if ( x_location <= domain_tollerance || x_location >= mCellPopulationWidth - domain_tollerance ||
-			// 		// 	 y_location <= domain_tollerance || y_location >= mCellPopulationDepth - domain_tollerance   )
-			// 		// if ( (x_location >= domain_tollerance || x_location <= mCellPopulationWidth - domain_tollerance) &&
-			// 		// 	 (y_location >= domain_tollerance || y_location <= mCellPopulationDepth - domain_tollerance)   )
-			// 		// {
-			// 			// Do killing in the x-direction
-			// 			if ( pow(x_location - 0.5*mCellPopulationWidth,2) >= pow(mCutOffLength,2) )
-			// 			{
-			// 				// TRACE("Got A Cell");
-			// 				individual_node_information[1] = 1;
-			// 			}
-
-						
-			// 		// }
-					
-			// 	}
-			// }
-
-			CellPtr p_cell = p_tissue->GetCellUsingLocationIndex(node_index);
 
 			// if (cell_iter->GetMutationState()->IsType<StromalCellMutationState>()==false && cell_iter->GetMutationState()->IsType<WildTypeCellMutationState>()==true)
 			if (p_cell->GetMutationState()->IsType<StromalCellMutationState>()==false && p_cell->GetMutationState()->IsType<WildTypeCellMutationState>()==true)
@@ -633,11 +732,39 @@ std::vector<c_vector<unsigned,2> > DensityDependantCellKillerStrip3DWithGhostNod
 				double y_location = this->mpCellPopulation->GetLocationOfCellCentre(p_cell)[1];
 				double z_location = this->mpCellPopulation->GetLocationOfCellCentre(p_cell)[2];
 
+
+				////////////////////////////////////////////////////////////////////////////////////////////////
+
+					// Find the first order neighbours
+
+					// std::vector<unsigned> first_order_neighs_vect;
+					// for(unsigned j=0; j<10; j++)
+					// {
+					// 	first_order_neighs_vect.push_back(epithelial_neighbours[node_index][j]);
+					// 	// first_order_neighs_vect.push_back(epithelial_neighbours[cell_i_ext][j]);
+					// }
+					// // order and remove doubles
+					// std::sort(first_order_neighs_vect.begin(), first_order_neighs_vect.end());
+					// first_order_neighs_vect.erase(std::unique(first_order_neighs_vect.begin(), first_order_neighs_vect.end()), first_order_neighs_vect.end());
+					// // Remove zero from vector
+					// first_order_neighs_vect.erase(std::remove(first_order_neighs_vect.begin(), first_order_neighs_vect.end(), 0), first_order_neighs_vect.end());
+					// first_order_neighs_vect.erase(std::remove(first_order_neighs_vect.begin(), first_order_neighs_vect.end(), node_index), first_order_neighs_vect.end());
+
+					// // Determining whether to remove this cell of it's too small
+
+					// c_vector<double,2> is_too_small_density = this->IsCellTooSmall(mpExtendedMesh,mExtendedMeshNodeIndexMap,node_index, first_order_neighs_vect);
+
+					// PRINT_3_VARIABLES(node_index, is_too_small_density[1], first_order_neighs_vect.size() );
+					// PRINT_VECTOR(first_order_neighs_vect);
+
+				////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 				// Do killing in the x-direction
 				// if ( pow(x_location - 0.5*mCellPopulationWidth,2) >= pow(mCutOffLength,2) && !(cell_iter->IsDead()) && (p_cell->GetAge() > 1) )
 				if ( pow(x_location - 0.5*mCellPopulationWidth,2) >= pow(mCutOffLength,2) && !(p_cell->IsDead()) && (p_cell->GetAge() >= 1) )
 				{
-					// Find the first order neighbours
+					// // Find the first order neighbours
 
 					std::vector<unsigned> first_order_neighs_vect;
 					for(unsigned j=0; j<10; j++)
@@ -653,9 +780,36 @@ std::vector<c_vector<unsigned,2> > DensityDependantCellKillerStrip3DWithGhostNod
 					first_order_neighs_vect.erase(std::remove(first_order_neighs_vect.begin(), first_order_neighs_vect.end(), node_index), first_order_neighs_vect.end());
 
 					// Determining whether to remove this cell of it's too small
-					if( (this->IsCellTooSmall(mpExtendedMesh,mExtendedMeshNodeIndexMap,node_index, first_order_neighs_vect)==true) )
+
+					c_vector<double,2> is_too_small_density = this->IsCellTooSmall(mpExtendedMesh,mExtendedMeshNodeIndexMap,node_index, first_order_neighs_vect);
+					
+					// PRINT_3_VARIABLES(node_index, is_too_small_density[1], first_order_neighs_vect.size() );
+					
+					// if( (this->IsCellTooSmall(mpExtendedMesh,mExtendedMeshNodeIndexMap,node_index, first_order_neighs_vect)==true) )
+					if( is_too_small_density[0] == 1.0)
 					{
-						individual_node_information[1] = 1;
+						if( !(p_cell->HasApoptosisBegun()) )
+						{
+							p_cell->StartApoptosis();
+							individual_node_information[1] = 1;
+
+							SimulationTime* p_time = SimulationTime::Instance();
+							c_vector<double, 3> cell_location = p_tissue->GetNode(node_index)->rGetLocation();
+
+							OutputFileHandler output_file_handler(mOutputDirectory+"/", false);
+							out_stream deathLocationFile = output_file_handler.OpenOutputFile("densityDeaths.dat", std::ios::app);
+
+							*deathLocationFile << p_time->GetTime() << "\t";
+							for (unsigned i=0; i<3; i++)
+							{
+								*deathLocationFile << cell_location[i] << "\t";
+							}
+							*deathLocationFile << is_too_small_density[1] << "\t";
+							*deathLocationFile << node_index << "\n";
+							deathLocationFile->close();
+
+						}
+
 					}
 
 				}
@@ -667,20 +821,6 @@ std::vector<c_vector<unsigned,2> > DensityDependantCellKillerStrip3DWithGhostNod
 	}
 
 	delete mpExtendedMesh;
-	return cells_to_remove;
-}
-
-/* Cell Killer that kills transit cells that move beyond the walls of the box
- * and also any transit cells that pop upwards and become detached from the stromal
- * cells
-*/
-void DensityDependantCellKillerStrip3DWithGhostNodes::CheckAndLabelCellsForApoptosisOrDeath()
-{
-	// TRACE("Density In")
-	DomMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<3>*> (this->mpCellPopulation);
-
-    // Get the information at this timestep for each node index that says whether to remove by anoikis 
-    std::vector<c_vector<unsigned,2> > cells_to_remove = this->RemoveByAnoikis();
 
     // Keep a record of how many cells have been removed at this timestep
     this->SetNumberCellsRemovedByAnoikis(cells_to_remove);
@@ -689,40 +829,22 @@ void DensityDependantCellKillerStrip3DWithGhostNodes::CheckAndLabelCellsForApopt
     // Need to avoid trying to kill any cells twice (i.e. both by anoikis or random apoptosis)
     // Loop over these vectors individually and kill any cells that they tell you to
 
-    for (unsigned i=0; i<cells_to_remove.size(); i++)
-    {
-    	if (cells_to_remove[i][1] == 1)
-    	{
-			// PRINT_VARIABLE("cell removed");
-    		// Get cell associated to this node
+    // for (unsigned i=0; i<cells_to_remove.size(); i++)
+    // {
+    // 	if (cells_to_remove[i][1] == 1)
+    // 	{
+	// 		// PRINT_VARIABLE("cell removed");
+    // 		// Get cell associated to this node
 			
-    		CellPtr p_cell = p_tissue->GetCellUsingLocationIndex(cells_to_remove[i][0]);
-			if( !(p_cell->HasApoptosisBegun()) )
-			{
-				p_cell->StartApoptosis();
+    // 		CellPtr p_cell = p_tissue->GetCellUsingLocationIndex(cells_to_remove[i][0]);
+	// 		if( !(p_cell->HasApoptosisBegun()) )
+	// 		{
+	// 			p_cell->StartApoptosis();
 
-			}
-			
-			// c_vector<double, 3> node_A_location = p_tissue->GetNode(cells_to_remove[i][0])->rGetLocation();
+	// 		}
 
-			// double x_location = this->mpCellPopulation->GetLocationOfCellCentre(p_cell)[0];
-			// double y_location = this->mpCellPopulation->GetLocationOfCellCentre(p_cell)[1];
-			// double z_location = this->mpCellPopulation->GetLocationOfCellCentre(p_cell)[2];
-
-			// PRINT_3_VARIABLES(x_location,y_location,z_location);
-    		
-			// // Make sure cell is well inside tissue and not just an edge
-			// if (x_location >= 1.0 && x_location <= mCellPopulationWidth - 1.0)
-			// {
-			// 	if (y_location >= 1.0 && y_location <= mCellPopulationDepth - 1.0)
-			// 	{
-			// 		TRACE("Yup, inside");
-			// 	}
-			// }
-			
-			
-    	}
-    }
+    // 	}
+    // }
 
 	for (AbstractCellPopulation<3>::Iterator cell_iter = p_tissue->Begin();
     	 cell_iter != p_tissue->End();
@@ -742,19 +864,19 @@ void DensityDependantCellKillerStrip3DWithGhostNodes::CheckAndLabelCellsForApopt
 					p_cell_A->Kill();
 					// TRACE("Cell Removed By Density");
 
-					SimulationTime* p_time = SimulationTime::Instance();
-            		c_vector<double, 3> cell_location = p_tissue->GetNode(node_index)->rGetLocation();
+					// SimulationTime* p_time = SimulationTime::Instance();
+            		// c_vector<double, 3> cell_location = p_tissue->GetNode(node_index)->rGetLocation();
 
-					OutputFileHandler output_file_handler(mOutputDirectory+"/", false);
-					out_stream deathLocationFile = output_file_handler.OpenOutputFile("densityDeaths.dat", std::ios::app);
+					// OutputFileHandler output_file_handler(mOutputDirectory+"/", false);
+					// out_stream deathLocationFile = output_file_handler.OpenOutputFile("densityDeaths.dat", std::ios::app);
 
-					*deathLocationFile << p_time->GetTime() << "\t";
-					for (unsigned i=0; i<3; i++)
-					{
-						*deathLocationFile << cell_location[i] << "\t";
-					}
-					*deathLocationFile << node_index << "\n";
-					deathLocationFile->close();
+					// *deathLocationFile << p_time->GetTime() << "\t";
+					// for (unsigned i=0; i<3; i++)
+					// {
+					// 	*deathLocationFile << cell_location[i] << "\t";
+					// }
+					// *deathLocationFile << node_index << "\n";
+					// deathLocationFile->close();
 				}
 			}
 		}
@@ -763,7 +885,7 @@ void DensityDependantCellKillerStrip3DWithGhostNodes::CheckAndLabelCellsForApopt
 	}
 }
 
-void DensityDependantCellKillerStrip3DWithGhostNodes::SetNumberCellsRemovedByAnoikis(std::vector<c_vector<unsigned,2> > cellsRemoved)
+void DensityDependantCellKillerStrip3DWithGhostNodesV2::SetNumberCellsRemovedByAnoikis(std::vector<c_vector<unsigned,2> > cellsRemoved)
 {
 	unsigned num_removed_by_anoikis = 0;
 	
@@ -778,13 +900,13 @@ void DensityDependantCellKillerStrip3DWithGhostNodes::SetNumberCellsRemovedByAno
     mCellsRemovedByAnoikis += num_removed_by_anoikis;
 }
 
-unsigned DensityDependantCellKillerStrip3DWithGhostNodes::GetNumberCellsRemovedByAnoikis()
+unsigned DensityDependantCellKillerStrip3DWithGhostNodesV2::GetNumberCellsRemovedByAnoikis()
 {
 	return mCellsRemovedByAnoikis;
 }
 
 /* Data stored: time - node_index - x - y - z */
-void DensityDependantCellKillerStrip3DWithGhostNodes::SetLocationsOfCellsRemovedByAnoikis(std::vector<c_vector<unsigned,2> > cellsRemoved)
+void DensityDependantCellKillerStrip3DWithGhostNodesV2::SetLocationsOfCellsRemovedByAnoikis(std::vector<c_vector<unsigned,2> > cellsRemoved)
 {
 	DomMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<3>*> (this->mpCellPopulation);
 	double x_location, y_location, z_location;
@@ -814,12 +936,12 @@ void DensityDependantCellKillerStrip3DWithGhostNodes::SetLocationsOfCellsRemoved
     }
 }
 
-std::vector<c_vector<double,5> > DensityDependantCellKillerStrip3DWithGhostNodes::GetLocationsOfCellsRemovedByAnoikis()
+std::vector<c_vector<double,5> > DensityDependantCellKillerStrip3DWithGhostNodesV2::GetLocationsOfCellsRemovedByAnoikis()
 {
 	return mLocationsOfAnoikisCells;
 }
 
-void DensityDependantCellKillerStrip3DWithGhostNodes::OutputCellKillerParameters(out_stream& rParamsFile)
+void DensityDependantCellKillerStrip3DWithGhostNodesV2::OutputCellKillerParameters(out_stream& rParamsFile)
 {
     *rParamsFile << "\t\t\t<CellsRemovedByAnoikis>" << mCellsRemovedByAnoikis << "</CellsRemovedByAnoikis> \n";
 	*rParamsFile << "\t\t\t<CutOffLength>" << mCutOffLength << "</CutOffLength> \n";
@@ -832,4 +954,4 @@ void DensityDependantCellKillerStrip3DWithGhostNodes::OutputCellKillerParameters
 }
 
 #include "SerializationExportWrapperForCpp.hpp"
-CHASTE_CLASS_EXPORT(DensityDependantCellKillerStrip3DWithGhostNodes)
+CHASTE_CLASS_EXPORT(DensityDependantCellKillerStrip3DWithGhostNodesV2)

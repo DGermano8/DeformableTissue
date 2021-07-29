@@ -501,6 +501,7 @@ void PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::AddForceContribution
         }
         case 3:
         {
+            
             // If the width of the periodic domain has not been specified, use the initial width of the cell population
             if (mPeriodicDomainDepth == DOUBLE_UNSET)
             {
@@ -648,6 +649,123 @@ void PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::AddForceContribution
 
                 count++;
             }
+            
+
+
+
+
+            /*
+            unsigned num_nodes = rCellPopulation.GetNumNodes();
+
+            unsigned count = 0;
+            // Dom - Create a copy of original mesh
+            for (unsigned i=0; i<num_nodes; i++)
+            {
+                // First, create and store a copy of this real node and cell
+                unsigned real_node_index = i;
+                c_vector<double, 3> real_node_location = rCellPopulation.GetNode(real_node_index)->rGetLocation();
+
+                // Create a copy of the node corresponding to this cell and store it
+                Node<DIM>* p_real_node = new Node<DIM>(real_node_index, real_node_location);
+                extended_nodes[count] = p_real_node;
+
+                // Populate mExtendedMeshNodeIndexMap
+                mExtendedMeshNodeIndexMap[count] = real_node_index;
+
+                count++;
+            }
+
+            for (unsigned i=0; i<num_nodes; i++)
+            {
+                // First, create and store a copy of this real node and cell
+                unsigned real_node_index = i;
+                c_vector<double, 3> real_node_location = rCellPopulation.GetNode(real_node_index)->rGetLocation();
+
+                // Compute the location of the image node corresponding to this node
+                c_vector<double,3> image_node_location = real_node_location;
+                if (real_node_location[0] >= mPeriodicDomainWidth*0.5)
+                {
+                    image_node_location[0] -= mPeriodicDomainWidth;
+                }
+                else if (real_node_location[0] <  mPeriodicDomainWidth*0.5)
+                {
+                    image_node_location[0] += mPeriodicDomainWidth;
+                }
+
+                // Create a copy of the node corresponding to this cell, suitable translated, and store it
+                Node<DIM>* p_image_node = new Node<DIM>(count, image_node_location);
+                extended_nodes[count] = p_image_node;
+
+                // Populate mExtendedMeshNodeIndexMap
+                mExtendedMeshNodeIndexMap[count] = real_node_index;
+
+                count++;
+            }
+
+            for (unsigned i=0; i<num_nodes; i++)
+            {
+                // First, create and store a copy of this real node and cell
+                unsigned real_node_index = i;
+                c_vector<double, 3> real_node_location = rCellPopulation.GetNode(real_node_index)->rGetLocation();
+
+                // Compute the location of the image node corresponding to this node
+                c_vector<double,3> image_node_location = real_node_location;
+
+                if (real_node_location[1] >= mPeriodicDomainDepth*0.5)
+                {
+                    image_node_location[1] -= mPeriodicDomainDepth;
+                }
+                else if (real_node_location[1] <  mPeriodicDomainDepth*0.5)
+                {
+                    image_node_location[1] += mPeriodicDomainDepth;
+                }
+
+                // Create a copy of the node corresponding to this cell, suitable translated, and store it
+                Node<DIM>* p_image_node = new Node<DIM>(count, image_node_location);
+                extended_nodes[count] = p_image_node;
+
+                // Populate mExtendedMeshNodeIndexMap
+                mExtendedMeshNodeIndexMap[count] = real_node_index;
+
+                count++;
+            }
+
+            for (unsigned i=0; i<num_nodes; i++)
+            {
+                // First, create and store a copy of this real node and cell
+                unsigned real_node_index = i;
+                c_vector<double, 3> real_node_location = rCellPopulation.GetNode(real_node_index)->rGetLocation();
+
+                // Compute the location of the image node corresponding to this node
+                c_vector<double,3> image_node_location = real_node_location;
+
+                if (real_node_location[1] >= mPeriodicDomainDepth*0.5)
+                {
+                    image_node_location[1] -= mPeriodicDomainDepth;
+                }
+                else if (real_node_location[1] <  mPeriodicDomainDepth*0.5)
+                {
+                    image_node_location[1] += mPeriodicDomainDepth;
+                }
+                if (real_node_location[0] >= mPeriodicDomainWidth*0.5)
+                {
+                    image_node_location[0] -= mPeriodicDomainWidth;
+                }
+                else if (real_node_location[0] <  mPeriodicDomainWidth*0.5)
+                {
+                    image_node_location[0] += mPeriodicDomainWidth;
+                }
+
+                // Create a copy of the node corresponding to this cell, suitable translated, and store it
+                Node<DIM>* p_image_node = new Node<DIM>(count, image_node_location);
+                extended_nodes[count] = p_image_node;
+
+                // Populate mExtendedMeshNodeIndexMap
+                mExtendedMeshNodeIndexMap[count] = real_node_index;
+
+                count++;
+            }
+            */
 
             // We now construct mpExtendedMesh using extended_nodes
             if (mpExtendedMesh != NULL)
@@ -671,9 +789,6 @@ void PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::AddForceContribution
                 // Dom - Hijacked "mUseOneWaySprings" to implement stromal cells as ghosts...
                 if(mUseOneWaySprings)
                 {
-                    
-                    
-
                     if (nodeA_global_index < num_cells)
                     {
                         unsigned real_A_node_index = mExtendedMeshNodeIndexMap[nodeA_global_index];
@@ -749,7 +864,6 @@ void PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::AddForceContribution
             // This can't happen
             NEVER_REACHED;
     }
-    
 
 }
 
@@ -800,8 +914,6 @@ c_vector<double, DIM> PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::Cal
             return zero_vector<double>(DIM); // c_vector<double,DIM>() is not guaranteed to be fresh memory
         }
     }
-
- 
 
     ///\todo Extend force class to cope with apoptotic cells (#1856)
 
@@ -860,7 +972,14 @@ c_vector<double, DIM> PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::Cal
         if(a_apop==true && (a_born==false || a_born==true ) )
         {
             double time_until_death_a = p_cell_A->GetTimeUntilDeath();
-            a_rest_length = a_rest_length * time_until_death_a / p_cell_A->GetApoptosisTime();
+            a_rest_length = a_rest_length * (2.0*time_until_death_a /(p_cell_A->GetApoptosisTime()) - p_cell_A->GetApoptosisTime());
+
+            if(a_rest_length < 0.0)
+            {
+                a_rest_length = 0.0;
+            }
+
+            // PRINT_3_VARIABLES(p_cell_A->GetApoptosisTime(), p_cell_A->GetTimeUntilDeath(), a_rest_length);
         }
         // if(a_apop==false && a_born==true)
         // {
@@ -870,7 +989,11 @@ c_vector<double, DIM> PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::Cal
         if(b_apop==true && (b_born==false || b_born==true) )
         {
             double time_until_death_b = p_cell_B->GetTimeUntilDeath();
-            b_rest_length = b_rest_length * time_until_death_b / p_cell_B->GetApoptosisTime();
+            b_rest_length = b_rest_length * (2.0*time_until_death_b /(p_cell_B->GetApoptosisTime()) - p_cell_B->GetApoptosisTime());
+            if(b_rest_length < 0.0)
+            {
+                b_rest_length = 0.0;
+            }
         }
         // if(b_apop==false && b_born==true)
         // {

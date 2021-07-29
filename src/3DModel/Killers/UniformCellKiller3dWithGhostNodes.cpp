@@ -109,7 +109,7 @@ void UniformCellKiller3dWithGhostNodes::CheckAndLabelCellsForApoptosisOrDeath()
 	DomMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<3>*> (this->mpCellPopulation);
 	//assert(p_tissue->GetVoronoiTessellation()!=NULL);	// This fails during archiving of a simulation as Voronoi stuff not archived yet
     double death_prob_this_timestep = 1.0 - pow((1.0 - mProbabilityOfDeathInAnHour), SimulationTime::Instance()->GetTimeStep());
-	int how_many_cells_to_kill = 0;
+	// int how_many_cells_to_kill = 0;
 
 	// for (AbstractCellPopulation<3>::Iterator cell_iter = p_tissue->Begin();
     // 	 cell_iter != p_tissue->End();
@@ -199,7 +199,7 @@ void UniformCellKiller3dWithGhostNodes::CheckAndLabelCellsForApoptosisOrDeath()
 	std::vector<unsigned> randon_cells;
 	if(can_i_kill_cells)
 	{
-		for(int j=0; j< (mpCellPopulation->GetNumRealCells() - mMinCellPopulation); j++)
+		for(int j=0; j< (mpCellPopulation->GetNumRealCells() - number_of_apoptic_cells - mMinCellPopulation); j++)
 		{
 			int cell_to_kill = int ((cells_which_can_die.size() )*(RandomNumberGenerator::Instance()->ranf()));
 
@@ -251,7 +251,6 @@ void UniformCellKiller3dWithGhostNodes::CheckAndLabelCellsForApoptosisOrDeath()
 			}
 		}
 		
-
 	}
 	// TRACE("Leaving")
 
