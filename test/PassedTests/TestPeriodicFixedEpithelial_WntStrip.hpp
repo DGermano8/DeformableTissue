@@ -34,6 +34,8 @@
 #include "CellMutationStatesWriter.hpp"
 #include "CellProliferativeTypesWriter.hpp"
 #include "CellAncestorWriter.hpp"
+#include "CellAncestor.hpp"
+
 #include "CellPopulationEpithelialWriter.hpp"
 #include "VoronoiDataWriter.hpp"
 
@@ -74,8 +76,8 @@ public:
 
         std::string output_directory = "FixedEp_WntStrip_20210728_01";
 
-        unsigned width = 12;	   // x
-        unsigned height = 14;      // y
+        unsigned width = 10;	   // x
+        unsigned height = 12;      // y
         unsigned ghosts_bottom = 0;       // ghosts > depth
         unsigned ghosts_top = 1;       // ghosts > depth
         unsigned num_tissue_depth = 1;
@@ -91,6 +93,8 @@ public:
 
         double periodic_width = (double) (width+0.0)*width_space;
         double periodic_height = (double) (height+0.0)*height_space;
+
+        double  wnt_strip_width = 1.5;
 
         double tissue_base = 5.0; //Hieght of tissue to prevent drift
         double tissue_middle = 0.0;
@@ -240,20 +244,21 @@ public:
             // p_model->SetG2Duration(0.5);
             // p_model->SetMDuration(1);
 
-            p_model->SetTransitCellG1Duration(6);
-            p_model->SetSDuration(3);
-            p_model->SetG2Duration(2);
-            p_model->SetMDuration(1);
+            // p_model->SetTransitCellG1Duration(6);
+            // p_model->SetSDuration(3);
+            // p_model->SetG2Duration(2);
+            // p_model->SetMDuration(1);
 
             // p_model->SetTransitCellG1Duration(11);
             // p_model->SetSDuration(8);
             // p_model->SetG2Duration(4);
             // p_model->SetMDuration(1);
 
-            // p_model->SetTransitCellG1Duration(0.5);
-            // p_model->SetSDuration(0.25);
-            // p_model->SetG2Duration(0.25);
-            // p_model->SetMDuration(0.5);
+            p_model->SetTransitCellG1Duration(0.5);
+            p_model->SetSDuration(0.5);
+            p_model->SetG2Duration(1);
+            p_model->SetMDuration(1);
+            
             
             CellPtr p_epithelial_cell(new Cell(p_state, p_model));
             // double birth_time = -8;
@@ -267,7 +272,11 @@ public:
             
             p_epithelial_cell->InitialiseCellCycleModel();
             
-			cells.push_back(p_epithelial_cell);
+            MAKE_PTR_ARGS(CellAncestor, p_cell_ancestor, (i));
+            p_epithelial_cell->SetAncestor(p_cell_ancestor);
+
+            cells.push_back(p_epithelial_cell);
+
         }
         
         std::cout<< "number of cells comp = " << real_node_indices.size() << "\n";
@@ -292,10 +301,9 @@ public:
         DomWntConcentration<3>::Instance()->SetCryptLength(20.0);
         DomWntConcentration<3>::Instance()->SetCryptCentreX(0.5*periodic_width);
         DomWntConcentration<3>::Instance()->SetCryptCentreY(0.5*periodic_height);
-        DomWntConcentration<3>::Instance()->SetCryptRadius(1.5);
+        DomWntConcentration<3>::Instance()->SetCryptRadius(wnt_strip_width);
         DomWntConcentration<3>::Instance()->SetWntConcentrationParameter(2.0);
         
-
         // Pass an adaptive numerical method to the simulation
         boost::shared_ptr<AbstractNumericalMethod<3,3> > p_method(new ForwardEulerNumericalMethod<3,3>());
         p_method->SetUseAdaptiveTimestep(false);
@@ -401,7 +409,7 @@ public:
 
         double cut_off = 2.5;
         double density_threshold = 0.98;
-        double density_radius = 2.5;
+        double density_radius = wnt_strip_width + 2.0;
         // Add anoikis cell killer
         // MAKE_PTR_ARGS(AnoikisCellKiller3DWithGhostNodes, anoikis, (&cell_population, cut_off, periodic_width, periodic_height));
         // simulator.AddCellKiller(anoikis);

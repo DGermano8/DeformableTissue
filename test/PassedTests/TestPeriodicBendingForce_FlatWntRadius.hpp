@@ -29,7 +29,7 @@
 #include "PeriodicStromalBoxBoundaryCondition3d.hpp"
 // #include "TrianglesMeshWriter.hpp"
 #include "Debug.hpp"
-#include "DensityDependantCellKiller3DWithGhostNodes.hpp"
+#include "DensityDependantCellKillerRadiual3DWithGhostNodesV2.hpp"
 
 #include "DifferentiatedCellProliferativeType.hpp"
 #include "TransitCellProliferativeType.hpp"
@@ -37,7 +37,8 @@
 #include "CellIdWriter.hpp"
 // #include "CellMutationStatesWriter.hpp"
 #include "CellProliferativeTypesWriter.hpp"
-// #include "CellAncestorWriter.hpp"
+#include "CellAncestorWriter.hpp"
+#include "CellAncestor.hpp"
 // #include "CellPopulationEpithelialWriter.hpp"
 // #include "VoronoiDataWriter.hpp"
 #include "NodeVelocityWriter.hpp"
@@ -50,6 +51,7 @@
 // #include "MeshModifier.hpp"
 // #include "MeshRemeshModifier.hpp"
 // #include "PeriodicRemeshCellsModifier.hpp"
+#include "MeshRemeshCutoffModifier.hpp"
 
 #include "DomSimpleWntCellCycleModel.hpp"
 
@@ -73,7 +75,7 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "FlatWntRadius_NoMeshMod";
+        std::string output_directory = "FlatWntRadius_20210804_03";
 
         unsigned width = 8;	   // x
         unsigned height = 10;      // y
@@ -106,6 +108,7 @@ public:
         double centre_y = 30;
 
         double spring_strength = 20.0;
+        double spring_cuttoff = 1.75;
 
         double radius =  2.0;//periodic_width+1.0;
         double target_curvature = -0.2; //maximum curvature is 0.2066 -> higher curvature means smaller sphere
@@ -113,8 +116,8 @@ public:
         double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 0.01;
-        double plot_step = 1;
+        double end_time = 120;
+        double plot_step = 10;
 
         bool include_springs = true;
         bool include_bending = true;
@@ -259,8 +262,10 @@ public:
 			
             p_epithelial_cell->SetBirthTime(birth_time);
             p_epithelial_cell->SetApoptosisTime(1);
-            
             p_epithelial_cell->InitialiseCellCycleModel();
+
+            MAKE_PTR_ARGS(CellAncestor, p_cell_ancestor, (i));
+            p_epithelial_cell->SetAncestor(p_cell_ancestor);
             
 			cells.push_back(p_epithelial_cell);
         }
@@ -299,7 +304,7 @@ public:
         cell_population.AddCellWriter<CellIdWriter>();
         // cell_population.AddCellWriter<CellMutationStatesWriter>();
         cell_population.AddCellWriter<CellProliferativeTypesWriter>();
-        // // cell_population.AddCellWriter<CellAncestorWriter>();
+        cell_population.AddCellWriter<CellAncestorWriter>();
         // cell_population.AddPopulationWriter<CellPopulationEpithelialWriter>();
         cell_population.AddPopulationWriter<NodeVelocityWriter>();
 
@@ -340,7 +345,7 @@ public:
 		// Create periodic spring force law
         MAKE_PTR(PeriodicCryptModelInteractionForceWithGhostNodes<3>, periodic_spring_force);
         periodic_spring_force->SetUseOneWaySprings(false); //turning this on makes the stromal cells act as ghosts..
-        periodic_spring_force->SetCutOffLength(1.5);
+        periodic_spring_force->SetCutOffLength(spring_cuttoff);
         //                     SetEpithelialStromalCellDependentSprings(ind , Ep-Ep, Str-Str, Ep-Str, apcTwoHitStromalMultiplier);
         periodic_spring_force->SetEpithelialStromalCellDependentSprings(true, 1.0,     1.0,     0.5,    1.0);
         periodic_spring_force->SetPeriodicDomainWidth(periodic_width);
@@ -380,13 +385,15 @@ public:
         // simulator.AddForce(p_random_force);
         
         double cut_off = 1.5;
-        double density_threshold = 0.99;
-        double domain_tol = 1.0;
+        double density_threshold = 0.95;
+        double domain_tol = 3.0;
         // Add anoikis cell killer
         MAKE_PTR_ARGS(AnoikisCellKiller3DWithGhostNodes, anoikis, (&cell_population, cut_off, periodic_width, periodic_height));
+        anoikis->SetOutputDirectory(output_directory);
         simulator.AddCellKiller(anoikis);
 
-        MAKE_PTR_ARGS(DensityDependantCellKiller3DWithGhostNodes, density, (&cell_population, domain_tol, density_threshold, periodic_width, periodic_height));
+        MAKE_PTR_ARGS(DensityDependantCellKillerRadiual3DWithGhostNodesV2, density, (&cell_population, domain_tol, density_threshold, periodic_width, periodic_height));
+        density->SetOutputDirectory(output_directory);
         simulator.AddCellKiller(density);
 
         simulator.SetOutputDirectory(output_directory);	 
@@ -413,6 +420,14 @@ public:
 	    // MAKE_PTR(GeneralisedLinearSpringForce<3>, linear_force);
 	    // linear_force->SetCutOffLength(1.5);
         // simulator.AddForce(linear_force);
+
+        MAKE_PTR(MeshRemeshCutoffModifier<3>, pc_modifier);
+        pc_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
+        pc_modifier->SetWidth(periodic_width);
+        pc_modifier->SetDepth(periodic_height);
+        pc_modifier->SetCutoff(spring_cuttoff+0.001);
+
+        simulator.AddSimulationModifier(pc_modifier);
 
         simulator.SetSamplingTimestepMultiple(plot_step);			// Every hour
 		simulator.SetEndTime(end_time);

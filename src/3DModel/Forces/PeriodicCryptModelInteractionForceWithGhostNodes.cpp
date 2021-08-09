@@ -969,7 +969,7 @@ c_vector<double, DIM> PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::Cal
         bool a_apop = p_cell_A->HasApoptosisBegun();
         bool b_apop = p_cell_B->HasApoptosisBegun();
 
-        if(a_apop==true && (a_born==false || a_born==true ) )
+        if(a_apop==true )
         {
             double time_until_death_a = p_cell_A->GetTimeUntilDeath();
             a_rest_length = a_rest_length * (2.0*time_until_death_a /(p_cell_A->GetApoptosisTime()) - p_cell_A->GetApoptosisTime());
@@ -979,14 +979,9 @@ c_vector<double, DIM> PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::Cal
                 a_rest_length = 0.0;
             }
 
-            // PRINT_3_VARIABLES(p_cell_A->GetApoptosisTime(), p_cell_A->GetTimeUntilDeath(), a_rest_length);
         }
-        // if(a_apop==false && a_born==true)
-        // {
-        //     a_rest_length = a_rest_length*(p_cell_A->GetAge()/p_model_A->GetMDuration());
-        // }
 
-        if(b_apop==true && (b_born==false || b_born==true) )
+        if(b_apop==true )
         {
             double time_until_death_b = p_cell_B->GetTimeUntilDeath();
             b_rest_length = b_rest_length * (2.0*time_until_death_b /(p_cell_B->GetApoptosisTime()) - p_cell_B->GetApoptosisTime());
@@ -995,25 +990,31 @@ c_vector<double, DIM> PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::Cal
                 b_rest_length = 0.0;
             }
         }
-        // if(b_apop==false && b_born==true)
-        // {
-        //     b_rest_length = b_rest_length*(p_cell_B->GetAge()/p_model_B->GetMDuration());
-        // }
+
 
         if( (b_apop==false && b_born==true) && (a_apop==false && a_born==true) )
         {
             double age_a = p_cell_A->GetAge();
             double age_b = p_cell_B->GetAge();
-
-            // PRINT_2_VARIABLES(age_a , age_b);
-
             if (age_a == age_b)
             {
-                b_rest_length = b_rest_length*(p_cell_B->GetAge()/p_model_B->GetMDuration());
-                a_rest_length = a_rest_length*(p_cell_A->GetAge()/p_model_A->GetMDuration());
+                b_rest_length = b_rest_length*(age_b/p_model_B->GetMDuration());
+                a_rest_length = a_rest_length*(age_a/p_model_A->GetMDuration());
             }
+            // else_do_nothing_to_maintain_1_rest_length
+
         }
-        
+
+        // This does not work, as when a cell is born, the rest length with a neighbour not born will shrink instantaneously from 1 to 0.5
+        // if( a_apop==false && a_born==true )
+        // {
+        //     a_rest_length = a_rest_length*(p_cell_A->GetAge()/p_model_A->GetMDuration());
+        // }
+        //
+        // if( b_apop==false && b_born==true )
+        // {
+        //     b_rest_length = b_rest_length*(p_cell_B->GetAge()/p_model_B->GetMDuration());
+        // }
         
         rest_length = a_rest_length + b_rest_length;
 

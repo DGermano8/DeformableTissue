@@ -34,6 +34,7 @@
 #include "CellMutationStatesWriter.hpp"
 #include "CellProliferativeTypesWriter.hpp"
 #include "CellAncestorWriter.hpp"
+#include "CellAncestor.hpp"
 #include "CellPopulationEpithelialWriter.hpp"
 #include "VoronoiDataWriter.hpp"
 
@@ -46,8 +47,9 @@
 
 #include "MeshModifier.hpp"
 #include "MeshRemeshModifier.hpp"
+#include "MeshRemeshCutoffModifier.hpp"
 #include "PeriodicRemeshCellsModifier.hpp"
-#include "DensityDependantCellKiller3DWithGhostNodes.hpp"
+#include "DensityDependantCellKillerRadiual3DWithGhostNodesV2.hpp"
 
 #include "DomSimpleWntCellCycleModel.hpp"
 #include "NodeVelocityWriter.hpp"
@@ -73,14 +75,10 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-<<<<<<< HEAD
-        std::string output_directory = "FixedEp_WntRadius_20210716_02";
-=======
-        std::string output_directory = "FixedEp_WntRadius_20210716_04";
->>>>>>> 89afbf2755d16197c55bced18586c2d49d6a3160
+        std::string output_directory = "FixedEp_WntRadius_20210804_02";
 
-        unsigned width = 12;	   // x
-        unsigned height = 14;      // y
+        unsigned width = 10;	   // x
+        unsigned height = 12;      // y
         unsigned ghosts_bottom = 0;       // ghosts > depth
         unsigned ghosts_top = 1;       // ghosts > depth
         unsigned num_tissue_depth = 1;
@@ -108,13 +106,15 @@ public:
 
         double spring_strength = 20.0;
 
+        double spring_cuttoff = 1.75;
+
         double radius =  0;//periodic_width+1.0;
         double target_curvature = -0.2; //maximum curvature is 0.2066 -> higher curvature means smaller sphere
         double beta_parameter = 2.0*spring_strength;
         double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 480;
+        double end_time = 120;
         double plot_step = 10.0;
 
         bool include_springs = true;
@@ -239,20 +239,20 @@ public:
             p_model->SetDimension(3);
             // p_model->SetMaxTransitGenerations(100);
 
-            p_model->SetTransitCellG1Duration(6);
-            p_model->SetSDuration(3);
-            p_model->SetG2Duration(2);
-            p_model->SetMDuration(1);
+            // p_model->SetTransitCellG1Duration(6);
+            // p_model->SetSDuration(3);
+            // p_model->SetG2Duration(2);
+            // p_model->SetMDuration(1);
 
             // p_model->SetTransitCellG1Duration(11);
             // p_model->SetSDuration(8);
             // p_model->SetG2Duration(4);
             // p_model->SetMDuration(1);
 
-            // p_model->SetTransitCellG1Duration(0.5);
-            // p_model->SetSDuration(0.25);
-            // p_model->SetG2Duration(0.25);
-            // p_model->SetMDuration(0.5);
+            p_model->SetTransitCellG1Duration(0.5);
+            p_model->SetSDuration(0.25);
+            p_model->SetG2Duration(0.25);
+            p_model->SetMDuration(1);
             
             CellPtr p_epithelial_cell(new Cell(p_state, p_model));
             // double birth_time = -8;
@@ -265,6 +265,9 @@ public:
             p_epithelial_cell->SetApoptosisTime(1);
             
             p_epithelial_cell->InitialiseCellCycleModel();
+
+            MAKE_PTR_ARGS(CellAncestor, p_cell_ancestor, (i));
+            p_epithelial_cell->SetAncestor(p_cell_ancestor);
             
 			cells.push_back(p_epithelial_cell);
         }
@@ -362,7 +365,7 @@ public:
 		// Create periodic spring force law
         MAKE_PTR(PeriodicCryptModelInteractionForceWithGhostNodes<3>, periodic_spring_force);
         periodic_spring_force->SetUseOneWaySprings(false); //turning this on makes the stromal cells act as ghosts..
-        periodic_spring_force->SetCutOffLength(1.25);
+        periodic_spring_force->SetCutOffLength(spring_cuttoff);
         //                     SetEpithelialStromalCellDependentSprings(ind , Ep-Ep, Str-Str, Ep-Str, apcTwoHitStromalMultiplier);
         periodic_spring_force->SetEpithelialStromalCellDependentSprings(true, 1.0,     0.5,     0.5,    1.0);
         periodic_spring_force->SetPeriodicDomainWidth(periodic_width);
@@ -400,24 +403,24 @@ public:
 
         double cut_off = 2.0;
         double density_threshold = 0.98;
-        double density_radius = 4.0;
+        double density_radius = 3.5;
         // Add anoikis cell killer
         // MAKE_PTR_ARGS(AnoikisCellKiller3DWithGhostNodes, anoikis, (&cell_population, cut_off, periodic_width, periodic_height));
         // simulator.AddCellKiller(anoikis);
 
-        MAKE_PTR_ARGS(DensityDependantCellKiller3DWithGhostNodes, density, (&cell_population, density_radius, density_threshold, periodic_width, periodic_height));
+        MAKE_PTR_ARGS(DensityDependantCellKillerRadiual3DWithGhostNodesV2, density, (&cell_population, density_radius, density_threshold, periodic_width, periodic_height));
         density->SetOutputDirectory(output_directory);
         simulator.AddCellKiller(density);
 
         // std::string output_directory = "Test_WithSpringsBending_randz_alpha_2";
         simulator.SetOutputDirectory(output_directory);	 
 
-        MAKE_PTR(MeshRemeshModifier<3>, p_modifier);
-        p_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
-        p_modifier->SetWidth(periodic_width);
-        p_modifier->SetDepth(periodic_height);
+        // MAKE_PTR(MeshRemeshModifier<3>, p_modifier);
+        // p_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
+        // p_modifier->SetWidth(periodic_width);
+        // p_modifier->SetDepth(periodic_height);
 
-        simulator.AddSimulationModifier(p_modifier);
+        // simulator.AddSimulationModifier(p_modifier);
 
         // MAKE_PTR(PeriodicRemeshCellsModifier<3>, p_per_modifier);
         // p_per_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
@@ -425,6 +428,14 @@ public:
         // p_per_modifier->SetDepth(periodic_height);
 
         // simulator.AddSimulationModifier(p_per_modifier);
+
+        MAKE_PTR(MeshRemeshCutoffModifier<3>, pc_modifier);
+        pc_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
+        pc_modifier->SetWidth(periodic_width);
+        pc_modifier->SetDepth(periodic_height);
+        pc_modifier->SetCutoff(spring_cuttoff+0.001);
+
+        simulator.AddSimulationModifier(pc_modifier);
 
 
 
