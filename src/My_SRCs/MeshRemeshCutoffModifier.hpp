@@ -66,7 +66,7 @@ class MeshRemeshCutoffModifier : public AbstractCellBasedSimulationModifier<DIM,
         archive & mWidth;
         archive & mDepth;
         archive & mCutoff;
-    }
+    } 
 
     std::string mOutputDirectory;
     double mWidth;

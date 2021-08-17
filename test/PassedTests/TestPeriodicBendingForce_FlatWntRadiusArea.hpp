@@ -21,8 +21,8 @@
 
 // #include "RandomMotionForce.hpp"
 #include "PeriodicCryptModelInteractionForceWithGhostNodes.hpp"
-#include "PeriodicBendingForce3dHeightWithGhostNodes.hpp"
-// #include "PeriodicBendingForce3dHeightAreaCurvatureWithGhostNodes.hpp"
+// #include "PeriodicBendingForce3dHeightWithGhostNodes.hpp"
+#include "PeriodicBendingForce3dHeightAreaCurvatureWithGhostNodes.hpp"
 
 // #include "SloughingCellKiller3DWithGhostNodes.hpp"
 #include "AnoikisCellKiller3DWithGhostNodes.hpp"
@@ -77,8 +77,8 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-        // std::string output_directory = "FlatWntRadiusArea_20210811_02";
-        std::string output_directory = "FlatWntRadius_20210811_02";
+        std::string output_directory = "FlatWntRadiusArea_20210811_03";
+        // std::string output_directory = "FlatWntRadius_20210811_01";
 
         unsigned width = 12;	   // x
         unsigned height = 14;      // y
@@ -115,7 +115,7 @@ public:
 
         double radius =  2.0;//periodic_width+1.0;
         double target_curvature = -0.2; //maximum curvature is 0.2066 -> higher curvature means smaller sphere
-        double beta_parameter = 1.0*spring_strength;
+        double beta_parameter = 0.5*spring_strength;
         double alpha_parameter = 1.2;
         double crypt_radius = 1.5;
 
@@ -361,8 +361,8 @@ public:
         }
 
 		// Create periodic basement membrane force law
-        MAKE_PTR(PeriodicBendingForce3dHeightWithGhostNodes, periodic_bending_force);
-        // MAKE_PTR(PeriodicBendingForce3dHeightAreaCurvatureWithGhostNodes, periodic_bending_force);
+        // MAKE_PTR(PeriodicBendingForce3dHeightWithGhostNodes, periodic_bending_force);
+        MAKE_PTR(PeriodicBendingForce3dHeightAreaCurvatureWithGhostNodes, periodic_bending_force);
         periodic_bending_force->SetOutputDirectory(output_directory);
         periodic_bending_force->SetHeightDependantCurvatureParameter(1.2);
         periodic_bending_force->SetBasementMembraneParameter(beta_parameter);

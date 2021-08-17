@@ -153,6 +153,7 @@ private:
     {
         bool is_set_up = IsWntSetUp();
         archive & is_set_up;
+        // if (is_set_up)
         if (is_set_up)
         {
             archive & mCryptLength;
