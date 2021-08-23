@@ -74,7 +74,7 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "PeriodicBend_WntStrip_20210817_02";
+        std::string output_directory = "PeriodicBend_WntStrip_20210817_03";
 
         unsigned width = 10;	   // x
         unsigned height = 12;      // y

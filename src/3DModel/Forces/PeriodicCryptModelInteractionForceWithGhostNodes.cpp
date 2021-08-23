@@ -856,6 +856,11 @@ void PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::AddForceContribution
                     }
                 }
             }
+
+            // if (mpExtendedMesh != NULL)
+            // {
+            //     delete mpExtendedMesh;
+            // }
            
 			break;
         }

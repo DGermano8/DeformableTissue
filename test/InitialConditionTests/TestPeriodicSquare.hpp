@@ -2,6 +2,7 @@
 #define TEST3DBOXMODEL_HPP_
 
 #include <cxxtest/TestSuite.h>
+#include "Timer.hpp"
 
 // Must be included before other cell_based headers
 #include "CellBasedSimulationArchiver.hpp"
@@ -26,6 +27,8 @@
 #include "PeriodicStromalBoxBoundaryCondition3d.hpp"
 #include "TrianglesMeshWriter.hpp"
 #include "Debug.hpp"
+
+#include "PeriodicNeighbourModifier.hpp"
 
 #include "DifferentiatedCellProliferativeType.hpp"
 #include "TransitCellProliferativeType.hpp"
@@ -68,7 +71,7 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "IC_Squ_4_Deep";
+        std::string output_directory = "IC_Squ_4_Deep_noise_0p02_rmax_1p5_square_domain";
 
         unsigned width = 10;	   // x
         unsigned height = 10;      // y
@@ -79,7 +82,7 @@ public:
 
         // Initialise the tissue in an equilibrum state
         double width_space = 1.0;
-        double height_space = 1.0*sqrt(0.75);
+        double height_space = 1.0;//*sqrt(0.75);
         double ghost_sep = 1.0;
         double depth_space = 1.0; //Magic number for z-spaceing... 
         unsigned cells_per_layer = width*height;
@@ -99,17 +102,11 @@ public:
 
         double spring_strength = 20.0;
 
-        double radius =  0;//periodic_width+1.0;
-        double target_curvature = -0.2; //maximum curvature is 0.2066 -> higher curvature means smaller sphere
-        double beta_parameter = 2.0*spring_strength;
-        double alpha_parameter = 1.2;
-
         double time_step = 0.001;
-        double end_time = 0.2;
+        double end_time = 10.0;
         double plot_step = 1.0;
 
         bool include_springs = true;
-        bool include_bending = true;
 
         int is_transit[depth*height*width];
         int num_real_nodes = 0;
@@ -136,17 +133,17 @@ public:
                         
                     c_vector<double, 3> node_i_new_location;
 
-                    x_coordinate = (double) i*width_space       + 0.0*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
-                    y_coordinate = (double) j*height_space                          + 0.0*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                    x_coordinate = (double) i*width_space       + 0.2*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                    y_coordinate = (double) j*height_space      + 0.2*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
                     
                     if( k == depth)
                     {
-                        z_coordinate = (double) tissue_base + (-1.0)*depth_space    + 0.0*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                        z_coordinate = (double) tissue_base + (-1.0)*depth_space    + 0.2*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
 
                     }
                     else
                     {
-                        z_coordinate = (double) tissue_base + k*depth_space         +  0.0*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                        z_coordinate = (double) tissue_base + k*depth_space         +  0.2*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
                     }    
                     if( pow(x_coordinate - 0.5*periodic_width,2)+ pow(y_coordinate - 0.5*periodic_height ,2) <= pow(1.0,2) )
                     {
@@ -282,7 +279,7 @@ public:
         cell_population.AddCellWriter<CellProliferativeTypesWriter>();
         cell_population.AddCellWriter<CellAncestorWriter>();
         cell_population.AddPopulationWriter<CellPopulationEpithelialWriter>();
-        
+                
         //cell_population.AddPopulationWriter<VoronoiDataWriter>(); // paraview is pretty pointless at viewing this, worth looking into
         
         //cell_population.WriteVtkResultsToFile(output_directory);
@@ -338,30 +335,33 @@ public:
         // simulator.AddForce(p_drift_force);
 
         // Prevents getting stuck in a local minimums -> used to help break symmetry in cell anoikus
-        // MAKE_PTR(RandomMotionForce<3>, p_random_force);
-        // p_random_force->SetMovementParameter(0.02); //0.1 causes dissasociation, 0.001 is not enough
-        // simulator.AddForce(p_random_force);
+        MAKE_PTR(RandomMotionForce<3>, p_random_force);
+        p_random_force->SetMovementParameter(0.02); //0.1 causes dissasociation, 0.001 is not enough
+        simulator.AddForce(p_random_force);
 
         double cut_off = 2.0;
         // Add anoikis cell killer
 
-        simulator.SetOutputDirectory(output_directory);	 
+        simulator.SetOutputDirectory(output_directory);	
+
+
+        MAKE_PTR(PeriodicNeighbourModifier<3>, p_n_modifier);
+        p_n_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
+        p_n_modifier->SetWidth(periodic_width);
+        p_n_modifier->SetDepth(periodic_height);
+        simulator.AddSimulationModifier(p_n_modifier);
 
 
         simulator.SetSamplingTimestepMultiple(plot_step);			// Every hour
 		simulator.SetEndTime(end_time);
         simulator.SetDt(time_step);
 
-        auto t1 = std::chrono::high_resolution_clock::now();
+        Timer::Reset();
         simulator.Solve();
-        auto t2 = std::chrono::high_resolution_clock::now();
-        auto duration = pow(10.0,-6)*(std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count());
-
-        std::cout << "\nTime taken = " << duration << " seconds\n\n";
+        Timer::Print("Time Ellapsed");
         
     }     
 
 };
 
 #endif /*TEST3DBOXMODEL_HPP_*/
-

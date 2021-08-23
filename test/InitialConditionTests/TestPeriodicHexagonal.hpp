@@ -42,6 +42,7 @@
 #include "PlanarDivisionRule.hpp"
 #include "DriftPreventForce.hpp"
 
+#include "PeriodicNeighbourModifier.hpp"
 
 #include "MeshModifier.hpp"
 #include "MeshRemeshModifier.hpp"
@@ -68,7 +69,7 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "IC_Hex_4_Deep";
+        std::string output_directory = "IC_Hex_4_Deep_noise_0p02_rmax_1p5";
 
         unsigned width = 10;	   // x
         unsigned height = 10;      // y
@@ -105,7 +106,7 @@ public:
         double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 0.2;
+        double end_time = 10;
         double plot_step = 1.0;
 
         bool include_springs = true;
@@ -346,6 +347,12 @@ public:
         double cut_off = 2.0;
         // Add anoikis cell killer
 
+        MAKE_PTR(PeriodicNeighbourModifier<3>, p_n_modifier);
+        p_n_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
+        p_n_modifier->SetWidth(periodic_width);
+        p_n_modifier->SetDepth(periodic_height);
+        simulator.AddSimulationModifier(p_n_modifier);
+
         simulator.SetOutputDirectory(output_directory);	 
 
 
@@ -353,12 +360,9 @@ public:
 		simulator.SetEndTime(end_time);
         simulator.SetDt(time_step);
 
-        auto t1 = std::chrono::high_resolution_clock::now();
+        Timer::Reset();
         simulator.Solve();
-        auto t2 = std::chrono::high_resolution_clock::now();
-        auto duration = pow(10.0,-6)*(std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count());
-
-        std::cout << "\nTime taken = " << duration << " seconds\n\n";
+        Timer::Print("Time Ellapsed");
         
     }     
 
