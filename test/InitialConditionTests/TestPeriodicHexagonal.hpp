@@ -2,6 +2,7 @@
 #define TEST3DBOXMODEL_HPP_
 
 #include <cxxtest/TestSuite.h>
+#include "Timer.hpp"
 
 // Must be included before other cell_based headers
 #include "CellBasedSimulationArchiver.hpp"
@@ -15,15 +16,14 @@
 #include "WildTypeCellMutationState.hpp"
 #include "StromalCellMutationState.hpp"
 #include "CellsGenerator.hpp"
-#include "RandomMotionForce.hpp"
-#include "PeriodicCryptModelInteractionForceWithGhostNodes.hpp"
+#include "RandomMotionForceTurnsOffAfterTime.hpp"
+#include "PeriodicCryptModelInteractionForceWithGhostNodesIncreasingDomain.hpp"
 #include "PeriodicBendingForce3dHeightWithGhostNodes.hpp"
 #include "SloughingCellKiller3DWithGhostNodes.hpp"
 #include "AnoikisCellKiller3DWithGhostNodes.hpp"
 #include "UniformCellKiller3dWithGhostNodes.hpp"
-#include "PeriodicBoxBoundaryCondition3d.hpp"
-#include "PeriodicBoxBoundaryCondition3dGhosts.hpp"
-#include "PeriodicStromalBoxBoundaryCondition3d.hpp"
+#include "PeriodicBoxBoundaryCondition3dGhostsIncreasingDomain.hpp"
+#include "PeriodicStromalBoxBoundaryCondition3dIncreasingDomain.hpp"
 #include "TrianglesMeshWriter.hpp"
 #include "Debug.hpp"
 
@@ -42,7 +42,7 @@
 #include "PlanarDivisionRule.hpp"
 #include "DriftPreventForce.hpp"
 
-#include "PeriodicNeighbourModifier.hpp"
+#include "PeriodicNeighbourModifierIncreasingDomain.hpp"
 
 #include "MeshModifier.hpp"
 #include "MeshRemeshModifier.hpp"
@@ -65,24 +65,29 @@ public:
      */
     void TestPeriodicCubeWithGhosts() throw (Exception)
     {
-    	RandomNumberGenerator::Instance()->Reseed(1);
+    	RandomNumberGenerator::Instance()->Reseed(3);
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "IC_Hex_4_Deep_noise_0p02_rmax_1p5";
+        std::string output_directory = "IC_Hex_4_Deep_noise_0p1_rmax_1p5_spread_0p3_IncreasingDomain_05";
 
         unsigned width = 10;	   // x
         unsigned height = 10;      // y
-        unsigned ghosts_bottom = 0;       // ghosts > depth
-        unsigned ghosts_top = 1;       // ghosts > depth
+        unsigned ghosts_bottom = 1;       // ghosts > depth
+        unsigned ghosts_top = 2;       // ghosts > depth
         unsigned num_tissue_depth = 3;
         unsigned depth = num_tissue_depth + (ghosts_bottom + ghosts_top) + 1;        // z
+
+        double rand_noise = 0.1;
+        double spring_max_length = 1.5;
+        double rand_spread = 0.3;
 
         // Initialise the tissue in an equilibrum state
         double width_space = 1.0;
         double height_space = 1.0*sqrt(0.75);
         double ghost_sep = 1.0;
-        double depth_space = 0.738431690356779*1.0; //Magic number for z-spaceing... 
+        // double depth_space = 0.738431690356779*1.0; //Magic number for z-spaceing... 
+        double depth_space = 1.0; //Magic number for z-spaceing... 
         unsigned cells_per_layer = width*height;
         unsigned cell_iter = 0;
 
@@ -106,8 +111,14 @@ public:
         double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 10;
+        double end_time = 7.0;
         double plot_step = 1.0;
+        double turn_off_rand = end_time;
+
+        double start_increase_domain_time = 1.0;       			      
+        double end_increase_domain_time = 5.0;
+        double domain_increase = 4.0;
+        double multiplyer_increse_domain = domain_increase/((end_increase_domain_time - start_increase_domain_time)/end_increase_domain_time);
 
         bool include_springs = true;
         bool include_bending = true;
@@ -137,17 +148,23 @@ public:
                         
                     c_vector<double, 3> node_i_new_location;
 
-                    x_coordinate = (double) (i + 0.5*(j%2 + k%2))*width_space       + 0.2*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
-                    y_coordinate = (double) j*height_space                          + 0.2*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                    // x_coordinate = (double) (i + 0.5*(j%2 + k%2))*width_space       + rand_spread*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                    // y_coordinate = (double) j*height_space                          + rand_spread*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
                     
+                    x_coordinate = (double) ( (i + 0.5*(j%2 + k%2)) + rand_spread*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0) )*width_space;
+                    y_coordinate = (double) ( j                     + rand_spread*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0) )*height_space;
+                  
+
                     if( k == depth)
                     {
-                        z_coordinate = (double) tissue_base + (-1.0)*depth_space    + 0.2*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                        // z_coordinate = (double) tissue_base + ((-1.0)*depth_space    + rand_spread*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0));
+                        z_coordinate = (double) tissue_base + ((-1.0) + rand_spread*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0))*depth_space;
 
                     }
                     else
                     {
-                        z_coordinate = (double) tissue_base + k*depth_space         +  0.2*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                        // z_coordinate = (double) tissue_base + (k*depth_space       +  rand_spread*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0));
+                        z_coordinate = (double) tissue_base + (k      + rand_spread*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0))*depth_space;
                     }    
                     if( pow(x_coordinate - 0.5*periodic_width,2)+ pow(y_coordinate - 0.5*periodic_height ,2) <= pow(1.0,2) )
                     {
@@ -305,31 +322,39 @@ public:
             //PRINT_VECTOR(node_locations_before[p_node]);
         }
 
-        // MAKE_PTR_ARGS(PeriodicBoxBoundaryCondition3d, boundary_condition, (&cell_population));
-        MAKE_PTR_ARGS(PeriodicBoxBoundaryCondition3dGhosts, boundary_condition, (&cell_population));
+        MAKE_PTR_ARGS(PeriodicBoxBoundaryCondition3dGhostsIncreasingDomain, boundary_condition, (&cell_population));
         boundary_condition->SetCellPopulationWidth(periodic_width);
         boundary_condition->SetCellPopulationDepth(periodic_height);
         boundary_condition->SetMaxHeightForPinnedCells(0.0);       			      
         boundary_condition->ImposeBoundaryCondition(node_locations_before);
+        boundary_condition->SetIncreaseDomainTime(start_increase_domain_time);	      
+        boundary_condition->SetEndIncreaseDomainTime(end_increase_domain_time);
+        boundary_condition->SetMultiplyerIncreaseDomainTime(multiplyer_increse_domain);
         simulator.AddCellPopulationBoundaryCondition(boundary_condition);
 
-        MAKE_PTR_ARGS(PeriodicStromalBoxBoundaryCondition3d, stromal_boundary_condition, (&cell_population));
+        MAKE_PTR_ARGS(PeriodicStromalBoxBoundaryCondition3dIncreasingDomain, stromal_boundary_condition, (&cell_population));
         stromal_boundary_condition->SetCellPopulationWidth(periodic_width);
         stromal_boundary_condition->SetCellPopulationDepth(periodic_height);
         stromal_boundary_condition->SetMaxHeightForPinnedCells(0.0);
         stromal_boundary_condition->ImposeBoundaryCondition(node_locations_before);
+        stromal_boundary_condition->SetIncreaseDomainTime(start_increase_domain_time);	      
+        stromal_boundary_condition->SetEndIncreaseDomainTime(end_increase_domain_time);
+        stromal_boundary_condition->SetMultiplyerIncreaseDomainTime(multiplyer_increse_domain);
         simulator.AddCellPopulationBoundaryCondition(stromal_boundary_condition);
 
 
 		// Create periodic spring force law
-        MAKE_PTR(PeriodicCryptModelInteractionForceWithGhostNodes<3>, periodic_spring_force);
+        MAKE_PTR(PeriodicCryptModelInteractionForceWithGhostNodesIncreasingDomain<3>, periodic_spring_force);
         periodic_spring_force->SetUseOneWaySprings(false); //turning this on makes the stromal cells act as ghosts..
-        periodic_spring_force->SetCutOffLength(1.5);
+        periodic_spring_force->SetCutOffLength(spring_max_length);
         //                     SetEpithelialStromalCellDependentSprings(ind , Ep-Ep, Str-Str, Ep-Str, apcTwoHitStromalMultiplier);
         periodic_spring_force->SetEpithelialStromalCellDependentSprings(true, 1.0,     1.0,     1.0,    1.0);
         periodic_spring_force->SetPeriodicDomainWidth(periodic_width);
         periodic_spring_force->SetPeriodicDomainDepth(periodic_height);
         periodic_spring_force->SetMeinekeSpringStiffness(spring_strength);
+        periodic_spring_force->SetIncreaseDomainTime(start_increase_domain_time);	      
+        periodic_spring_force->SetEndIncreaseDomainTime(end_increase_domain_time);
+        periodic_spring_force->SetMultiplyerIncreaseDomainTime(multiplyer_increse_domain);
         if(include_springs)
         {
             simulator.AddForce(periodic_spring_force);
@@ -340,17 +365,21 @@ public:
         // simulator.AddForce(p_drift_force);
 
         // Prevents getting stuck in a local minimums -> used to help break symmetry in cell anoikus
-        MAKE_PTR(RandomMotionForce<3>, p_random_force);
-        p_random_force->SetMovementParameter(0.02); //0.1 causes dissasociation, 0.001 is not enough
+        MAKE_PTR(RandomMotionForceTurnsOffAfterTime<3>, p_random_force);
+        p_random_force->SetMovementParameter(rand_noise); //0.1 causes dissasociation, 0.001 is not enough
+        p_random_force->SetTurnOffAfterTime(turn_off_rand);
         simulator.AddForce(p_random_force);
 
         double cut_off = 2.0;
         // Add anoikis cell killer
 
-        MAKE_PTR(PeriodicNeighbourModifier<3>, p_n_modifier);
+        MAKE_PTR(PeriodicNeighbourModifierIncreasingDomain<3>, p_n_modifier);
         p_n_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
         p_n_modifier->SetWidth(periodic_width);
         p_n_modifier->SetDepth(periodic_height);
+        p_n_modifier->SetIncreaseDomainTime(start_increase_domain_time);	      
+        p_n_modifier->SetEndIncreaseDomainTime(end_increase_domain_time);
+        p_n_modifier->SetMultiplyerIncreaseDomainTime(multiplyer_increse_domain);
         simulator.AddSimulationModifier(p_n_modifier);
 
         simulator.SetOutputDirectory(output_directory);	 

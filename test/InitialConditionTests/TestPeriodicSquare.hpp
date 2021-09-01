@@ -71,7 +71,7 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "IC_Squ_4_Deep_noise_0p02_rmax_1p5_square_domain";
+        std::string output_directory = "IC_Squ_4_Deep_noise_0p02_rmax_1p5_square_domain_02";
 
         unsigned width = 10;	   // x
         unsigned height = 10;      // y
@@ -133,17 +133,17 @@ public:
                         
                     c_vector<double, 3> node_i_new_location;
 
-                    x_coordinate = (double) i*width_space       + 0.2*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
-                    y_coordinate = (double) j*height_space      + 0.2*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                    x_coordinate = (double) i*width_space       + 0.5*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                    y_coordinate = (double) j*height_space      + 0.5*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
                     
                     if( k == depth)
                     {
-                        z_coordinate = (double) tissue_base + (-1.0)*depth_space    + 0.2*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                        z_coordinate = (double) tissue_base + (-1.0)*depth_space    + 0.5*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
 
                     }
                     else
                     {
-                        z_coordinate = (double) tissue_base + k*depth_space         +  0.2*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
+                        z_coordinate = (double) tissue_base + k*depth_space         +  0.5*(2.0*RandomNumberGenerator::Instance()->ranf()-1.0);
                     }    
                     if( pow(x_coordinate - 0.5*periodic_width,2)+ pow(y_coordinate - 0.5*periodic_height ,2) <= pow(1.0,2) )
                     {
