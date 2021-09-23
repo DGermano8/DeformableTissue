@@ -419,12 +419,12 @@ void PeriodicCryptModelInteractionForceWithGhostNodesIncreasingDomain<DIM>::AddF
 	else if( sim_time >= mIncreaseDomainTime && sim_time < mEndIncreaseDomainTime)
 	{
 		gotPeriodicDomainWidth = GetPeriodicDomainWidth() + mMultiplyerIncreaseDomainTime*(sim_time - mIncreaseDomainTime)/mEndIncreaseDomainTime ;
-		gotPeriodicDomainDepth = GetPeriodicDomainDepth() + mMultiplyerIncreaseDomainTime*(sim_time - mIncreaseDomainTime)/mEndIncreaseDomainTime ;
+		gotPeriodicDomainDepth = GetPeriodicDomainDepth() + sqrt(0.75)*mMultiplyerIncreaseDomainTime*(sim_time - mIncreaseDomainTime)/mEndIncreaseDomainTime ;
 	}
 	else if(sim_time >= mEndIncreaseDomainTime  && mEndIncreaseDomainTime > 0.0)
 	{
 		gotPeriodicDomainWidth = GetPeriodicDomainWidth() + mMultiplyerIncreaseDomainTime*(mEndIncreaseDomainTime - mIncreaseDomainTime)/mEndIncreaseDomainTime;
-		gotPeriodicDomainDepth = GetPeriodicDomainDepth() + mMultiplyerIncreaseDomainTime*(mEndIncreaseDomainTime - mIncreaseDomainTime)/mEndIncreaseDomainTime ;
+		gotPeriodicDomainDepth = GetPeriodicDomainDepth() + sqrt(0.75)*mMultiplyerIncreaseDomainTime*(mEndIncreaseDomainTime - mIncreaseDomainTime)/mEndIncreaseDomainTime ;
 	}
 
 

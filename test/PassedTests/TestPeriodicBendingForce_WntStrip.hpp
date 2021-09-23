@@ -114,7 +114,7 @@ public:
         double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 240;
+        double end_time = 1;
         double plot_step = 10.0;
 
         bool include_springs = true;

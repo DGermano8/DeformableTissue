@@ -30,12 +30,12 @@ void PeriodicStromalBoxBoundaryCondition3dIncreasingDomain::ImposeBoundaryCondit
 	else if( sim_time >= mIncreaseDomainTime && sim_time < mEndIncreaseDomainTime)
 	{
 		gotCellPopulationWidth = GetCellPopulationWidth() +  mMultiplyerIncreaseDomainTime*(sim_time - mIncreaseDomainTime)/mEndIncreaseDomainTime ;
-		gotCellPopulationDepth = GetCellPopulationDepth() +  mMultiplyerIncreaseDomainTime*(sim_time - mIncreaseDomainTime)/mEndIncreaseDomainTime ;
+		gotCellPopulationDepth = GetCellPopulationDepth() +  sqrt(0.75)*mMultiplyerIncreaseDomainTime*(sim_time - mIncreaseDomainTime)/mEndIncreaseDomainTime ;
 	}
 	else if(sim_time >= mEndIncreaseDomainTime && mEndIncreaseDomainTime > 0.0)
 	{
 		gotCellPopulationWidth = GetCellPopulationWidth() +  mMultiplyerIncreaseDomainTime*(mEndIncreaseDomainTime - mIncreaseDomainTime)/mEndIncreaseDomainTime;
-		gotCellPopulationDepth = GetCellPopulationDepth() +  mMultiplyerIncreaseDomainTime*(mEndIncreaseDomainTime - mIncreaseDomainTime)/mEndIncreaseDomainTime ;
+		gotCellPopulationDepth = GetCellPopulationDepth() +  sqrt(0.75)*mMultiplyerIncreaseDomainTime*(mEndIncreaseDomainTime - mIncreaseDomainTime)/mEndIncreaseDomainTime ;
 	}
 
 	for (AbstractCellPopulation<3>::Iterator cell_iter = this->mpCellPopulation->Begin();
@@ -107,12 +107,12 @@ bool PeriodicStromalBoxBoundaryCondition3dIncreasingDomain::VerifyBoundaryCondit
 	else if( sim_time >= mIncreaseDomainTime && sim_time < mEndIncreaseDomainTime)
 	{
 		gotCellPopulationWidth = GetCellPopulationWidth() + mMultiplyerIncreaseDomainTime*(sim_time - mIncreaseDomainTime)/mEndIncreaseDomainTime ;
-		gotCellPopulationDepth = GetCellPopulationDepth() + mMultiplyerIncreaseDomainTime*(sim_time - mIncreaseDomainTime)/mEndIncreaseDomainTime ;
+		gotCellPopulationDepth = GetCellPopulationDepth() + sqrt(0.75)*mMultiplyerIncreaseDomainTime*(sim_time - mIncreaseDomainTime)/mEndIncreaseDomainTime ;
 	}
 	else if(sim_time >= mEndIncreaseDomainTime  && mEndIncreaseDomainTime > 0.0)
 	{
 		gotCellPopulationWidth = GetCellPopulationWidth() + mMultiplyerIncreaseDomainTime*(mEndIncreaseDomainTime - mIncreaseDomainTime)/mEndIncreaseDomainTime;
-		gotCellPopulationDepth = GetCellPopulationDepth() + mMultiplyerIncreaseDomainTime*(mEndIncreaseDomainTime - mIncreaseDomainTime)/mEndIncreaseDomainTime ;
+		gotCellPopulationDepth = GetCellPopulationDepth() + sqrt(0.75)*mMultiplyerIncreaseDomainTime*(mEndIncreaseDomainTime - mIncreaseDomainTime)/mEndIncreaseDomainTime ;
 	}
 
 	bool boundary_condition_satisfied = true;

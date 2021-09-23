@@ -43,6 +43,7 @@
 #include "DriftPreventForce.hpp"
 
 #include "PeriodicNeighbourModifierIncreasingDomain.hpp"
+#include "PeriodicNeighbourNonGhostModifierIncreasingDomain.hpp"
 
 #include "MeshModifier.hpp"
 #include "MeshRemeshModifier.hpp"
@@ -65,22 +66,23 @@ public:
      */
     void TestPeriodicCubeWithGhosts() throw (Exception)
     {
-    	RandomNumberGenerator::Instance()->Reseed(3);
+    	RandomNumberGenerator::Instance()->Reseed(1);
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "IC_Hex_4_Deep_noise_0p1_rmax_1p5_spread_0p3_IncreasingDomain_05";
+        // std::string output_directory = "IC_Hex_4_Deep_noise_0p1_rmax_1p5_spread_0p3_IncDomain_m2_Over_6hrs_RelaxationTime_6hrs";
+        std::string output_directory = "test_ic_7";
 
         unsigned width = 10;	   // x
         unsigned height = 10;      // y
         unsigned ghosts_bottom = 1;       // ghosts > depth
         unsigned ghosts_top = 2;       // ghosts > depth
-        unsigned num_tissue_depth = 3;
+        unsigned num_tissue_depth = 5;
         unsigned depth = num_tissue_depth + (ghosts_bottom + ghosts_top) + 1;        // z
 
-        double rand_noise = 0.1;
+        double rand_noise = 0.2;
         double spring_max_length = 1.5;
-        double rand_spread = 0.3;
+        double rand_spread = 0.5;
 
         // Initialise the tissue in an equilibrum state
         double width_space = 1.0;
@@ -111,12 +113,12 @@ public:
         double alpha_parameter = 1.2;
 
         double time_step = 0.001;
-        double end_time = 7.0;
+        double end_time = 001.0;
         double plot_step = 1.0;
         double turn_off_rand = end_time;
 
-        double start_increase_domain_time = 1.0;       			      
-        double end_increase_domain_time = 5.0;
+        double start_increase_domain_time = 2.0;       			      
+        double end_increase_domain_time = 10.0;
         double domain_increase = 4.0;
         double multiplyer_increse_domain = domain_increase/((end_increase_domain_time - start_increase_domain_time)/end_increase_domain_time);
 
@@ -173,6 +175,22 @@ public:
                         
                     if(isGhost)
                     {
+                        if(i == 0)
+                        {
+                            x_coordinate = x_coordinate + 0.2;
+                        }
+                        else if(i == width - 1)
+                        {
+                            x_coordinate = x_coordinate - 0.2;
+                        }
+                        if(j == 0)
+                        {
+                            y_coordinate = y_coordinate + 0.2;
+                        }
+                        else if(j == height - 1)
+                        {
+                            y_coordinate = y_coordinate - 0.2;
+                        }
                         ghost_node_indices.push_back(cell_iter);
                     }
                     else
@@ -373,6 +391,19 @@ public:
         double cut_off = 2.0;
         // Add anoikis cell killer
 
+
+        
+
+        // MAKE_PTR(PeriodicNeighbourNonGhostModifierIncreasingDomain<3>, p_ng_modifier);
+        // p_ng_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
+        // p_ng_modifier->SetWidth(periodic_width);
+        // p_ng_modifier->SetDepth(periodic_height);
+        // p_ng_modifier->SetIncreaseDomainTime(start_increase_domain_time);	      
+        // p_ng_modifier->SetEndIncreaseDomainTime(end_increase_domain_time);
+        // p_ng_modifier->SetMultiplyerIncreaseDomainTime(multiplyer_increse_domain);
+        // simulator.AddSimulationModifier(p_ng_modifier);
+
+
         MAKE_PTR(PeriodicNeighbourModifierIncreasingDomain<3>, p_n_modifier);
         p_n_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
         p_n_modifier->SetWidth(periodic_width);
@@ -381,6 +412,7 @@ public:
         p_n_modifier->SetEndIncreaseDomainTime(end_increase_domain_time);
         p_n_modifier->SetMultiplyerIncreaseDomainTime(multiplyer_increse_domain);
         simulator.AddSimulationModifier(p_n_modifier);
+
 
         simulator.SetOutputDirectory(output_directory);	 
 

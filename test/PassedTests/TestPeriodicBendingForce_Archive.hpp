@@ -232,15 +232,15 @@ public:
         for (unsigned i=real_node_indices.size()-num_epithelial_cells; i<real_node_indices.size(); i++)
         {
 
-        	// FixedG1GenerationalCellCycleModel* p_model = new FixedG1GenerationalCellCycleModel();
-            // p_model->SetMaxTransitGenerations(100);
-            // p_model->SetSDuration(2); 
-            // p_model->SetG2Duration(2); 
-            // p_model->SetMDuration(2); 
-            // p_model->SetDimension(3);
+        	FixedG1GenerationalCellCycleModel* p_model = new FixedG1GenerationalCellCycleModel();
+            p_model->SetMaxTransitGenerations(100);
+            p_model->SetSDuration(2); 
+            p_model->SetG2Duration(2); 
+            p_model->SetMDuration(2); 
+            p_model->SetDimension(3);
             
             // DomSimpleWntCellCycleModel* p_model = new DomSimpleWntCellCycleModel();
-            SimpleWntCellCycleModel* p_model = new SimpleWntCellCycleModel();
+            // SimpleWntCellCycleModel* p_model = new SimpleWntCellCycleModel();
             
             p_model->SetDimension(3);
 
@@ -289,10 +289,10 @@ public:
         std::cout<< "number of ghosts     = " << ghost_node_indices.size() << "\n";
 
 
-        MeshBasedCellPopulationWithGhostNodes<3> cell_population(mesh, cells, real_node_indices); //ghost_sep
+        // MeshBasedCellPopulationWithGhostNodes<3> cell_population(mesh, cells, real_node_indices); //ghost_sep
         // cell_population.SetWriteVtkAsPoints(true);
 
-        // DomMeshBasedCellPopulationWithGhostNodes<3> cell_population(mesh, cells, real_node_indices); //ghost_sep
+        DomMeshBasedCellPopulationWithGhostNodes<3> cell_population(mesh, cells, real_node_indices); //ghost_sep
         // DomMeshBasedCellPopulationWithGhostNodesV2<3> cell_population(mesh, cells, real_node_indices); //ghost_sep
         // assert(cell_population.GetNumRealCells() != 0);
 
@@ -304,10 +304,10 @@ public:
         // DomWntConcentration<3>::Instance()->SetCryptRadius(wnt_strip_width);
         // DomWntConcentration<3>::Instance()->SetWntConcentrationParameter(2.0);
 
-        WntConcentration<3>::Instance()->SetType(LINEAR);
-        WntConcentration<3>::Instance()->SetCellPopulation(cell_population);
-        WntConcentration<3>::Instance()->SetCryptLength(20.0);
-        WntConcentration<3>::Instance()->SetWntConcentrationParameter(2.0);
+        // WntConcentration<3>::Instance()->SetType(LINEAR);
+        // WntConcentration<3>::Instance()->SetCellPopulation(cell_population);
+        // WntConcentration<3>::Instance()->SetCryptLength(20.0);
+        // WntConcentration<3>::Instance()->SetWntConcentrationParameter(2.0);
 
         // Set the division rule for our population to be the random direction division rule
         // boost::shared_ptr<AbstractCentreBasedDivisionRule<3,3> > p_division_rule(new PlanarDivisionRule());

@@ -1,6 +1,8 @@
 #include "PeriodicBoxBoundaryCondition3dGhostsIncreasingDomain.hpp"
 #include "AbstractCentreBasedCellPopulation.hpp"
 #include "StromalCellMutationState.hpp"
+#include "WildTypeCellMutationState.hpp"
+
 #include "Debug.hpp"
 
 PeriodicBoxBoundaryCondition3dGhostsIncreasingDomain::PeriodicBoxBoundaryCondition3dGhostsIncreasingDomain(AbstractCellPopulation<3>* pCellPopulation)
@@ -22,7 +24,7 @@ PeriodicBoxBoundaryCondition3dGhostsIncreasingDomain::~PeriodicBoxBoundaryCondit
 //void PeriodicBoxBoundaryCondition3d::ImposeBoundaryCondition(const std::vector< c_vector<double, 3> >& rOldLocations)
 void PeriodicBoxBoundaryCondition3dGhostsIncreasingDomain::ImposeBoundaryCondition(const std::map<Node<3>*, c_vector<double, 3> >& rOldLocations)
 {	
-	
+
 	double sim_time = SimulationTime::Instance()->GetTime();
 	double gotCellPopulationWidth = GetCellPopulationWidth();
 	double gotCellPopulationDepth = GetCellPopulationDepth();
@@ -35,12 +37,12 @@ void PeriodicBoxBoundaryCondition3dGhostsIncreasingDomain::ImposeBoundaryConditi
 	else if( sim_time >= mIncreaseDomainTime && sim_time < mEndIncreaseDomainTime)
 	{
 		gotCellPopulationWidth = GetCellPopulationWidth() + mMultiplyerIncreaseDomainTime*(sim_time - mIncreaseDomainTime)/mEndIncreaseDomainTime ;
-		gotCellPopulationDepth = GetCellPopulationDepth() + mMultiplyerIncreaseDomainTime*(sim_time - mIncreaseDomainTime)/mEndIncreaseDomainTime ;
+		gotCellPopulationDepth = GetCellPopulationDepth() + sqrt(0.75)*mMultiplyerIncreaseDomainTime*(sim_time - mIncreaseDomainTime)/mEndIncreaseDomainTime ;
 	}
 	else if(sim_time >= mEndIncreaseDomainTime && mEndIncreaseDomainTime > 0.0)
 	{
 		gotCellPopulationWidth = GetCellPopulationWidth() + mMultiplyerIncreaseDomainTime*(mEndIncreaseDomainTime - mIncreaseDomainTime)/mEndIncreaseDomainTime;
-		gotCellPopulationDepth = GetCellPopulationDepth() + mMultiplyerIncreaseDomainTime*(mEndIncreaseDomainTime - mIncreaseDomainTime)/mEndIncreaseDomainTime ;
+		gotCellPopulationDepth = GetCellPopulationDepth() + sqrt(0.75)*mMultiplyerIncreaseDomainTime*(mEndIncreaseDomainTime - mIncreaseDomainTime)/mEndIncreaseDomainTime ;
 	}
 
 
@@ -58,6 +60,29 @@ void PeriodicBoxBoundaryCondition3dGhostsIncreasingDomain::ImposeBoundaryConditi
 
         // Get pointer to this node
         Node<3>* p_node = this->mpCellPopulation->GetNode(node_index);
+
+		double ghost_length = 0.0;
+		try
+        {
+			(this->mpCellPopulation->GetCellUsingLocationIndex(node_index));
+			// TRACE("Got cell");
+			ghost_length = 0.0;
+        }
+        catch(Exception&)
+        {
+            // TRACE("No cell");
+			ghost_length = 0.5;
+        }
+
+		// if (this->mpCellPopulation->GetCellUsingLocationIndex(node_index)->GetMutationState()->IsType<WildTypeCellMutationState>() ||
+		// 	this->mpCellPopulation->GetCellUsingLocationIndex(node_index)->GetMutationState()->IsType<StromalCellMutationState>() )
+		// {
+		// 	ghost_length = 0.0;
+		// }
+		// else
+		// {
+		// 	ghost_length = 0.1;
+		// }
 
 		// Pin the bottom cells (only stromal)
 		// if ( (this->mpCellPopulation->GetCellUsingLocationIndex(node_index)->GetMutationState()->IsType<StromalCellMutationState>())
@@ -77,25 +102,54 @@ void PeriodicBoxBoundaryCondition3dGhostsIncreasingDomain::ImposeBoundaryConditi
 
 		// Want to enforce a periodic boundary box, such that cells which move outside the boundaries of the box get
 		// moved to the opposite side (as in the cylindrical mesh)
-		if (p_node->rGetLocation()[0] < 0.0)
+		if (p_node->rGetLocation()[0] < 0.0 + ghost_length)
 		{
 			/* Move to the opposite edge */
-			 p_node->rGetModifiableLocation()[0] = p_node->rGetLocation()[0] + gotCellPopulationWidth;
+			if(ghost_length > 0)
+			{
+				p_node->rGetModifiableLocation()[0] = ghost_length;
+			}
+			else
+			{
+				p_node->rGetModifiableLocation()[0] = p_node->rGetLocation()[0] + gotCellPopulationWidth;
+			}
 		}
-		else if (p_node->rGetLocation()[0] > gotCellPopulationWidth)
+		else if (p_node->rGetLocation()[0] > gotCellPopulationWidth - ghost_length)
 		{
 			/* Move to the opposite edge */
-			p_node->rGetModifiableLocation()[0] = p_node->rGetLocation()[0] - gotCellPopulationWidth;
+			if(ghost_length > 0)
+			{
+				p_node->rGetModifiableLocation()[0] = gotCellPopulationWidth - ghost_length;
+			}
+			else
+			{
+				p_node->rGetModifiableLocation()[0] = p_node->rGetLocation()[0] - gotCellPopulationWidth;
+			}
 		}
-		if (p_node->rGetLocation()[1] < 0.0)
+		if (p_node->rGetLocation()[1] < 0.0 + ghost_length)
 		{
 			/* Move to the opposite edge */
-			 p_node->rGetModifiableLocation()[1] = p_node->rGetLocation()[1] + gotCellPopulationDepth;
+			if(ghost_length > 0)
+			{
+				p_node->rGetModifiableLocation()[1] = ghost_length;
+			}
+			else
+			{
+				p_node->rGetModifiableLocation()[1] = p_node->rGetLocation()[1] + gotCellPopulationDepth;
+			}
+		
 		}
-		else if (p_node->rGetLocation()[1] > gotCellPopulationDepth)
+		else if (p_node->rGetLocation()[1] > gotCellPopulationDepth - ghost_length)
 		{
 			/* Move to the opposite edge */
-			p_node->rGetModifiableLocation()[1] = p_node->rGetLocation()[1] - gotCellPopulationDepth;
+			if(ghost_length > 0)
+			{
+				p_node->rGetModifiableLocation()[1] = gotCellPopulationDepth - ghost_length;
+			}
+			else
+			{
+				p_node->rGetModifiableLocation()[1] = p_node->rGetLocation()[1] - gotCellPopulationDepth;
+			}
 		}
 	}
 }
@@ -114,12 +168,12 @@ bool PeriodicBoxBoundaryCondition3dGhostsIncreasingDomain::VerifyBoundaryConditi
 	else if( sim_time >= mIncreaseDomainTime && sim_time < mEndIncreaseDomainTime)
 	{
 		gotCellPopulationWidth = GetCellPopulationWidth() + mMultiplyerIncreaseDomainTime*(sim_time - mIncreaseDomainTime)/mEndIncreaseDomainTime ;
-		gotCellPopulationDepth = GetCellPopulationDepth() + mMultiplyerIncreaseDomainTime*(sim_time - mIncreaseDomainTime)/mEndIncreaseDomainTime ;
+		gotCellPopulationDepth = GetCellPopulationDepth() + sqrt(0.75)*mMultiplyerIncreaseDomainTime*(sim_time - mIncreaseDomainTime)/mEndIncreaseDomainTime ;
 	}
 	else if(sim_time >= mEndIncreaseDomainTime  && mEndIncreaseDomainTime > 0.0)
 	{
 		gotCellPopulationWidth = GetCellPopulationWidth() + mMultiplyerIncreaseDomainTime*(mEndIncreaseDomainTime - mIncreaseDomainTime)/mEndIncreaseDomainTime;
-		gotCellPopulationDepth = GetCellPopulationDepth() + mMultiplyerIncreaseDomainTime*(mEndIncreaseDomainTime - mIncreaseDomainTime)/mEndIncreaseDomainTime ;
+		gotCellPopulationDepth = GetCellPopulationDepth() + sqrt(0.75)*mMultiplyerIncreaseDomainTime*(mEndIncreaseDomainTime - mIncreaseDomainTime)/mEndIncreaseDomainTime ;
 	}
 
 	bool boundary_condition_satisfied = true;
@@ -139,15 +193,39 @@ bool PeriodicBoxBoundaryCondition3dGhostsIncreasingDomain::VerifyBoundaryConditi
         // Get pointer to this node
         Node<3>* p_node = this->mpCellPopulation->GetNode(node_index);
 
+		double ghost_length = 0.0;
+		try
+        {
+			(this->mpCellPopulation->GetCellUsingLocationIndex(node_index));
+			// TRACE("Got cell");
+			ghost_length = 0.0;
+        }
+        catch(Exception&)
+        {
+            // TRACE("No cell");
+			ghost_length = 0.5;
+        }
+		// if (this->mpCellPopulation->GetCellUsingLocationIndex(node_index)->GetMutationState()->IsType<WildTypeCellMutationState>() ||
+		// 	this->mpCellPopulation->GetCellUsingLocationIndex(node_index)->GetMutationState()->IsType<StromalCellMutationState>() )
+		// {
+		// 	ghost_length = 0.0;
+		// }
+		// else
+		// {
+		// 	ghost_length = 0.1;
+		// }
+
         // If this node lies below the z=0 boundary (NO! - Dom), or outside of the periodic boundaries, break and return false
         // If this node lies below the z=0 boundary, or outside of the periodic boundaries, break and return false
         // if ( (p_node->rGetLocation()[2] < 0.0) || (p_node->rGetLocation()[0] < 0.0) || (p_node->rGetLocation()[0] > mCellPopulationWidth)
         // 		|| (p_node->rGetLocation()[1] < 0.0) || (p_node->rGetLocation()[1] > mCellPopulationDepth) )
-        if ( (p_node->rGetLocation()[0] < 0.0) || (p_node->rGetLocation()[0] > gotCellPopulationWidth)
-          || (p_node->rGetLocation()[1] < 0.0) || (p_node->rGetLocation()[1] > gotCellPopulationDepth) )
+        if ( (p_node->rGetLocation()[0] < 0.0 + ghost_length) || (p_node->rGetLocation()[0] > gotCellPopulationWidth - ghost_length)
+          || (p_node->rGetLocation()[1] < 0.0 + ghost_length) || (p_node->rGetLocation()[1] > gotCellPopulationDepth - ghost_length) )
         {
         	PRINT_2_VARIABLES(node_index, SimulationTime::Instance()->GetTime());
         	PRINT_VECTOR(p_node->rGetLocation());
+			TRACE("Boundaries are:");
+			PRINT_3_VARIABLES(ghost_length, gotCellPopulationWidth-ghost_length, gotCellPopulationDepth-ghost_length);
         	boundary_condition_satisfied = false;
         	break;
         }

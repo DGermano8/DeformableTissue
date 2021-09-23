@@ -33,7 +33,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "PeriodicNeighbourModifierIncreasingDomain.hpp"
+#include "PeriodicNeighbourNonGhostModifierIncreasingDomain.hpp"
 #include "DomMeshBasedCellPopulationWithGhostNodes.hpp"
 #include "VtkMeshWriter.hpp"
 
@@ -45,7 +45,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 template<unsigned DIM>
-PeriodicNeighbourModifierIncreasingDomain<DIM>::PeriodicNeighbourModifierIncreasingDomain()
+PeriodicNeighbourNonGhostModifierIncreasingDomain<DIM>::PeriodicNeighbourNonGhostModifierIncreasingDomain()
     : AbstractCellBasedSimulationModifier<DIM>(),
     mOutputDirectory(""),
     mCellPopulationWidth(0.0),
@@ -58,12 +58,12 @@ PeriodicNeighbourModifierIncreasingDomain<DIM>::PeriodicNeighbourModifierIncreas
 }
 
 template<unsigned DIM>
-void PeriodicNeighbourModifierIncreasingDomain<DIM>::SetOutputDirectory(std::string outputDirectory)
+void PeriodicNeighbourNonGhostModifierIncreasingDomain<DIM>::SetOutputDirectory(std::string outputDirectory)
 {
 	mOutputDirectory = outputDirectory;
 
     OutputFileHandler output_file_handler(mOutputDirectory+"/", false);
-    out_stream locationFile = output_file_handler.OpenOutputFile("periodicNeighbours.dat");
+    out_stream locationFile = output_file_handler.OpenOutputFile("periodicNeighboursNonGhosts.dat");
     *locationFile << "time \t";
     *locationFile << "Cell ID" << "\t";
     *locationFile << "Neighbour Number " << "\t";
@@ -72,65 +72,65 @@ void PeriodicNeighbourModifierIncreasingDomain<DIM>::SetOutputDirectory(std::str
 }
 
 template<unsigned DIM>
-void PeriodicNeighbourModifierIncreasingDomain<DIM>::SetWidth(double width)
+void PeriodicNeighbourNonGhostModifierIncreasingDomain<DIM>::SetWidth(double width)
 {
 	mCellPopulationWidth = width;
 }
 template<unsigned DIM>
-double PeriodicNeighbourModifierIncreasingDomain<DIM>::GetWidth()
+double PeriodicNeighbourNonGhostModifierIncreasingDomain<DIM>::GetWidth()
 {
 	return mCellPopulationWidth;
 }
 
 template<unsigned DIM>
-void PeriodicNeighbourModifierIncreasingDomain<DIM>::SetDepth(double depth)
+void PeriodicNeighbourNonGhostModifierIncreasingDomain<DIM>::SetDepth(double depth)
 {
 	mCellPopulationDepth = depth;
 }
 template<unsigned DIM>
-double PeriodicNeighbourModifierIncreasingDomain<DIM>::GetDepth()
+double PeriodicNeighbourNonGhostModifierIncreasingDomain<DIM>::GetDepth()
 {
 	return mCellPopulationDepth;
 }
 
 template<unsigned DIM>
-void PeriodicNeighbourModifierIncreasingDomain<DIM>::SetIncreaseDomainTime(double increaseDomainTime)
+void PeriodicNeighbourNonGhostModifierIncreasingDomain<DIM>::SetIncreaseDomainTime(double increaseDomainTime)
 {
 	mIncreaseDomainTime = increaseDomainTime;
 }
 
 // template<unsigned DIM>
-// void PeriodicNeighbourModifierIncreasingDomain<DIM>::GetIncreaseDomainTime()
+// void PeriodicNeighbourNonGhostModifierIncreasingDomain<DIM>::GetIncreaseDomainTime()
 // {
 // 	return mIncreaseDomainTime;
 // }
 
 template<unsigned DIM>
-void PeriodicNeighbourModifierIncreasingDomain<DIM>::SetEndIncreaseDomainTime(double endIncreaseDomainTime)
+void PeriodicNeighbourNonGhostModifierIncreasingDomain<DIM>::SetEndIncreaseDomainTime(double endIncreaseDomainTime)
 {
 	mEndIncreaseDomainTime = endIncreaseDomainTime;
 }
 
 template<unsigned DIM>
-void PeriodicNeighbourModifierIncreasingDomain<DIM>::SetMultiplyerIncreaseDomainTime(double multiplyerIncreaseDomainTime)
+void PeriodicNeighbourNonGhostModifierIncreasingDomain<DIM>::SetMultiplyerIncreaseDomainTime(double multiplyerIncreaseDomainTime)
 {
 	mMultiplyerIncreaseDomainTime = multiplyerIncreaseDomainTime;
 }
 
 template<unsigned DIM>
-double PeriodicNeighbourModifierIncreasingDomain<DIM>::GetMultiplyerIncreaseDomainTime()
+double PeriodicNeighbourNonGhostModifierIncreasingDomain<DIM>::GetMultiplyerIncreaseDomainTime()
 {
 	return mMultiplyerIncreaseDomainTime;
 }
 
 // template<unsigned DIM>
-// void PeriodicNeighbourModifierIncreasingDomain<DIM>::GetEndIncreaseDomainTime()
+// void PeriodicNeighbourNonGhostModifierIncreasingDomain<DIM>::GetEndIncreaseDomainTime()
 // {
 // 	return mEndIncreaseDomainTime;
 // }
 
 template<unsigned DIM>
-void PeriodicNeighbourModifierIncreasingDomain<DIM>::SetCutoff(double cutoff)
+void PeriodicNeighbourNonGhostModifierIncreasingDomain<DIM>::SetCutoff(double cutoff)
 {
 	mCutoff = cutoff;
 }
@@ -141,17 +141,17 @@ void PeriodicNeighbourModifierIncreasingDomain<DIM>::SetCutoff(double cutoff)
 // }
 
 template<unsigned DIM>
-PeriodicNeighbourModifierIncreasingDomain<DIM>::~PeriodicNeighbourModifierIncreasingDomain()
+PeriodicNeighbourNonGhostModifierIncreasingDomain<DIM>::~PeriodicNeighbourNonGhostModifierIncreasingDomain()
 {
 }
 
 template<unsigned DIM>
-void PeriodicNeighbourModifierIncreasingDomain<DIM>::UpdateAtEndOfTimeStep(AbstractCellPopulation<DIM>& rCellPopulation)
+void PeriodicNeighbourNonGhostModifierIncreasingDomain<DIM>::UpdateAtEndOfTimeStep(AbstractCellPopulation<DIM>& rCellPopulation)
 {
 }
 
 template<unsigned DIM>
-void PeriodicNeighbourModifierIncreasingDomain<DIM>::UpdateAtEndOfOutputTimeStep(AbstractCellPopulation<DIM>& rCellPopulation)
+void PeriodicNeighbourNonGhostModifierIncreasingDomain<DIM>::UpdateAtEndOfOutputTimeStep(AbstractCellPopulation<DIM>& rCellPopulation)
 {
     
     DomMeshBasedCellPopulationWithGhostNodes<DIM>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<DIM>*> (&rCellPopulation);
@@ -296,7 +296,7 @@ void PeriodicNeighbourModifierIncreasingDomain<DIM>::UpdateAtEndOfOutputTimeStep
     mpExtendedMesh = new MutableMesh<DIM,DIM>(extended_nodes);
 
     OutputFileHandler output_file_handler(mOutputDirectory+"/", false);
-	out_stream locationFile = output_file_handler.OpenOutputFile("periodicNeighbours.dat", std::ios::app);
+	out_stream locationFile = output_file_handler.OpenOutputFile("periodicNeighboursNonGhosts.dat", std::ios::app);
     
     SimulationTime* p_time = SimulationTime::Instance();
 
@@ -308,6 +308,7 @@ void PeriodicNeighbourModifierIncreasingDomain<DIM>::UpdateAtEndOfOutputTimeStep
 	{
         
         double cell_size = 0.0;
+        bool no_ghost_neighbours = true;
 
 		unsigned index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
         CellPtr p_cell = rCellPopulation.GetCellUsingLocationIndex(index);
@@ -362,17 +363,30 @@ void PeriodicNeighbourModifierIncreasingDomain<DIM>::UpdateAtEndOfOutputTimeStep
 
                     
                 }
+                else if(node_index != index && p_tissue->IsGhostNode(global_index))
+                {
+                    no_ghost_neighbours = false;
+                }
             }
         }
         
-        int neigh_number = neighbouring_node_indices.size();
-        // PRINT_VARIABLE(neigh_number);
+        if(no_ghost_neighbours == true)
+        {
+            int neigh_number = neighbouring_node_indices.size();
+            // PRINT_VARIABLE(neigh_number);
 
-        double cell_density = cell_size/(neigh_number);
-        *locationFile << index << "\t";
-        *locationFile << neigh_number << "\t";
-        *locationFile << cell_density << "\t";
+            double cell_density = cell_size/(neigh_number);
 
+            *locationFile << index << "\t";
+            *locationFile << neigh_number << "\t";
+            *locationFile << cell_density << "\t";
+        }
+        else if(no_ghost_neighbours == false)
+        {
+            *locationFile << index << "\t";
+            *locationFile << 0.0 << "\t";
+            *locationFile << 0.0 << "\t";
+        }
         
 
     }
@@ -389,7 +403,7 @@ void PeriodicNeighbourModifierIncreasingDomain<DIM>::UpdateAtEndOfOutputTimeStep
 
 
 template<unsigned DIM>
-void PeriodicNeighbourModifierIncreasingDomain<DIM>::SetupSolve(AbstractCellPopulation<DIM>& rCellPopulation, std::string outputDirectory)
+void PeriodicNeighbourNonGhostModifierIncreasingDomain<DIM>::SetupSolve(AbstractCellPopulation<DIM>& rCellPopulation, std::string outputDirectory)
 {
     /*
      * We must update CellData in SetupSolve(), otherwise it will not have been
@@ -402,7 +416,7 @@ void PeriodicNeighbourModifierIncreasingDomain<DIM>::SetupSolve(AbstractCellPopu
 
 
 template<unsigned DIM>
-void PeriodicNeighbourModifierIncreasingDomain<DIM>::OutputSimulationModifierParameters(out_stream& rParamsFile)
+void PeriodicNeighbourNonGhostModifierIncreasingDomain<DIM>::OutputSimulationModifierParameters(out_stream& rParamsFile)
 {
     // No parameters to output, so just call method on direct parent class
     AbstractCellBasedSimulationModifier<DIM>::OutputSimulationModifierParameters(rParamsFile);
@@ -411,9 +425,9 @@ void PeriodicNeighbourModifierIncreasingDomain<DIM>::OutputSimulationModifierPar
 // Explicit instantiation
 // template class MeshModifier<1>;
 // template class MeshModifier<2>;
-template class PeriodicNeighbourModifierIncreasingDomain<3>;
+template class PeriodicNeighbourNonGhostModifierIncreasingDomain<3>;
 
 // Serialization for Boost >= 1.36
 #include "SerializationExportWrapperForCpp.hpp"
-EXPORT_TEMPLATE_CLASS_SAME_DIMS(PeriodicNeighbourModifierIncreasingDomain)
+EXPORT_TEMPLATE_CLASS_SAME_DIMS(PeriodicNeighbourNonGhostModifierIncreasingDomain)
 
