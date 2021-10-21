@@ -11,6 +11,8 @@
 #include "GeneralisedLinearSpringForce.hpp"
 #include "SimpleWntCellCycleModel.hpp"
 #include "DomMeshBasedCellPopulationWithGhostNodes.hpp"
+// #include "MeshBasedCellPopulationWithGhostNodes.hpp"
+
 #include "AbstractCellBasedTestSuite.hpp"
 #include "WildTypeCellMutationState.hpp"
 #include "StromalCellMutationState.hpp"
@@ -31,6 +33,9 @@
 #include "TransitCellProliferativeType.hpp"
 #include "FixedG1GenerationalCellCycleModel.hpp"
 #include "CellIdWriter.hpp"
+#include "CellAngleWriter.hpp"
+
+
 #include "CellMutationStatesWriter.hpp"
 #include "CellProliferativeTypesWriter.hpp"
 #include "CellAncestorWriter.hpp"
@@ -74,7 +79,7 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "PeriodicBend_WntStrip_20210817_03";
+        std::string output_directory = "PeriodicBend_WntStrip_testWriter";
 
         unsigned width = 10;	   // x
         unsigned height = 12;      // y
@@ -284,8 +289,9 @@ public:
         std::cout<< "number of ghosts     = " << ghost_node_indices.size() << "\n";
 
         DomMeshBasedCellPopulationWithGhostNodes<3> cell_population(mesh, cells, real_node_indices); //ghost_sep
-        assert(cell_population.GetNumRealCells() != 0);
+        // assert(cell_population.GetNumRealCells() != 0);
 
+        // MeshBasedCellPopulationWithGhostNodes<3> cell_population(mesh, cells, real_node_indices); //ghost_sep
 
         // Set the division rule for our population to be the random direction division rule
         // boost::shared_ptr<AbstractCentreBasedDivisionRule<3,3> > p_division_rule_to_set(new PlanarDivisionRule<3,3>());
@@ -313,9 +319,12 @@ public:
 //        cell_population.InitialiseCells();
 
         // Make sure we have a Voronoi tessellation to begin with
-        cell_population.CreateVoronoiTessellation();
+        // cell_population.CreateVoronoiTessellation();
         
         cell_population.AddCellWriter<CellIdWriter>();
+
+        cell_population.AddCellWriter<CellAngleWriter>();
+        
         cell_population.AddCellWriter<CellMutationStatesWriter>();
         cell_population.AddCellWriter<CellProliferativeTypesWriter>();
         cell_population.AddCellWriter<CellAncestorWriter>();
@@ -331,7 +340,7 @@ public:
         cell_population.SetWriteVtkAsPointsDom(true);
         //std::cout<<cell_population.GetWriteVtkAsPoints() << "\n";
         //PRINT_VARIABLE(cell_population.GetWriteVtkAsPoints());
-        cell_population.SetOutputMeshInVtkDom(false);
+        // cell_population.SetOutputMeshInVtkDom(false);
 
 
 
@@ -340,11 +349,20 @@ public:
              cell_iter != cell_population.rGetCells().end();
              ++cell_iter)
         {
+
             Node<3>* p_node = cell_population.GetNodeCorrespondingToCell(*cell_iter);
             node_locations_before[p_node] = p_node->rGetLocation();
             //PRINT_VECTOR(node_locations_before[p_node]);
         }
 
+        TRACE("Initialise cells");
+        for (typename AbstractCellPopulation<3>::Iterator cell_iter = cell_population.Begin();
+         cell_iter != cell_population.End();
+         ++cell_iter)
+        {
+            cell_iter->GetCellData()->SetItem("angle_curvature", 0.0);
+        }
+        TRACE("Done");
 
         // MAKE_PTR_ARGS(PeriodicBoxBoundaryCondition3d, boundary_condition, (&cell_population));
         MAKE_PTR_ARGS(PeriodicBoxBoundaryCondition3dGhosts, boundary_condition, (&cell_population));
@@ -397,7 +415,6 @@ public:
             simulator.AddForce(periodic_bending_force);
         }
 
-
         // MAKE_PTR(DriftPreventForce<3>, p_drift_force);
         // p_drift_force->SetTissueMiddle(tissue_middle);
         // simulator.AddForce(p_drift_force);
@@ -443,13 +460,13 @@ public:
         pc_modifier->SetCutoff(spring_cuttoff+0.001);
         simulator.AddSimulationModifier(pc_modifier);
 
-
-
         // Add random cell killer for death at the edges
         //                                                              ProbabilityOfDeathInAnHour,    MinXBoundary,                MaxXBoundary,     MinYBoundary,                    MaxYBoundary
         // MAKE_PTR_ARGS(UniformCellKiller3dWithGhostNodes, random_cell_death, (&cell_population, 1.0, 1.5*width_space,  periodic_width-1.5*width_space, 1.5*height_space,  periodic_height-1.5*height_space, num_epithelial_cells+num_tissue_cells));
         // MAKE_PTR_ARGS(UniformCellKiller3dWithGhostNodes, random_cell_death, (&cell_population, 1.0, periodic_width + 1,  0 - 1, periodic_height + 1,  0 - 1 , num_epithelial_cells+num_tissue_cells));
 		// simulator.AddCellKiller(random_cell_death);
+
+        TRACE("Set uo done - lets solve");
     	
         simulator.SetSamplingTimestepMultiple(plot_step);			// Every hour
 		simulator.SetEndTime(end_time);

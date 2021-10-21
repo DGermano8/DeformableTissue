@@ -1360,6 +1360,8 @@ bool PeriodicBendingForce3dHeightWithGhostNodes::DoesElementContainLongEdge(Abst
 // Dom - adds the force to the cell - will use this
 void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCellPopulation<3>& rCellPopulation)
 {
+	// TRACE("Adding force");
+
 	DomMeshBasedCellPopulationWithGhostNodes<3>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<3>*>(&rCellPopulation);
 
 	unsigned num_cells = rCellPopulation.GetNumRealCells();
@@ -1402,6 +1404,8 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
          cell_iter != rCellPopulation.End();
          ++cell_iter)
     {
+		
+
         // First, create and store a copy of this real node and cell
 
         unsigned real_node_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
@@ -1420,6 +1424,8 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 
 		// caluclating tissue height here.
 		CellPtr p_cell_i_ext = rCellPopulation.GetCellUsingLocationIndex(real_node_index);
+
+		
 
 		// bool is_wild = p_cell_i_ext->GetMutationState()->IsType<WildTypeCellMutationState>();
         // bool is_stom = p_cell_i_ext->GetMutationState()->IsType<StromalCellMutationState>();
@@ -1631,6 +1637,8 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 	// myfile.open (angle_string);
 	// myfile << SimulationTime::Instance()->GetTime() << ", ";
 	// TRACE("Computing Bending Force");
+	// TRACE(" ");
+	// PRINT_VARIABLE(SimulationTime::Instance()->GetTime());
 	for (AbstractCellPopulation<3>::Iterator cell_iter = rCellPopulation.Begin();
          cell_iter != rCellPopulation.End();
          ++cell_iter)
@@ -1641,6 +1649,8 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 
 		CellPtr p_cell_i_ext = rCellPopulation.GetCellUsingLocationIndex(real_node_index);
 
+		// TRACE("Stored Cell Angle");
+		cell_iter->GetCellData()->SetItem("angle_curvature", 0.0);
 
         unsigned cell_i_ext = real_node_index;
 
@@ -1781,6 +1791,10 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 			force_curvature[2] = force_due_to_curvature[2];
 
 			// myfile  << std::fixed << std::setprecision(12) << force_due_to_curvature[3] << ", ";
+
+			// TRACE("Storing an actual cell");
+			cell_iter->GetCellData()->SetItem("angle_curvature", force_due_to_curvature[3]);
+
 			if((p_cell_i_ext->GetAge()) < 1)
 			{
 				basement_membrane_parameter = (p_cell_i_ext->GetAge()) *get_basement_membrane_parameter;
@@ -1807,6 +1821,7 @@ void PeriodicBendingForce3dHeightWithGhostNodes::AddForceContribution(AbstractCe
 		}		
 		
 	}
+	// TRACE("Done");
 	// std::cout<< "\n\n";
 
 	// myfile.close();
