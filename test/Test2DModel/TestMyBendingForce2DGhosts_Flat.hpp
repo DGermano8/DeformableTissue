@@ -98,7 +98,7 @@ public:
         double alpha_parameter = 1.5;
 
         double time_step = 0.005;
-        double end_time = 12;
+        double end_time = 0.1;
 
         bool include_springs = true;
         bool include_bending = true;

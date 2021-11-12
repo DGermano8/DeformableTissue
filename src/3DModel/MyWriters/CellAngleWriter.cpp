@@ -57,14 +57,15 @@ void CellAngleWriter<ELEMENT_DIM, SPACE_DIM>::VisitCell(CellPtr pCell, AbstractC
 {
     unsigned cell_id = pCell->GetCellId();
     double angle = pCell->GetCellData()->GetItem("angle_curvature");
-    unsigned location_index = pCellPopulation->GetLocationIndexUsingCell(pCell);
-    *this->mpOutStream << " " << cell_id << " " << location_index << " " << angle;
 
-    c_vector<double, SPACE_DIM> coords = pCellPopulation->GetLocationOfCellCentre(pCell);
-    for (unsigned i=0; i<SPACE_DIM; i++)
-    {
-        *this->mpOutStream << " " << coords[i];
-    }
+    unsigned location_index = pCellPopulation->GetLocationIndexUsingCell(pCell);
+    *this->mpOutStream << " " << cell_id << " " << location_index << " " << std::fixed << std::setprecision(12) << angle;
+
+    // c_vector<double, SPACE_DIM> coords = pCellPopulation->GetLocationOfCellCentre(pCell);
+    // for (unsigned i=0; i<SPACE_DIM; i++)
+    // {
+    //     *this->mpOutStream << " " << coords[i];
+    // }
 }
 
 // Explicit instantiation

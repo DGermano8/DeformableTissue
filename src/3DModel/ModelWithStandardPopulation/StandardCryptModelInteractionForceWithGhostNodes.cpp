@@ -1,4 +1,4 @@
-#include "PeriodicCryptModelInteractionForceWithGhostNodes.hpp"
+#include "StandardCryptModelInteractionForceWithGhostNodes.hpp"
 #include "Debug.hpp"
 #include <cmath>
 #include <list>
@@ -13,7 +13,7 @@
  * variables should be done in the order they are defined in the header file.
  */
 template<unsigned DIM>
-PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::PeriodicCryptModelInteractionForceWithGhostNodes()
+StandardCryptModelInteractionForceWithGhostNodes<DIM>::StandardCryptModelInteractionForceWithGhostNodes()
    : LinearSpringWithVariableSpringConstantsForce<DIM>(),
    mPeriodicDomainWidth(DOUBLE_UNSET),
    mPeriodicDomainDepth(DOUBLE_UNSET),
@@ -38,7 +38,7 @@ PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::PeriodicCryptModelInterac
 }
 
 template<unsigned DIM>
-PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::~PeriodicCryptModelInteractionForceWithGhostNodes()
+StandardCryptModelInteractionForceWithGhostNodes<DIM>::~StandardCryptModelInteractionForceWithGhostNodes()
 {
     // Avoid memory leaks
     if (mpExtendedMesh != NULL)
@@ -49,7 +49,7 @@ PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::~PeriodicCryptModelIntera
 }
 
 template<unsigned DIM>
-void PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::SetCellTypeDependentSprings(bool useCellTypeDependentSprings,
+void StandardCryptModelInteractionForceWithGhostNodes<DIM>::SetCellTypeDependentSprings(bool useCellTypeDependentSprings,
 		double transitTransitMultiplier,
 		double differentiatedDifferentiatedMultiplier,
 		double transitDifferentiatedMultiplier)
@@ -61,7 +61,7 @@ void PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::SetCellTypeDependent
 }
 
 template<unsigned DIM>
-void PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::SetEpithelialStromalCellDependentSprings(bool useEpithelialStromalCellDependentSprings,
+void StandardCryptModelInteractionForceWithGhostNodes<DIM>::SetEpithelialStromalCellDependentSprings(bool useEpithelialStromalCellDependentSprings,
 		double epithelialEpithelialMultiplier,
 		double stromalStromalMultiplier,
 		double epithelialStromalMultiplier,
@@ -75,33 +75,33 @@ void PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::SetEpithelialStromal
 }
 
 template<unsigned DIM>
-void PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::SetEdgeBasedSpringConstant(bool useEdgeBasedSpringConstant)
+void StandardCryptModelInteractionForceWithGhostNodes<DIM>::SetEdgeBasedSpringConstant(bool useEdgeBasedSpringConstant)
 {
     assert(DIM == 2);
     mUseEdgeBasedSpringConstant = useEdgeBasedSpringConstant;
 }
 
 template<unsigned DIM>
-void PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::SetUseOneWaySprings(bool useOneWaySprings)
+void StandardCryptModelInteractionForceWithGhostNodes<DIM>::SetUseOneWaySprings(bool useOneWaySprings)
 {
 	mUseOneWaySprings = useOneWaySprings;
 }
 
 template<unsigned DIM>
-void PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::SetPositionDependentSpringConstants(bool usePositionDependentSpringConstants, double springConstantsMultiplier)
+void StandardCryptModelInteractionForceWithGhostNodes<DIM>::SetPositionDependentSpringConstants(bool usePositionDependentSpringConstants, double springConstantsMultiplier)
 {
 	mUsePositionDependentSpringConstants = usePositionDependentSpringConstants;
 	mSpringConstantsMultiplier = springConstantsMultiplier;
 }
 
 template<unsigned DIM>
-double PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::GetPositionDependentSpringConstants()
+double StandardCryptModelInteractionForceWithGhostNodes<DIM>::GetPositionDependentSpringConstants()
 {
 	return mSpringConstantsMultiplier;
 }
 
 template<unsigned DIM>
-double PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::VariableSpringConstantMultiplicationFactor(unsigned nodeAGlobalIndex,
+double StandardCryptModelInteractionForceWithGhostNodes<DIM>::VariableSpringConstantMultiplicationFactor(unsigned nodeAGlobalIndex,
 																							unsigned nodeBGlobalIndex,
 																							AbstractCellPopulation<DIM>& rCellPopulation,
 																							bool isCloserThanRestLength)
@@ -111,7 +111,7 @@ double PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::VariableSpringCons
 																																rCellPopulation,
 																																isCloserThanRestLength);
 
-    DomMeshBasedCellPopulationWithGhostNodes<DIM>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<DIM>*>(&rCellPopulation);
+    MeshBasedCellPopulationWithGhostNodes<DIM>* p_tissue = static_cast<MeshBasedCellPopulationWithGhostNodes<DIM>*>(&rCellPopulation);
     assert(!(p_tissue->IsGhostNode(nodeAGlobalIndex)));
     assert(!(p_tissue->IsGhostNode(nodeBGlobalIndex)));
 
@@ -204,9 +204,9 @@ double PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::VariableSpringCons
  * [1] - y or z-coordinate of base
  */
 template<unsigned DIM>
-c_vector<double,2> PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::GetCryptHeightExtremes(AbstractCellPopulation<DIM>& rCellPopulation)
+c_vector<double,2> StandardCryptModelInteractionForceWithGhostNodes<DIM>::GetCryptHeightExtremes(AbstractCellPopulation<DIM>& rCellPopulation)
 {
-    DomMeshBasedCellPopulationWithGhostNodes<DIM>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<DIM>*>(&rCellPopulation);
+    MeshBasedCellPopulationWithGhostNodes<DIM>* p_tissue = static_cast<MeshBasedCellPopulationWithGhostNodes<DIM>*>(&rCellPopulation);
 
     // Create a vector to store the y-coordinates of the lowest point of the crypt base and the highest point of the
     // crypt orifice
@@ -249,7 +249,7 @@ c_vector<double,2> PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::GetCry
 }
 
 template<unsigned DIM>
-void PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::RemoveDuplicates1D(std::vector<unsigned>& rVectorWithDuplicates)
+void StandardCryptModelInteractionForceWithGhostNodes<DIM>::RemoveDuplicates1D(std::vector<unsigned>& rVectorWithDuplicates)
 {
     std::sort(rVectorWithDuplicates.begin(), rVectorWithDuplicates.end());
     rVectorWithDuplicates.erase(std::unique(rVectorWithDuplicates.begin(), rVectorWithDuplicates.end()), rVectorWithDuplicates.end());
@@ -259,9 +259,9 @@ void PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::RemoveDuplicates1D(s
  * Method to determine whether an element contains ghost nodes
  */
 template<unsigned DIM>
-bool PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::DoesElementContainGhostNodes(AbstractCellPopulation<DIM>& rCellPopulation, unsigned elementIndex)
+bool StandardCryptModelInteractionForceWithGhostNodes<DIM>::DoesElementContainGhostNodes(AbstractCellPopulation<DIM>& rCellPopulation, unsigned elementIndex)
 {
-	DomMeshBasedCellPopulationWithGhostNodes<DIM>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<DIM>*>(&rCellPopulation);
+	MeshBasedCellPopulationWithGhostNodes<DIM>* p_tissue = static_cast<MeshBasedCellPopulationWithGhostNodes<DIM>*>(&rCellPopulation);
 
 	bool element_contains_ghost_nodes = false;
 
@@ -286,9 +286,9 @@ bool PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::DoesElementContainGh
  * excluding those elements that have ghost nodes
  */
 template<unsigned DIM>
-unsigned PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::GetNumContainingElementsWithoutGhostNodes(AbstractCellPopulation<DIM>& rCellPopulation, unsigned nodeIndex)
+unsigned StandardCryptModelInteractionForceWithGhostNodes<DIM>::GetNumContainingElementsWithoutGhostNodes(AbstractCellPopulation<DIM>& rCellPopulation, unsigned nodeIndex)
 {
-	DomMeshBasedCellPopulationWithGhostNodes<DIM>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<DIM>*>(&rCellPopulation);
+	MeshBasedCellPopulationWithGhostNodes<DIM>* p_tissue = static_cast<MeshBasedCellPopulationWithGhostNodes<DIM>*>(&rCellPopulation);
 
     // Get pointer to the node
     Node<DIM>* p_node = p_tissue->GetNode(nodeIndex);
@@ -328,9 +328,9 @@ unsigned PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::GetNumContaining
  * triangulation, excluding ghost nodes.
  */
 template<unsigned DIM>
-std::set<unsigned> PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::GetNeighbouringNodeIndices(AbstractCellPopulation<DIM>& rCellPopulation, unsigned nodeIndex)
+std::set<unsigned> StandardCryptModelInteractionForceWithGhostNodes<DIM>::GetNeighbouringNodeIndices(AbstractCellPopulation<DIM>& rCellPopulation, unsigned nodeIndex)
 {
-	DomMeshBasedCellPopulationWithGhostNodes<DIM>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<DIM>*>(&rCellPopulation);
+	MeshBasedCellPopulationWithGhostNodes<DIM>* p_tissue = static_cast<MeshBasedCellPopulationWithGhostNodes<DIM>*>(&rCellPopulation);
 
 	assert(!(p_tissue->IsGhostNode(nodeIndex)));
 
@@ -368,9 +368,9 @@ std::set<unsigned> PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::GetNei
  * FALSE if cell remains in the monolayer
  */
 template<unsigned DIM>
-bool PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::HasEpithelialCellDetachedFromBasementMembrane(AbstractCellPopulation<DIM>& rCellPopulation, unsigned nodeIndex)
+bool StandardCryptModelInteractionForceWithGhostNodes<DIM>::HasEpithelialCellDetachedFromBasementMembrane(AbstractCellPopulation<DIM>& rCellPopulation, unsigned nodeIndex)
 {
-	DomMeshBasedCellPopulationWithGhostNodes<DIM>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<DIM>*>(&rCellPopulation);
+	MeshBasedCellPopulationWithGhostNodes<DIM>* p_tissue = static_cast<MeshBasedCellPopulationWithGhostNodes<DIM>*>(&rCellPopulation);
 
 	bool has_cell_detached = false;	// Initialising
 
@@ -402,7 +402,7 @@ bool PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::HasEpithelialCellDet
 template<unsigned DIM> 
 //void PeriodicCryptModelInteractionForce<DIM>::AddForceContribution(std::vector<c_vector<double, DIM> >& rForces,
 //                                                                   AbstractCellPopulation<DIM>& rCellPopulation)
-void PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::AddForceContribution(AbstractCellPopulation<DIM>& rCellPopulation)
+void StandardCryptModelInteractionForceWithGhostNodes<DIM>::AddForceContribution(AbstractCellPopulation<DIM>& rCellPopulation)
 {
     // PRINT_2_VARIABLES("Spring",SimulationTime::Instance()->GetTime());
     // If the width of the periodic domain has not been specified, use the initial width of the cell population
@@ -875,12 +875,12 @@ void PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::AddForceContribution
 
 
 template<unsigned DIM>
-c_vector<double, DIM> PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::CalculateForceBetweenNodes(unsigned nodeAGlobalIndex,
+c_vector<double, DIM> StandardCryptModelInteractionForceWithGhostNodes<DIM>::CalculateForceBetweenNodes(unsigned nodeAGlobalIndex,
 																						 unsigned nodeBGlobalIndex,
                                                                                          AbstractCellPopulation<DIM>& rCellPopulation)
 {
-    assert(dynamic_cast<DomMeshBasedCellPopulationWithGhostNodes<DIM>*>(&rCellPopulation) != nullptr);
-    DomMeshBasedCellPopulationWithGhostNodes<DIM>* p_tissue = static_cast<DomMeshBasedCellPopulationWithGhostNodes<DIM>*>(&rCellPopulation);
+    assert(dynamic_cast<MeshBasedCellPopulationWithGhostNodes<DIM>*>(&rCellPopulation) != nullptr);
+    MeshBasedCellPopulationWithGhostNodes<DIM>* p_tissue = static_cast<MeshBasedCellPopulationWithGhostNodes<DIM>*>(&rCellPopulation);
  //   assert(rCellPopulation.IsMeshBasedCellPopulation());
  //   assert(bool(dynamic_cast<MeshBasedCellPopulation<DIM>*>(&rCellPopulation)))
 
@@ -1066,7 +1066,7 @@ c_vector<double, DIM> PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::Cal
 
  //   if (rCellPopulation.IsMeshBasedCellPopulation())
  // if(bool(dynamic_cast<MeshBasedCellPopulation<DIM>*>(&rCellPopulation) != nullptr))
- if (bool(dynamic_cast<DomMeshBasedCellPopulationWithGhostNodes<DIM>*>(&rCellPopulation)))
+ if (bool(dynamic_cast<MeshBasedCellPopulationWithGhostNodes<DIM>*>(&rCellPopulation)))
     {
         return multiplication_factor * spring_stiffness * unit_difference * overlap;
     }
@@ -1098,32 +1098,32 @@ c_vector<double, DIM> PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::Cal
 
 
 template<unsigned DIM>
-double PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::GetPeriodicDomainWidth()
+double StandardCryptModelInteractionForceWithGhostNodes<DIM>::GetPeriodicDomainWidth()
 {
 	return mPeriodicDomainWidth;
 }
 
 template<unsigned DIM>
-void PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::SetPeriodicDomainWidth(double periodicDomainWidth)
+void StandardCryptModelInteractionForceWithGhostNodes<DIM>::SetPeriodicDomainWidth(double periodicDomainWidth)
 {
 	mPeriodicDomainWidth = periodicDomainWidth;
 }
 
 template<unsigned DIM>
-double PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::GetPeriodicDomainDepth()
+double StandardCryptModelInteractionForceWithGhostNodes<DIM>::GetPeriodicDomainDepth()
 {
 	return mPeriodicDomainDepth;
 }
 
 template<unsigned DIM>
-void PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::SetPeriodicDomainDepth(double periodicDomainDepth)
+void StandardCryptModelInteractionForceWithGhostNodes<DIM>::SetPeriodicDomainDepth(double periodicDomainDepth)
 {
 	mPeriodicDomainDepth = periodicDomainDepth;
 }
 
 
 template<unsigned DIM>
-void PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::OutputForceParameters(out_stream& rParamsFile)
+void StandardCryptModelInteractionForceWithGhostNodes<DIM>::OutputForceParameters(out_stream& rParamsFile)
 {
 	*rParamsFile <<  "\t\t\t<UseCellTypeDependentSprings>"<< mUseCellTypeDependentSprings << "</UseCellTypeDependentSprings> \n" ;
 	*rParamsFile <<  "\t\t\t<TransitTransitMultiplier>"<< mTransitTransitMultiplier << "</TransitTransitMultiplier> \n" ;
@@ -1147,10 +1147,10 @@ void PeriodicCryptModelInteractionForceWithGhostNodes<DIM>::OutputForceParameter
 // Explicit instantiation
 /////////////////////////////////////////////////////////////////////////////
 
-template class PeriodicCryptModelInteractionForceWithGhostNodes<1>;
-template class PeriodicCryptModelInteractionForceWithGhostNodes<2>;
-template class PeriodicCryptModelInteractionForceWithGhostNodes<3>;
+template class StandardCryptModelInteractionForceWithGhostNodes<1>;
+template class StandardCryptModelInteractionForceWithGhostNodes<2>;
+template class StandardCryptModelInteractionForceWithGhostNodes<3>;
 
 // Serialization for Boost >= 1.36
 #include "SerializationExportWrapperForCpp.hpp"
-EXPORT_TEMPLATE_CLASS_SAME_DIMS(PeriodicCryptModelInteractionForceWithGhostNodes)
+EXPORT_TEMPLATE_CLASS_SAME_DIMS(StandardCryptModelInteractionForceWithGhostNodes)

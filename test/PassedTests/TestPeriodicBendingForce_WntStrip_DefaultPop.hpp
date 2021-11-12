@@ -10,19 +10,19 @@
 #include "OffLatticeSimulation.hpp"
 #include "GeneralisedLinearSpringForce.hpp"
 #include "SimpleWntCellCycleModel.hpp"
-#include "DomMeshBasedCellPopulationWithGhostNodes.hpp"
-// #include "MeshBasedCellPopulationWithGhostNodes.hpp"
+// #include "DomMeshBasedCellPopulationWithGhostNodes.hpp"
+#include "MeshBasedCellPopulationWithGhostNodes.hpp"
 
 #include "AbstractCellBasedTestSuite.hpp"
 #include "WildTypeCellMutationState.hpp"
 #include "StromalCellMutationState.hpp"
 #include "CellsGenerator.hpp"
 #include "RandomMotionForce.hpp"
-#include "PeriodicCryptModelInteractionForceWithGhostNodes.hpp"
-#include "PeriodicBendingForce3dHeightWithGhostNodes.hpp"
+#include "StandardCryptModelInteractionForceWithGhostNodes.hpp"
+#include "StandardBendingForce3dHeightWithGhostNodes.hpp"
 #include "SloughingCellKiller3DWithGhostNodes.hpp"
-#include "AnoikisCellKiller3DWithGhostNodes.hpp"
-#include "UniformCellKiller3dWithGhostNodes.hpp"
+#include "StandardAnoikisCellKiller3DWithGhostNodes.hpp"
+#include "StandardUniformCellKiller3dWithGhostNodes.hpp"
 #include "PeriodicBoxBoundaryCondition3d.hpp"
 #include "PeriodicBoxBoundaryCondition3dGhosts.hpp"
 #include "PeriodicStromalBoxBoundaryCondition3d.hpp"
@@ -55,11 +55,13 @@
 #include "MeshRemeshModifier.hpp"
 #include "PeriodicRemeshCellsModifier.hpp"
 #include "MeshRemeshCutoffModifier.hpp"
-#include "DensityDependantCellKillerStrip3DWithGhostNodesV2.hpp"
-// #include "DensityDependantCellKillerStrip3DWithGhostNodes.hpp"
+#include "StandardDensityDependantCellKillerStrip3DWithGhostNodesV2.hpp"
 
 #include "DomSimpleWntCellCycleModel.hpp"
 #include "NodeVelocityWriter.hpp"
+
+// #include "PointWriterModifier.hpp"
+#include "PointWriterModifier3.hpp"
 
 // Tests have been copied directly from TestOffLatticeSimulation3d.hpp - most likely that bits will get changed
 // and broken by me along the way
@@ -79,7 +81,7 @@ public:
 
         std::vector<Node<3>*> nodes;
 
-        std::string output_directory = "PeriodicBend_WntStrip_testWriter_O";
+        std::string output_directory = "PeriodicBend_WntStrip_testWriter";
 
         unsigned width = 10;	   // x
         unsigned height = 12;      // y
@@ -288,10 +290,10 @@ public:
         std::cout<< "number of cells all  = " << num_epithelial_cells+num_tissue_cells << "\n";
         std::cout<< "number of ghosts     = " << ghost_node_indices.size() << "\n";
 
-        DomMeshBasedCellPopulationWithGhostNodes<3> cell_population(mesh, cells, real_node_indices); //ghost_sep
+        // DomMeshBasedCellPopulationWithGhostNodes<3> cell_population(mesh, cells, real_node_indices); //ghost_sep
         // assert(cell_population.GetNumRealCells() != 0);
 
-        // MeshBasedCellPopulationWithGhostNodes<3> cell_population(mesh, cells, real_node_indices); //ghost_sep
+        MeshBasedCellPopulationWithGhostNodes<3> cell_population(mesh, cells, real_node_indices); //ghost_sep
 
         // Set the division rule for our population to be the random direction division rule
         // boost::shared_ptr<AbstractCentreBasedDivisionRule<3,3> > p_division_rule_to_set(new PlanarDivisionRule<3,3>());
@@ -329,13 +331,18 @@ public:
         cell_population.AddCellWriter<CellProliferativeTypesWriter>();
         cell_population.AddCellWriter<CellAncestorWriter>();
         cell_population.AddPopulationWriter<CellPopulationEpithelialWriter>();
+        
 
         cell_population.AddPopulationWriter<NodeVelocityWriter>();
 
         
         //cell_population.AddPopulationWriter<VoronoiDataWriter>(); // paraview is pretty pointless at viewing this, worth looking into
         
-        //cell_population.WriteVtkResultsToFile(output_directory);
+        // cell_population.WriteVtkResultsToFile(output_directory);
+        // cell_population.SetWriteVtkAsPoints(true);
+        // cell_population.SetOutputMeshInVtk(true);
+
+
         //To fix paraview
         // cell_population.SetWriteVtkAsPointsDom(true);
         //std::cout<<cell_population.GetWriteVtkAsPoints() << "\n";
@@ -387,7 +394,7 @@ public:
         // simulator.AddCellPopulationBoundaryCondition(epithelial_boundary_condition);
 
 		// Create periodic spring force law
-        MAKE_PTR(PeriodicCryptModelInteractionForceWithGhostNodes<3>, periodic_spring_force);
+        MAKE_PTR(StandardCryptModelInteractionForceWithGhostNodes<3>, periodic_spring_force);
         periodic_spring_force->SetUseOneWaySprings(false); //turning this on makes the stromal cells act as ghosts..
         periodic_spring_force->SetCutOffLength(spring_cuttoff);
         //                     SetEpithelialStromalCellDependentSprings(ind , Ep-Ep, Str-Str, Ep-Str, apcTwoHitStromalMultiplier);
@@ -401,7 +408,7 @@ public:
         }
 
 		// Create periodic basement membrane force law
-        MAKE_PTR(PeriodicBendingForce3dHeightWithGhostNodes, periodic_bending_force);
+        MAKE_PTR(StandardBendingForce3dHeightWithGhostNodes, periodic_bending_force);
         periodic_bending_force->SetOutputDirectory(output_directory);
         periodic_bending_force->SetHeightDependantCurvatureParameter(1.2);
         periodic_bending_force->SetBasementMembraneParameter(beta_parameter);
@@ -428,29 +435,21 @@ public:
         double density_threshold = 0.95;
         double density_radius = wnt_strip_width + 2.0;
         // Add anoikis cell killer
-        MAKE_PTR_ARGS(AnoikisCellKiller3DWithGhostNodes, anoikis, (&cell_population, cut_off, periodic_width, periodic_height));
+        MAKE_PTR_ARGS(StandardAnoikisCellKiller3DWithGhostNodes, anoikis, (&cell_population, cut_off, periodic_width, periodic_height));
         anoikis->SetOutputDirectory(output_directory);
         simulator.AddCellKiller(anoikis);
 
-        MAKE_PTR_ARGS(DensityDependantCellKillerStrip3DWithGhostNodesV2, density, (&cell_population, density_radius, density_threshold, periodic_width, periodic_height));
+        MAKE_PTR_ARGS(StandardDensityDependantCellKillerStrip3DWithGhostNodesV2, density, (&cell_population, density_radius, density_threshold, periodic_width, periodic_height));
         density->SetOutputDirectory(output_directory);
         simulator.AddCellKiller(density);
 
         // std::string output_directory = "Test_WithSpringsBending_randz_alpha_2";
         simulator.SetOutputDirectory(output_directory);	 
 
-        // MAKE_PTR(MeshRemeshModifier<3>, p_modifier);
-        // p_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
-        // p_modifier->SetWidth(periodic_width);
-        // p_modifier->SetDepth(periodic_height);
-
-        // simulator.AddSimulationModifier(p_modifier);
-
         // MAKE_PTR(PeriodicRemeshCellsModifier<3>, p_per_modifier);
         // p_per_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
         // p_per_modifier->SetWidth(periodic_width);
         // p_per_modifier->SetDepth(periodic_height);
-
         // simulator.AddSimulationModifier(p_per_modifier);
 
         // MAKE_PTR(MeshRemeshCutoffModifier<3>, pc_modifier);
@@ -460,10 +459,15 @@ public:
         // pc_modifier->SetCutoff(spring_cuttoff+0.001);
         // simulator.AddSimulationModifier(pc_modifier);
 
+        // MAKE_PTR(PointWriterModifier<3>, pc_modifier);
+        // MAKE_PTR(PointWriterModifier3, pw_modifier);
+        // pw_modifier->SetOutputDirectory(output_directory + "/results_from_time_0");
+        // simulator.AddSimulationModifier(pw_modifier);
+        
+
         // Add random cell killer for death at the edges
         //                                                              ProbabilityOfDeathInAnHour,    MinXBoundary,                MaxXBoundary,     MinYBoundary,                    MaxYBoundary
-        // MAKE_PTR_ARGS(UniformCellKiller3dWithGhostNodes, random_cell_death, (&cell_population, 1.0, 1.5*width_space,  periodic_width-1.5*width_space, 1.5*height_space,  periodic_height-1.5*height_space, num_epithelial_cells+num_tissue_cells));
-        // MAKE_PTR_ARGS(UniformCellKiller3dWithGhostNodes, random_cell_death, (&cell_population, 1.0, periodic_width + 1,  0 - 1, periodic_height + 1,  0 - 1 , num_epithelial_cells+num_tissue_cells));
+        // MAKE_PTR_ARGS(StandardUniformCellKiller3dWithGhostNodes, random_cell_death, (&cell_population, 1.0, periodic_width + 1,  0 - 1, periodic_height + 1,  0 - 1 , num_epithelial_cells+num_tissue_cells));
 		// simulator.AddCellKiller(random_cell_death);
 
         TRACE("Set uo done - lets solve");
